@@ -15,6 +15,7 @@
     "@chakra-ui/react": "^1.8.6",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
+    "@ethersproject/contracts": "^5.5.0",
     "@ethersproject/providers": "^5.5.3",
     "cids": "^1.1.9",
     "framer-motion": "^6",
