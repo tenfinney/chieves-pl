@@ -7,7 +7,7 @@ import {
     useDisclosure, Table, Thead, Tbody, Tr, Th, Td, Tooltip, useToast, Heading,
   } from '@chakra-ui/react'
   import React, { useCallback, useEffect, useRef, useState } from 'react'
-  import { useHistory, useParams, Link, useLocation } from 'react-router-dom'
+//   import { useHistory, useParams, Link, useLocation } from 'react-router-dom'
   import ReactMarkdown from 'react-markdown'
   import { AddIcon, CloseIcon, ExternalLinkIcon } from '@chakra-ui/icons'
   import { create as ipfsHttpClient } from 'ipfs-http-client'
