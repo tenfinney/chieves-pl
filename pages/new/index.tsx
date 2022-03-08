@@ -13,7 +13,9 @@ import {
 //   import { create as ipfsHttpClient } from 'ipfs-http-client'
   import { httpURL, capitalize } from 'lib/helpers'
   import { NFT_HOMEPAGE_BASE } from 'lib/constants'
-import { Maybe } from 'lib/types'
+import { Maybe, Optional } from 'lib/types'
+import { StaticJsonRpcProvider } from '@ethersproject/providers'
+import { useRouter } from 'next/router'
   
   type ModelProps = {
     isOpen: boolean
@@ -311,13 +313,24 @@ import { Maybe } from 'lib/types'
     return Boolean(val)
   }
   
+  type Attribute = {
+    trait_type: string
+    value: string | number
+    display_type: string
+  }
+
   export const NFTForm: React.FC<{
     contract: string
     purpose: string 
     onSubmit: () => void 
     desiredNetwork: string
     ensProvider: typeof StaticJsonRpcProvider
-    metadata: Record<string, string>
+    metadata: {
+      attributes: Array<Attribute>
+      properties: { wearables: Record<string, string> }
+    } & {
+      [key: string]: string
+    }
   }> = ({
     contract, purpose = 'create', onSubmit, desiredNetwork,
     ensProvider, metadata,
@@ -329,7 +342,9 @@ import { Maybe } from 'lib/types'
     const imageRef = useRef()
     const [animation, setAnimation] = useState()
     const [wearables, setWearables] = useState({})
-    const [attributes, setAttributes] = useState([])
+    const [attributes, setAttributes] = (
+      useState<Array<AttrProps>>([])
+    )
     const [color, setColor] = useState('#FFFFFF')
     const [quantity, setQuantity] = useState(1)
     const [treasurer, setTreasurer] = useState('')
@@ -337,10 +352,9 @@ import { Maybe } from 'lib/types'
     const [ipfsURI] = useState(
       process.env.REACT_APP_IPFS_URI ?? '/ip4/127.0.0.1/tcp/5001'
     )
-    const ipfs = ipfsHttpClient(ipfsURI)
-    const history = useHistory()
-    const params = useParams()
-    const location = useLocation()
+    // const ipfs = ipfsHttpClient(ipfsURI)
+    const router = useRouter() 
+    // const location = useLocation()
     const toast = useToast()
     const refs = Object.fromEntries(
       ['quantity', 'treasurer', 'name', 'homepage', 'background']
@@ -362,7 +376,7 @@ import { Maybe } from 'lib/types'
         if(hasValue(attrs)) {
           setAttributes(attrs.map(({
             trait_type: name, value, display_type: type = 'string',
-          }) => ({ name, value, type })))
+          }: Attribute) => ({ name, value, type })))
         }
   
         setWearables(metadata.properties?.wearables ?? {})
@@ -391,16 +405,16 @@ import { Maybe } from 'lib/types'
     }, [contract, purpose, homepage])
   
     useEffect(() => {
-      if(location.hash) {
+      if(window.location.hash) {
         const elem = document.getElementById(
-          location.hash.substring(1)
+          window.location.hash.substring(1)
         )
         window.scroll({
           top: elem.offsetTop - 120,
           behavior: 'smooth',
         })
       }
-    }, [location])
+    }, [window.location])
   
     const configImage = ({ target: { files }}) => {
       if(files.length === 1) {
@@ -448,10 +462,10 @@ import { Maybe } from 'lib/types'
           if(enact) {
             const address = ensProvider.resolveName(treasurer)
             await contract.mint(address, quantity, metadata, [])
-            history.push('/')
+            router.push('/')
           }
         } else if(purpose === 'update') {
-          const [tokenId] = params.id.split('-').slice(-1)
+          const [tokenId] = router.query.id.split('-').slice(-1)
           await contract.setURI(metadata, parseInt(tokenId, 16))
         }
       } catch(err) {
@@ -464,7 +478,7 @@ import { Maybe } from 'lib/types'
         })
       }
     }, [
-      purpose, contract, quantity, history, params.id,
+      purpose, contract, quantity, router, router.query.id,
       treasurer, ensProvider, toast,
     ])
   
