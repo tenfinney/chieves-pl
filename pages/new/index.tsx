@@ -10,7 +10,7 @@ import {
 //   import { useHistory, useParams, Link, useLocation } from 'react-router-dom'
   import ReactMarkdown from 'react-markdown'
   import { AddIcon, CloseIcon, ExternalLinkIcon } from '@chakra-ui/icons'
-  import { create as ipfsHttpClient } from 'ipfs-http-client'
+//   import { create as ipfsHttpClient } from 'ipfs-http-client'
   import { httpURL, capitalize } from '../helpers'
   import { NFT_HOMEPAGE_BASE } from '../constants'
   
