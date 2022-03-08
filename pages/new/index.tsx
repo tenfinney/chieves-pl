@@ -4,22 +4,33 @@ import {
     Tabs, Tab, TabList, TabPanels, TabPanel, Textarea, Flex,
     Text, ModalOverlay, ModalContent, ModalHeader,
     ModalCloseButton, ModalBody, Select, ModalFooter, Modal,
-    useDisclosure, Table, Thead, Tbody, Tr, Th, Td, Tooltip, useToast, Heading,
+    useDisclosure, Table, Thead, Tbody, Tr, Th, Td, Tooltip, useToast, Heading, Link
   } from '@chakra-ui/react'
-  import React, { useCallback, useEffect, useRef, useState } from 'react'
+  import React, { MutableRefObject, ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 //   import { useHistory, useParams, Link, useLocation } from 'react-router-dom'
   import ReactMarkdown from 'react-markdown'
   import { AddIcon, CloseIcon, ExternalLinkIcon } from '@chakra-ui/icons'
 //   import { create as ipfsHttpClient } from 'ipfs-http-client'
   import { httpURL, capitalize } from 'lib/helpers'
   import { NFT_HOMEPAGE_BASE } from 'lib/constants'
+import { Maybe } from 'lib/types'
   
-  const ModelModal = ({
+  type ModelProps = {
+    isOpen: boolean
+    onClose: () => void
+    setWearables: (
+      React.Dispatch<React.SetStateAction<
+        Record<string, string>
+      >>
+    )
+  }
+ 
+  const ModelModal: React.FC<ModelProps> = ({
     isOpen, onClose, setWearables,
   }) => {
     const [type, setType] = useState('model/gltf-binary')
     const [specifiedType, setSpecifiedType] = useState('')
-    const addModel = (type, file) => {
+    const addModel = (type: string, file: string) => {
       setWearables((ws) => {
         if(!ws[type] || window.confirm(`¿Replace ${type}?`)) {
           return { ...ws, [type]: file }
@@ -38,7 +49,7 @@ import {
             evt.stopPropagation()
             addModel(
               type !== 'other' ? type : specifiedType,
-              evt.target['file'].files[0],
+              (evt.target as HTMLFormElement)['file'].files[0],
             )
             onClose()
           }}
@@ -98,7 +109,9 @@ import {
     )
   }
   
-  const Anchor = ({ name, box }) => {
+  const Anchor = ({ name, box }: {
+    name: string, box: MutableRefObject<Maybe<HTMLDivElement>>
+  } ) => {
     const anchor = name.toLowerCase().replace(/\s+/g, '-')
     const [visible, setVisible] = useState(false)
   
@@ -119,7 +132,7 @@ import {
     return (
       <Link
         id={anchor}
-        to={{ hash: `#${anchor}` }}
+        href={`#${anchor}`}
         style={{
           textDecoration: 'none',
           visibility: visible ? 'visible' : 'hidden'
@@ -130,7 +143,9 @@ import {
     )
   }
   
-  const Label = ({ name, box }) => (
+  const Label = ({ name, box }: {
+    name: string, box: MutableRefObject<HTMLDivElement>
+  }) => (
     <Flex ml="-2.75em" mt={-1.5}>
       <Anchor {...{ name, box }}/>
       <Text ml={3} mr={2}>■</Text>
@@ -138,12 +153,14 @@ import {
     </Flex>
   )
   
-  const ExpandShow = ({ name, button = null, children }) => {
-    const [hide, setHide] = useState({})
+  const ExpandShow: React.FC<{
+    name: string, button: Maybe<ReactElement> 
+  }> = ({ name, button = null, children }) => {
+    const [hide, setHide] = useState<Record<string, boolean>>({})
     const toggle = useCallback((prop) => {
       setHide(h => ({ ...h, [prop]: !h[prop] }))
     }, [])
-    const box = useRef()
+    const box = useRef<HTMLDivElement>(null)
   
     return (
       <Box ref={box}>
@@ -164,13 +181,24 @@ import {
     )
   }              
   
-  const AttrRow = ({ attributes, setAttributes, index }) => {
+  type AttrProps = {
+    name: string
+    value: string | number
+    type: string
+  }
+  const AttrRow: React.FC<{
+    attributes: Array<AttrProps>
+    setAttributes: (
+      React.Dispatch<React.SetStateAction<Array<AttrProps>>>
+    )
+    index: number
+  }> = ({ attributes, setAttributes, index }) => {
     const { name = '', value = '', type = 'string' } = (
       attributes[index]
     )
     const setter = useCallback(
       (prop) => (
-        (value) => setAttributes(
+        (value: string | number) => setAttributes(
           (attrs) => ([
             ...attrs.slice(0, index),
             {...attrs[index], [prop]: value },
@@ -256,7 +284,10 @@ import {
     )
   }
   
-  const Submit = ({ purpose, desiredNetwork, ...props }) => (
+  const Submit: React.FC<{
+    purpose: string
+    desiredNetwork: string
+  }> = ({ purpose, desiredNetwork, ...props }) => (
     <Input
       variant="filled" type="submit"
       value={capitalize(purpose)}
@@ -270,7 +301,7 @@ import {
     />
   )
   
-  const hasValue = (val) => {
+  const hasValue = (val: unknown) => {
     if(Array.isArray(val)) {
       return val.length > 0
     }
@@ -280,7 +311,14 @@ import {
     return Boolean(val)
   }
   
-  export default ({
+  export const NFTForm: React.FC<{
+    contract: string
+    purpose: string 
+    onSubmit: () => void 
+    desiredNetwork: string
+    ensProvider: typeof StaticJsonRpcProvider
+    metadata: Record<string, string>
+  }> = ({
     contract, purpose = 'create', onSubmit, desiredNetwork,
     ensProvider, metadata,
   }) => {
