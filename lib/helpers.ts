@@ -1,6 +1,7 @@
 // export { default as Transactor } from "./Transactor";
-import { Maybe } from 'types'
-
+import { Maybe } from 'lib/types'
+import CID from 'cids'
+import { IPFS_LINK_PATTERN } from 'lib/constants';
 
 export const httpURL = (uri?: Maybe<string>) => {
     const [, origCID, path] =
@@ -21,7 +22,7 @@ export const httpURL = (uri?: Maybe<string>) => {
     return uri ?? undefined; // Image.src won't take null
   };
 
-export const capitalize = (str) => {
+export const capitalize = (str: string) => {
   if(!str?.split) return str
   return (
     str.trim().split(/\s+/g)

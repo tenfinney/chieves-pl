@@ -11,8 +11,8 @@ import {
   import ReactMarkdown from 'react-markdown'
   import { AddIcon, CloseIcon, ExternalLinkIcon } from '@chakra-ui/icons'
 //   import { create as ipfsHttpClient } from 'ipfs-http-client'
-  import { httpURL, capitalize } from '../helpers'
-  import { NFT_HOMEPAGE_BASE } from '../constants'
+  import { httpURL, capitalize } from 'lib/helpers'
+  import { NFT_HOMEPAGE_BASE } from 'lib/constants'
   
   const ModelModal = ({
     isOpen, onClose, setWearables,
