@@ -1,36 +1,62 @@
 {
-  "name": "achievements",
+  "name": "@metagame/achievements",
+  "author": {
+    "name": "dysbulic",
+    "email": "dys@dhappy.org"
+  },
   "version": "0.1.0",
-  "private": false,
   "license": "CC0-1.0",
-  "homepage": "https://dysbulic.github.io/achievements/",
+  "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "ui:start": "yarn workspace @metagame/achievements-ui dev",
+    "react-app:eject": "yarn workspace wearables-nfts-app eject",
+    "react-app:start": "yarn workspace wearables-nfts-app start",
+    "react-app:test": "yarn workspace wearables-nfts-app test",
+    "react-app:deploy": "yarn workspace wearables-nfts-app deploy",
+    "build": "yarn workspace wearables-nfts-app build --max-old-space-size=12288",
+    "chain": "yarn workspace @scaffold-eth/hardhat chain",
+    "fork": "yarn workspace @scaffold-eth/hardhat fork",
+    "node": "yarn workspace @scaffold-eth/hardhat chain",
+    "test": "yarn workspace @scaffold-eth/hardhat test",
+    "start": "yarn workspace wearables-nfts-app start",
+    "compile": "yarn workspace @scaffold-eth/hardhat compile",
+    "deploy": "yarn workspace @scaffold-eth/hardhat deploy",
+    "watch": "yarn workspace @scaffold-eth/hardhat watch",
+    "accounts": "yarn workspace @scaffold-eth/hardhat accounts",
+    "balance": "yarn workspace @scaffold-eth/hardhat balance",
+    "send": "yarn workspace @scaffold-eth/hardhat send",
+    "ipfs": "yarn workspace wearables-nfts-app ipfs",
+    "surge": "yarn workspace wearables-nfts-app surge",
+    "s3": "yarn workspace wearables-nfts-app s3",
+    "ship": "yarn workspace wearables-nfts-app ship",
+    "generate": "yarn workspace @scaffold-eth/hardhat generate",
+    "account": "yarn workspace @scaffold-eth/hardhat account",
+    "mineContractAddress": "cd packages/hardhat && npx hardhat mineContractAddress",
+    "wallet": "cd packages/hardhat && npx hardhat wallet",
+    "fundedwallet": "cd packages/hardhat && npx hardhat fundedwallet",
+    "flatten": "cd packages/hardhat && npx hardhat flatten",
+    "graph-run-node": "cd docker/graph-node && docker-compose up",
+    "graph-remove-node": "cd docker/graph-node && docker-compose down",
+    "graph-prepare": "mustache packages/subgraph/config/config.json packages/subgraph/src/subgraph.template.yaml > packages/subgraph/subgraph.yaml",
+    "graph-codegen": "yarn workspace @scaffold-eth/subgraph graph codegen",
+    "graph-build": "yarn workspace @scaffold-eth/subgraph graph build",
+    "graph-create-local": "yarn workspace @scaffold-eth/subgraph graph create --node http://localhost:8020/ scaffold-eth/your-contract",
+    "graph-remove-local": "yarn workspace @scaffold-eth/subgraph graph remove --node http://localhost:8020/ scaffold-eth/your-contract",
+    "graph-deploy-local": "yarn workspace @scaffold-eth/subgraph graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 scaffold-eth/your-contract",
+    "graph-ship-local": "yarn graph-prepare && yarn graph-codegen && yarn graph-deploy-local",
+    "deploy-and-graph": "yarn deploy && yarn graph-ship-local",
+    "theme": "yarn workspace wearables-nfts-app theme",
+    "watch-theme": "yarn workspace wearables-nfts-app watch"
   },
-  "dependencies": {
-    "@chakra-ui/icons": "^1.1.7",
-    "@chakra-ui/react": "^1.8.6",
-    "@emotion/react": "^11",
-    "@emotion/styled": "^11",
-    "@ethersproject/contracts": "^5.5.0",
-    "@ethersproject/providers": "^5.5.3",
-    "cids": "^1.1.9",
-    "framer-motion": "^6",
-    "mime": "^3.0.0",
-    "next": "12.1.0",
-    "nft.storage": "^6.0.2",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
-    "react-markdown": "^8.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "17.0.21",
-    "@types/react": "17.0.39",
-    "eslint": "8.10.0",
-    "eslint-config-next": "12.1.0",
-    "typescript": "4.6.2"
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/@graphprotocol/graph-ts",
+      "**/@graphprotocol/graph-ts/**",
+      "**/hardhat",
+      "**/hardhat/**"
+    ]
   }
 }
