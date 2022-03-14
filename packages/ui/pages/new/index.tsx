@@ -64,7 +64,7 @@ const ModelModal: React.FC<ModelProps> = ({
             <Select
               ml={5} w="calc(100% - 2rem)"
               value={type}
-              onChange={({ target: { value } }: ChangeEvent) => setType(value)}
+              onChange={({ target: { value } }) => setType(value)}
             >
               <chakra.optgroup style={{ padding: 0 }}>
                 <chakra.option value="model/gltf-binary">Binary glTF</chakra.option>
@@ -84,7 +84,7 @@ const ModelModal: React.FC<ModelProps> = ({
               <Input
                 ml={5} mt={3} w="calc(100% - 2rem)" placeholder="Mime Type"
                 required={true} value={specifiedType}
-                onChange={({ target: { value } }: ChangeEvent) => (
+                onChange={({ target: { value } }) => (
                   setSpecifiedType(value)
                 )}
               />
@@ -196,7 +196,7 @@ const AttrRow: React.FC<{
     <Tr>
       <Td><Input
         value={name}
-        onChange={({ target: { value } }: ChangeEvent) => setName(value)}
+        onChange={({ target: { value } }) => setName(value)}
       /></Td>
       <Td>{(() => {
         switch (type) {
@@ -205,7 +205,7 @@ const AttrRow: React.FC<{
               <Input
                 type="date"
                 value={(new Date(value)).toISOString().split('T')[0]}
-                onChange={({ target: { value } }: ChangeEvent) => (
+                onChange={({ target: { value } }) => (
                   setValue((new Date(value)).getTime())
                 )}
               />
@@ -214,7 +214,7 @@ const AttrRow: React.FC<{
             return (
               <Input
                 {...{ value }}
-                onChange={({ target: { value } }: ChangeEvent) => (
+                onChange={({ target: { value } }) => (
                   setValue(value)
                 )}
               />
@@ -224,7 +224,7 @@ const AttrRow: React.FC<{
               <Input
                 type="number"
                 {...{ value }}
-                onChange={({ target: { value } }: ChangeEvent) => (
+                onChange={({ target: { value } }) => (
                   setValue(!!value ? parseInt(value, 10) : '')
                 )}
               />
@@ -234,9 +234,7 @@ const AttrRow: React.FC<{
       <Td>
         <Select
           value={type}
-          onChange={({ target: { value } }: ChangeEvent) => (
-            setType(value)
-          )}
+          onChange={({ target: { value } }) => setType(value)}
         >
           <chakra.option value="string">String</chakra.option>
           <chakra.option value="date">Date</chakra.option>
@@ -336,7 +334,7 @@ export const NFTForm: React.FC<{
     const [name, setName] = useState('')
     const [description, setDescription] = useState('')
     const [homepage, setHomepage] = useState('')
-    const [image, setImage] = useState<Maybe<File>>()
+    const [image, setImage] = useState<Maybe<File | string>>()
     const imageRef = useRef<HTMLInputElement>(null)
     const [animation, setAnimation] = useState<Maybe<File | string>>()
     const [wearables, setWearables] = useState({})
@@ -363,7 +361,7 @@ export const NFTForm: React.FC<{
           image: setImage, treasurer: setTreasurer,
         })
           .forEach(([prop, setter]) => {
-            setter(metadata[prop])
+            setter(metadata[prop] as string)
           })
 
         const attrs = metadata.attributes
@@ -418,15 +416,17 @@ export const NFTForm: React.FC<{
       }
     }
 
-    const configAnimation = (evt: ChangeEvent & { target: { files: Maybe<FileList> } }) => {
-      const { target: { files } } = evt
-      if (files?.length === 1) {
-        setAnimation(files[0])
-      } else {
-        setAnimation(null)
+    const configAnimation = (
+      (evt: ChangeEvent & { target: { files: Maybe<FileList> } }) => {
+        const { target: { files } } = evt
+        if (files?.length === 1) {
+          setAnimation(files[0])
+        } else {
+          setAnimation(null)
+        }
+        evt.preventDefault()
       }
-      evt.preventDefault()
-    }
+    )
 
     const addRow = () => {
       setAttributes(attrs => [...attrs, {}])
@@ -586,7 +586,7 @@ export const NFTForm: React.FC<{
                   <Input
                     type="number" autoFocus
                     value={quantity}
-                    onChange={({ target: { value } }: ChangeEvent) => {
+                    onChange={({ target: { value } }) => {
                       setQuantity(value ? parseInt(value, 10) : '')
                     }}
                     placeholder="¿How many tokens to mint?"
@@ -603,7 +603,7 @@ export const NFTForm: React.FC<{
                   <Input
                     type="text"
                     value={treasurer}
-                    onChange={({ target: { value } }: ChangeEvent) => (
+                    onChange={({ target: { value } }) => (
                       setTreasurer(value)
                     )}
                     placeholder="¿Who should receive the new tokens?"
@@ -618,7 +618,7 @@ export const NFTForm: React.FC<{
                 <Label name="Name"/>
                 <Input
                   value={name} autoFocus={purpose !== 'create'}
-                  onChange={({ target: { value } }: ChangeEvent) => setName(value)}
+                  onChange={({ target: { value } }) => setName(value)}
                 />
               </Flex>
             </FormControl>

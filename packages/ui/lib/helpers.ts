@@ -1,6 +1,6 @@
 // export { default as Transactor } from "./Transactor";
 import { Maybe } from 'lib/types'
-import CID from 'cids'
+import { CID } from 'multiformats/cid'
 import { IPFS_LINK_PATTERN } from 'lib/constants';
 
 export const httpURL = (uri?: Maybe<string>) => {
@@ -8,9 +8,9 @@ export const httpURL = (uri?: Maybe<string>) => {
       uri?.match(/^(?:ipfs|dweb):(?:\/\/)?([^/]+)(?:\/(.*))?$/) ?? [];
   
     if (origCID) {
-      const cid = new CID(origCID);
+      const cid = CID.parse(origCID);
       const v0CID = cid.toV0().toString();
-      const v1CID = cid.toV1().toString('base32');
+      const v1CID = cid.toV1().toString();
       const pattern = IPFS_LINK_PATTERN;
       return pattern
         .replace(/{cid}/g, origCID)
