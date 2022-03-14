@@ -1,232 +1,211 @@
 import {
-    chakra, Button, FormControl, Container, Input,
-    FormLabel, UnorderedList, ListItem, Box, Image,
-    Tabs, Tab, TabList, TabPanels, TabPanel, Textarea, Flex,
-    Text, ModalOverlay, ModalContent, ModalHeader,
-    ModalCloseButton, ModalBody, Select, ModalFooter, Modal,
-    useDisclosure, Table, Thead, Tbody, Tr, Th, Td, Tooltip, useToast, Heading, Link
-  } from '@chakra-ui/react'
-  import React, { MutableRefObject, ReactElement, useCallback, useEffect, useRef, useState } from 'react'
-//   import { useHistory, useParams, Link, useLocation } from 'react-router-dom'
-  import ReactMarkdown from 'react-markdown'
-  import { AddIcon, CloseIcon, ExternalLinkIcon } from '@chakra-ui/icons'
+  chakra, Button, FormControl, Container, Input,
+  FormLabel, UnorderedList, ListItem, Box, Image,
+  Tabs, Tab, TabList, TabPanels, TabPanel, Textarea, Flex,
+  Text, ModalOverlay, ModalContent, ModalHeader,
+  ModalCloseButton, ModalBody, Select, ModalFooter, Modal,
+  useDisclosure, Table, Thead, Tbody, Tr, Th, Td, Tooltip, useToast, Heading, Link, InputProps
+} from '@chakra-ui/react'
+import React, { ChangeEvent, FormEvent, ReactElement, useCallback, useEffect, useRef, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+import { AddIcon, CloseIcon, ExternalLinkIcon } from '@chakra-ui/icons'
 //   import { create as ipfsHttpClient } from 'ipfs-http-client'
-  import { httpURL, capitalize } from 'lib/helpers'
-  import { NFT_HOMEPAGE_BASE } from 'lib/constants'
-import { Maybe, Optional } from 'lib/types'
-import { StaticJsonRpcProvider } from '@ethersproject/providers'
+import { httpURL, capitalize } from 'lib/helpers'
+import { NFT_HOMEPAGE_BASE } from 'lib/constants'
+import { Maybe } from 'lib/types'
+import { Provider } from '@ethersproject/providers'
 import { useRouter } from 'next/router'
-  
-  type ModelProps = {
-    isOpen: boolean
-    onClose: () => void
-    setWearables: (
-      React.Dispatch<React.SetStateAction<
-        Record<string, string>
-      >>
-    )
-  }
- 
-  const ModelModal: React.FC<ModelProps> = ({
-    isOpen, onClose, setWearables,
-  }) => {
-    const [type, setType] = useState('model/gltf-binary')
-    const [specifiedType, setSpecifiedType] = useState('')
-    const addModel = (type: string, file: string) => {
-      setWearables((ws) => {
-        if(!ws[type] || window.confirm(`¿Replace ${type}?`)) {
-          return { ...ws, [type]: file }
-        } else {
-          return ws
-        }
-      })
-    }
-    
-    return (
-      <Modal {...{ isOpen, onClose }}>
-        <ModalOverlay/>
-        <ModalContent
-          onSubmit={(evt) => {
-            evt.preventDefault()
-            evt.stopPropagation()
-            addModel(
-              type !== 'other' ? type : specifiedType,
-              (evt.target as HTMLFormElement)['file'].files[0],
-            )
-            onClose()
-          }}
-          as="form"
-        >
-          <ModalHeader>Add Model</ModalHeader>
-          <ModalCloseButton/>
-          <ModalBody>
-            <FormControl id="mimetype">
-              <FormLabel>Model Type:</FormLabel>
-              <Select
-                ml={5} w="calc(100% - 2rem)"
-                value={type}
-                onChange={({ target: { value } }) => setType(value)}
-              >
-                <optgroup style={{ padding: 0 }}>
-                  <option value="model/gltf-binary">Binary glTF</option>
-                  <option value="model/gltf+json">glTF</option>
-                  <option value="model/fbx">FBX</option>
-                  <option value="application/x-blender">Blender</option>
-                  <option value="model/vox">VOX</option>
-                  <option value="model/vrm">VRM</option>
-                </optgroup>
-                <optgroup>
-                  <option value="other" style={{ fontStyle: 'italic' }}>
-                    Other
-                  </option>
-                </optgroup>
-              </Select>
-              {type === 'other' && (
-                <Input
-                  ml={5} mt={3} w="calc(100% - 2rem)" placeholder="Mime Type"
-                  required={true} value={specifiedType}
-                  onChange={({ target: { value } }) => (
-                    setSpecifiedType(value)
-                  )}
-                />
-              )}
-            </FormControl>
-            <FormControl id="model" mt={5}>
-              <FormLabel>Model File:</FormLabel>
-              <Input
-                id="file" required={true} type="file"
-                ml={5} w="calc(100% - 2rem)" h="auto"
-              />
-            </FormControl>
-          </ModalBody>
-  
-          <ModalFooter>
-            <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button colorScheme="blue" ml={3} type="submit">
-              Add
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    )
-  }
-  
-  const Anchor = ({ name, box }: {
-    name: string, box: MutableRefObject<Maybe<HTMLDivElement>>
-  } ) => {
-    const anchor = name.toLowerCase().replace(/\s+/g, '-')
-    const [visible, setVisible] = useState(false)
-  
-    useEffect(() => {
-      const elem = box?.current
-      if(elem) {
-        const over = () => setVisible(true)
-        elem.addEventListener('mouseover', over)
-        const out = () => setVisible(false)
-        elem.addEventListener('mouseout', out)
-        return () => {
-          elem.removeEventListener('mouseover', over)
-          elem.removeEventListener('mouseout', out)
-        }
-      }
-    }, [box])
-  
-    return (
-      <Link
-        id={anchor}
-        href={`#${anchor}`}
-        style={{
-          textDecoration: 'none',
-          visibility: visible ? 'visible' : 'hidden'
-        }}
-      >
-        <span role="img" aria-label="Link">🔗</span>
-      </Link>
-    )
-  }
-  
-  const Label = ({ name, box }: {
-    name: string, box: MutableRefObject<HTMLDivElement>
-  }) => (
-    <Flex ml="-2.75em" mt={-1.5}>
-      <Anchor {...{ name, box }}/>
-      <Text ml={3} mr={2}>■</Text>
-      <FormLabel whiteSpace="pre">{name}:</FormLabel>
-    </Flex>
+
+type ModelProps = {
+  isOpen: boolean
+  onClose: () => void
+  setWearables: (
+    React.Dispatch<React.SetStateAction<
+      Record<string, string>
+    >>
   )
-  
-  const ExpandShow: React.FC<{
-    name: string, button: Maybe<ReactElement> 
-  }> = ({ name, button = null, children }) => {
-    const [hide, setHide] = useState<Record<string, boolean>>({})
-    const toggle = useCallback((prop) => {
-      setHide(h => ({ ...h, [prop]: !h[prop] }))
-    }, [])
-    const box = useRef<HTMLDivElement>(null)
-  
-    return (
-      <Box ref={box}>
-        <Flex ml="-3em" mt={3} align="center">
-          <Anchor {...{ name, box }}/>
-          <Text
-            ml={3}
-            cursor={hide[name] ? 'zoom-in' : 'zoom-out'}
-            onClick={() => toggle(name)}
-          >
-            {hide[name] ? '▸' : '▾'}
-            {` ${name}:`}
-          </Text>
-          {!hide[name] && button}
-        </Flex>
-        {!hide[name] && children}
-      </Box>
-    )
-  }              
-  
-  type AttrProps = {
-    name: string
-    value: string | number
-    type: string
+}
+
+const ModelModal: React.FC<ModelProps> = ({
+  isOpen, onClose, setWearables,
+}) => {
+  const [type, setType] = useState('model/gltf-binary')
+  const [specifiedType, setSpecifiedType] = useState('')
+  const addModel = (type: string, file: string) => {
+    setWearables((ws) => {
+      if (!ws[type] || window.confirm(`¿Replace ${type}?`)) {
+        return { ...ws, [type]: file }
+      } else {
+        return ws
+      }
+    })
   }
-  const AttrRow: React.FC<{
-    attributes: Array<AttrProps>
-    setAttributes: (
-      React.Dispatch<React.SetStateAction<Array<AttrProps>>>
-    )
-    index: number
-  }> = ({ attributes, setAttributes, index }) => {
-    const { name = '', value = '', type = 'string' } = (
-      attributes[index]
-    )
-    const setter = useCallback(
-      (prop) => (
-        (value: string | number) => setAttributes(
-          (attrs) => ([
-            ...attrs.slice(0, index),
-            {...attrs[index], [prop]: value },
-            ...attrs.slice(index + 1)
-          ])
-        )
-      ), [setAttributes, index]
-    )
-    const setName = setter('name')
-    const setValue = setter('value')
-    const setType = setter('type')
-  
-    return (
-      <Tr>
-        <Td><Input
-          value={name}
-          onChange={({ target: { value } }) => setName(value)}
-        /></Td>
-        <Td>{(() => {
-          switch(type) {
+
+  return (
+    <Modal {...{ isOpen, onClose }}>
+      <ModalOverlay />
+      <ModalContent
+        onSubmit={(evt: FormEvent) => {
+          evt.preventDefault()
+          evt.stopPropagation()
+          addModel(
+            type !== 'other' ? type : specifiedType,
+            (evt.target as HTMLFormElement)['file'].files[0],
+          )
+          onClose()
+        }}
+        as="form"
+      >
+        <ModalHeader>Add Model</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <FormControl id="mimetype">
+            <FormLabel>Model Type:</FormLabel>
+            <Select
+              ml={5} w="calc(100% - 2rem)"
+              value={type}
+              onChange={({ target: { value } }: ChangeEvent) => setType(value)}
+            >
+              <chakra.optgroup style={{ padding: 0 }}>
+                <chakra.option value="model/gltf-binary">Binary glTF</chakra.option>
+                <chakra.option value="model/gltf+json">glTF</chakra.option>
+                <chakra.option value="model/fbx">FBX</chakra.option>
+                <chakra.option value="application/x-blender">Blender</chakra.option>
+                <chakra.option value="model/vox">VOX</chakra.option>
+                <chakra.option value="model/vrm">VRM</chakra.option>
+              </chakra.optgroup>
+              <chakra.optgroup>
+                <chakra.option value="other" fontStyle="italic">
+                  Other
+                </chakra.option>
+              </chakra.optgroup>
+            </Select>
+            {type === 'other' && (
+              <Input
+                ml={5} mt={3} w="calc(100% - 2rem)" placeholder="Mime Type"
+                required={true} value={specifiedType}
+                onChange={({ target: { value } }: ChangeEvent) => (
+                  setSpecifiedType(value)
+                )}
+              />
+            )}
+          </FormControl>
+          <FormControl id="model" mt={5}>
+            <FormLabel>Model File:</FormLabel>
+            <Input
+              id="file" required={true} type="file"
+              ml={5} w="calc(100% - 2rem)" h="auto"
+            />
+          </FormControl>
+        </ModalBody>
+
+        <ModalFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button colorScheme="blue" ml={3} type="submit">
+            Add
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  )
+}
+
+const Anchor = ({ name }: { name: string }) => {
+  const anchor = name.toLowerCase().replace(/\s+/g, '-')
+
+  return (
+    <Link
+      id={anchor}
+      href={`#${anchor}`}
+      style={{
+        textDecoration: 'none',
+      }}
+    >
+      <chakra.span role="img" aria-label="Link">🔗</chakra.span>
+    </Link>
+  )
+}
+
+const Label = ({ name }: { name: string }) => (
+  <Flex ml="-2.75em" mt={-1.5}>
+    <Anchor {...{ name }} />
+    <Text ml={3} mr={2}>■</Text>
+    <FormLabel whiteSpace="pre">{name}:</FormLabel>
+  </Flex>
+)
+
+const ExpandShow: React.FC<{
+  name: string, button?: Maybe<ReactElement>
+}> = ({ name, button = null, children }) => {
+  const [hide, setHide] = useState<Record<string, boolean>>({})
+  const toggle = useCallback((prop) => {
+    setHide(h => ({ ...h, [prop]: !h[prop] }))
+  }, [])
+  const box = useRef<HTMLDivElement>(null)
+
+  return (
+    <Box ref={box}>
+      <Flex ml="-3em" mt={3} align="center">
+        <Anchor {...{ name, box }} />
+        <Text
+          ml={3}
+          cursor={hide[name] ? 'zoom-in' : 'zoom-out'}
+          onClick={() => toggle(name)}
+        >
+          {hide[name] ? '▸' : '▾'}
+          {` ${name}:`}
+        </Text>
+        {!hide[name] && button}
+      </Flex>
+      {!hide[name] && children}
+    </Box>
+  )
+}
+
+type AttrProps = {
+  name?: string
+  value?: string | number
+  type?: string
+}
+const AttrRow: React.FC<{
+  attributes: Array<AttrProps>
+  setAttributes: (
+    React.Dispatch<React.SetStateAction<Array<AttrProps>>>
+  )
+  index: number
+}> = ({ attributes, setAttributes, index }) => {
+  const { name = '', value = '', type = 'string' } = (
+    attributes[index]
+  )
+  const setter = useCallback(
+    (prop: string) => (
+      (value: string | number) => setAttributes(
+        (attrs: Array<AttrProps>) => ([
+          ...attrs.slice(0, index),
+          { ...attrs[index], [prop]: value },
+          ...attrs.slice(index + 1)
+        ])
+      )
+    ), [setAttributes, index]
+  )
+  const setName = setter('name')
+  const setValue = setter('value')
+  const setType = setter('type')
+
+  return (
+    <Tr>
+      <Td><Input
+        value={name}
+        onChange={({ target: { value } }: ChangeEvent) => setName(value)}
+      /></Td>
+      <Td>{(() => {
+        switch (type) {
           case 'date':
             return (
               <Input
                 type="date"
                 value={(new Date(value)).toISOString().split('T')[0]}
-                onChange={({ target: { value } }) => (
+                onChange={({ target: { value } }: ChangeEvent) => (
                   setValue((new Date(value)).getTime())
                 )}
               />
@@ -235,7 +214,7 @@ import { useRouter } from 'next/router'
             return (
               <Input
                 {...{ value }}
-                onChange={({ target: { value } }) => (
+                onChange={({ target: { value } }: ChangeEvent) => (
                   setValue(value)
                 )}
               />
@@ -245,341 +224,369 @@ import { useRouter } from 'next/router'
               <Input
                 type="number"
                 {...{ value }}
-                onChange={({ target: { value } }) => (
+                onChange={({ target: { value } }: ChangeEvent) => (
                   setValue(!!value ? parseInt(value, 10) : '')
                 )}
               />
             )
-          }
-        })()}</Td>
-        <Td>
-          <Select
-            value={type}
-            onChange={({ target: { value }}) => (
-              setType(value)
-            )}>
-            <option value="string">String</option>
-            <option value="date">Date</option>
-            <option value="number">Number</option>
-            <option value="boost_percentage">
-              Boost Percentage
-            </option>
-            <option value="boost_number">
-              Boost Number
-            </option>
-          </Select>
-        </Td>
-        <Td><Tooltip label="Remove" hasArrow>
-          <Button
-            size="sm" ml={2}
-            onClick={() => setAttributes(
-              (attrs) => ([
-                ...attrs.slice(0, index),
-                ...attrs.slice(index + 1)
-              ])
-            )}
-          >
-            <CloseIcon/>
-          </Button>
-        </Tooltip></Td>
-      </Tr>
-    )
-  }
-  
-  const Submit: React.FC<{
-    purpose: string
-    desiredNetwork: string
-  }> = ({ purpose, desiredNetwork, ...props }) => (
-    <Input
-      variant="filled" type="submit"
-      value={capitalize(purpose)}
-      title={
-        !desiredNetwork ? `${capitalize(purpose)} NFT` : (
-          `Connect to the ${desiredNetwork} network.`
-        )
-      }
-      isDisabled={!!desiredNetwork}
-      {...props}
-    />
+        }
+      })()}</Td>
+      <Td>
+        <Select
+          value={type}
+          onChange={({ target: { value } }: ChangeEvent) => (
+            setType(value)
+          )}
+        >
+          <chakra.option value="string">String</chakra.option>
+          <chakra.option value="date">Date</chakra.option>
+          <chakra.option value="number">Number</chakra.option>
+          <chakra.option value="boost_percentage">
+            Boost Percentage
+          </chakra.option>
+          <chakra.option value="boost_number">
+            Boost Number
+          </chakra.option>
+        </Select>
+      </Td>
+      <Td><Tooltip label="Remove" hasArrow>
+        <Button
+          size="sm" ml={2}
+          onClick={() => setAttributes(
+            (attrs) => ([
+              ...attrs.slice(0, index),
+              ...attrs.slice(index + 1)
+            ])
+          )}
+        >
+          <CloseIcon />
+        </Button>
+      </Tooltip></Td>
+    </Tr>
   )
-  
-  const hasValue = (val: unknown) => {
-    if(Array.isArray(val)) {
-      return val.length > 0
-    }
-    if(val instanceof Object) {
-      return Object.keys(val).length > 0
-    }
-    return Boolean(val)
-  }
-  
-  type Attribute = {
-    trait_type: string
-    value: string | number
-    display_type: string
-  }
+}
 
-  export const NFTForm: React.FC<{
-    contract: string
-    purpose: string 
-    onSubmit: () => void 
-    desiredNetwork: string
-    ensProvider: typeof StaticJsonRpcProvider
-    metadata: {
-      attributes: Array<Attribute>
-      properties: { wearables: Record<string, string> }
-    } & {
-      [key: string]: string
+const Submit: React.FC<InputProps & {
+  purpose: string
+  desiredNetwork: string
+}> = ({ purpose, desiredNetwork, ...props }) => (
+  <Input
+    variant="filled" type="submit"
+    value={capitalize(purpose)}
+    title={
+      !desiredNetwork ? `${capitalize(purpose)} NFT` : (
+        `Connect to the ${desiredNetwork} network.`
+      )
     }
-  }> = ({
-    contract, purpose = 'create', onSubmit, desiredNetwork,
-    ensProvider, metadata,
-  }) => {
+    isDisabled={!!desiredNetwork}
+    {...props}
+  />
+)
+
+const hasValue = (val: unknown) => {
+  if (Array.isArray(val)) {
+    return val.length > 0
+  }
+  if (val instanceof Object) {
+    return Object.keys(val).length > 0
+  }
+  return Boolean(val)
+}
+
+type Attribute = {
+  trait_type?: string
+  value?: string | number
+  display_type?: string
+}
+
+type NamedString = {
+  name: string
+  content: string
+}
+
+type ERC1155Metadata = {
+  name?: string
+  description?: string
+  decimals?: number
+  attributes?: Array<Attribute>
+  properties?: { wearables?: Record<string, string> }
+  external_url?: string
+  image?: string
+  animation_url?: string
+  background_color?: string
+
+} & {
+  [key: string]: string | number
+}
+
+export const NFTForm: React.FC<{
+  contract: {
+    tokenCount: () => Promise<string>
+    mint: (address: string, quantity: number, metadata: string, bytes: Array<number>) => void
+  }
+  purpose: string
+  onSubmit: () => void
+  desiredNetwork: string
+  ensProvider: Provider
+  metadata: ERC1155Metadata
+}> = ({
+  contract, purpose = 'create', onSubmit, desiredNetwork,
+  ensProvider, metadata,
+}) => {
     const [name, setName] = useState('')
     const [description, setDescription] = useState('')
     const [homepage, setHomepage] = useState('')
-    const [image, setImage] = useState()
-    const imageRef = useRef()
-    const [animation, setAnimation] = useState()
+    const [image, setImage] = useState<Maybe<File>>()
+    const imageRef = useRef<HTMLInputElement>(null)
+    const [animation, setAnimation] = useState<Maybe<File | string>>()
     const [wearables, setWearables] = useState({})
     const [attributes, setAttributes] = (
       useState<Array<AttrProps>>([])
     )
     const [color, setColor] = useState('#FFFFFF')
-    const [quantity, setQuantity] = useState(1)
+    const [quantity, setQuantity] = useState<string | number>(1)
     const [treasurer, setTreasurer] = useState('')
     const { isOpen, onOpen, onClose } = useDisclosure()
     const [ipfsURI] = useState(
       process.env.REACT_APP_IPFS_URI ?? '/ip4/127.0.0.1/tcp/5001'
     )
     // const ipfs = ipfsHttpClient(ipfsURI)
-    const router = useRouter() 
+    const router = useRouter()
     // const location = useLocation()
     const toast = useToast()
-    const refs = Object.fromEntries(
-      ['quantity', 'treasurer', 'name', 'homepage', 'background']
-      .map((attr) => [attr, useRef()])
-    )
-  
+
     useEffect(() => {
-      if(metadata) {
+      if (metadata) {
         Object.entries({
           name: setName, description: setDescription,
           external_url: setHomepage, animation_url: setAnimation,
           image: setImage, treasurer: setTreasurer,
         })
-        .forEach(([prop, setter]) => {
-          setter(metadata[prop])
-        })
-  
+          .forEach(([prop, setter]) => {
+            setter(metadata[prop])
+          })
+
         const attrs = metadata.attributes
-        if(hasValue(attrs)) {
-          setAttributes(attrs.map(({
+        if (hasValue(attrs)) {
+          setAttributes((attrs ?? []).map(({
             trait_type: name, value, display_type: type = 'string',
           }: Attribute) => ({ name, value, type })))
         }
-  
+
         setWearables(metadata.properties?.wearables ?? {})
-  
+
         const bg = metadata.background_color
         setColor(prev => bg ? `#${bg}` : prev)
       }
     }, [metadata])
-  
+
     useEffect(() => {
       ((async () => {
-        if(!!contract && purpose === 'create' && !homepage) {
+        if (!!contract && purpose === 'create' && !homepage) {
           try {
             const nextId = (
               (parseInt(await contract.tokenCount(), 16) + 1)
-              .toString(16)
+                .toString(16)
             )
             setHomepage(
               `${NFT_HOMEPAGE_BASE}/0x${nextId}`
             )
-          } catch(err) {
-            console.error('Get Token Id', err.message)
+          } catch (err) {
+            console.error('Get Token Id', (err as Error).message)
           }
         }
       })())
     }, [contract, purpose, homepage])
-  
+
     useEffect(() => {
-      if(window.location.hash) {
+      if (window.location.hash) {
         const elem = document.getElementById(
           window.location.hash.substring(1)
         )
         window.scroll({
-          top: elem.offsetTop - 120,
+          top: (elem?.offsetTop ?? 0) - 120,
           behavior: 'smooth',
         })
       }
-    }, [window.location])
-  
-    const configImage = ({ target: { files }}) => {
-      if(files.length === 1) {
+    }, [])
+
+    const configImage = ({ target: { files } }: { target: { files: Maybe<FileList> } }) => {
+      if (files?.length === 1) {
         setImage(files[0])
       } else {
         setImage(null)
       }
     }
-  
-    const configAnimation = (evt) => {
-      const { target: { files }} = evt
-      if(files.length === 1) {
+
+    const configAnimation = (evt: ChangeEvent & { target: { files: Maybe<FileList> } }) => {
+      const { target: { files } } = evt
+      if (files?.length === 1) {
         setAnimation(files[0])
       } else {
         setAnimation(null)
       }
       evt.preventDefault()
     }
-  
+
     const addRow = () => {
       setAttributes(attrs => [...attrs, {}])
     }
-  
-    const ipfsify = async (fileOrURL) => {
-      if(fileOrURL.startsWith?.('ipfs://')) return fileOrURL
-  
-      const name = fileOrURL.name
-      const result = await ipfs.add(
-        { path: name, content: fileOrURL.content ?? fileOrURL },
-        { pin: true, wrapWithDirectory: true }
-      )
-      return `ipfs://${result.cid.toString()}/${name}`
+
+    const ipfsify = async (fileOrURL: File | string | NamedString) => {
+      let value: File | NamedString = fileOrURL as NamedString
+      if(typeof fileOrURL === 'string') {
+        if(fileOrURL.startsWith?.('ipfs://')) {
+          return fileOrURL
+        }
+        value = {
+          name: 'Unknown',
+          content: fileOrURL,
+        }
+      }
+      const name = value.name
+      // const result = await ipfs.add(
+      //   { path: name, content: fileOrURL.content ?? fileOrURL },
+      //   { pin: true, wrapWithDirectory: true }
+      // )
+      // return `ipfs://${result.cid.toString()}/${name}`
     }
-  
+
     const enact = useCallback(async (metadata) => {
       try {
-        if(purpose === 'create') {
+        if (purpose === 'create') {
           const enact = (
             window.confirm(
-              `¿Mint ${quantity} token${
-                quantity === 1 ? '' : 's'
+              `¿Mint ${quantity} token${quantity === 1 ? '' : 's'
               } to ${treasurer}?`
             )
           )
-          if(enact) {
-            const address = ensProvider.resolveName(treasurer)
-            await contract.mint(address, quantity, metadata, [])
-            router.push('/')
+          if (enact) {
+            const address = await ensProvider.resolveName(treasurer)
+            if (!address) {
+              throw new Error(`Couldn't resolve ENS name: “${treasurer}”`)
+            }
+            if(typeof quantity !== 'string') {
+              await contract.mint(address, quantity, metadata, [])
+              router.push('/')
+            } else if(quantity === '') {
+              throw new Error('No quantity specified.')
+            } else {
+              throw new Error(`Quantity: “${quantity}”`)
+            }
           }
-        } else if(purpose === 'update') {
-          const [tokenId] = router.query.id.split('-').slice(-1)
-          await contract.setURI(metadata, parseInt(tokenId, 16))
+        } else if (purpose === 'update') {
+          // const [tokenId] = router.query.id.split('-').slice(-1)
+          // await contract.setURI(metadata, parseInt(tokenId, 16))
         }
-      } catch(err) {
+      } catch (err) {
         toast({
           title: 'Contract Error',
-          description: err.message,
+          description: (err as Error).message,
           status: 'error',
           isClosable: true,
           duration: 10000
         })
       }
-    }, [
-      purpose, contract, quantity, router, router.query.id,
-      treasurer, ensProvider, toast,
-    ])
-  
-    const submit = async (evt) => {
+    }, [purpose, contract, quantity, router, treasurer, ensProvider, toast])
+
+    const submit = async (evt: FormEvent) => {
       evt.preventDefault()
-  
-      const metadata = {
+
+      const metadata: ERC1155Metadata = {
         name: name ?? 'Untitled', description, decimals: 0,
       }
-  
-      if(!!homepage) {
+
+      if (!!homepage) {
         metadata.external_url = homepage
       }
-  
-      if(image instanceof File) {
+
+      if (image instanceof File) {
         metadata.image = await ipfsify(image)
-      } else if(typeof image === 'string') {
+      } else if (typeof image === 'string') {
         metadata.image = image
-      } else if(image !== undefined) {
+      } else if (image !== undefined) {
         console.warn(`Unknown Image Type: ${typeof image}`)
       }
-  
-      if(animation instanceof File) {
+
+      if (animation instanceof File) {
         metadata.animation_url = await ipfsify(animation)
-      } else if(typeof animation === 'string') {
+      } else if (typeof animation === 'string') {
         metadata.animation_url = animation
-      } else if(animation !== undefined) {
+      } else if (animation !== undefined) {
         console.warn(`Unknown Animation Type: ${typeof animation}`)
       }
-  
-      if(color.startsWith('#')) {
+
+      if (color.startsWith('#')) {
         metadata.background_color = (
           color.substring(1).toUpperCase()
         )
       }
-  
+
       metadata.properties = {}
-  
-      if(Object.keys(wearables).length > 0) {
+
+      if (Object.keys(wearables).length > 0) {
         metadata.properties.wearables = (
           Object.fromEntries(
             await Promise.all(
               Object.entries(wearables).map(
                 async ([type, value]) => (
-                  [type, await ipfsify(value)]
+                  [type, await ipfsify(value as string | File)]
                 )
               )
             )
           )
         )
       }
-  
-      if(attributes.length > 0) {
+
+      if (attributes.length > 0) {
         metadata.attributes = (
           attributes.map(({ name, value, type }) => {
-            const attr = {
-              trait_type: name, 
+            const attr: Attribute = {
+              trait_type: name,
               value,
             }
             // including a string type causes nothing to render
-            if(type !== 'string') {
+            if (type !== 'string') {
               attr.display_type = type
             }
             return attr
           })
         )
       }
-  
+
       const dataURI = await ipfsify({
         name: `metadata.${(new Date()).toISOString()}.json`,
         content: JSON.stringify(metadata, null, '  '),
       })
-  
+
       await enact(dataURI)
     }
-  
-    if(desiredNetwork) {
+
+    if (desiredNetwork) {
       return (
-        <Heading size="sm" mt={20} align="center">
+        <Heading size="sm" mt={20} textAlign="center">
           Please change your network to {desiredNetwork}.
         </Heading>
       )
     }
-  
+
     return (
       <Container
         as="form" onSubmit={submit}
         mt={10} maxW={['100%', 'min(85vw, 50em)']}
         sx={{ a: { textDecoration: 'underline' } }}
       >
-        <Submit {...{ purpose, desiredNetwork }} mb={3}/>
+        <Submit {...{ purpose, desiredNetwork }} mb={3} />
         <UnorderedList listStyleType="none">
           {purpose === 'create' && (
-            <ListItem ref={refs.quantity}>
+            <ListItem>
               <FormControl isRequired>
                 <Flex align="center">
-                  <Label name="Quantity to Mint" box={refs.quantity}/>
+                  <Label name="Quantity to Mint"/>
                   <Input
                     type="number" autoFocus
                     value={quantity}
-                    onChange={({ target: { value } }) => {
+                    onChange={({ target: { value } }: ChangeEvent) => {
                       setQuantity(value ? parseInt(value, 10) : '')
                     }}
                     placeholder="¿How many tokens to mint?"
@@ -589,14 +596,14 @@ import { useRouter } from 'next/router'
             </ListItem>
           )}
           {purpose === 'create' && (
-            <ListItem ref={refs.treasurer}>
+            <ListItem>
               <FormControl isRequired mt={3}>
                 <Flex align="center">
-                  <Label name="Treasurer" box={refs.treasurer}/>
+                  <Label name="Treasurer"/>
                   <Input
                     type="text"
                     value={treasurer}
-                    onChange={({ target: { value } }) => (
+                    onChange={({ target: { value } }: ChangeEvent) => (
                       setTreasurer(value)
                     )}
                     placeholder="¿Who should receive the new tokens?"
@@ -605,13 +612,13 @@ import { useRouter } from 'next/router'
               </FormControl>
             </ListItem>
           )}
-          <ListItem ref={refs.name}>
+          <ListItem>
             <FormControl mt={3}>
               <Flex align="center">
-                <Label name="Name" box={refs.name}/>
+                <Label name="Name"/>
                 <Input
                   value={name} autoFocus={purpose !== 'create'}
-                  onChange={({ target: { value } }) => setName(value)}
+                  onChange={({ target: { value } }: ChangeEvent) => setName(value)}
                 />
               </Flex>
             </FormControl>
@@ -625,35 +632,38 @@ import { useRouter } from 'next/router'
                   display={image ? 'none' : 'inherit'}
                   h="auto"
                 />
-                {image && (<Image
-                  src={
-                    (image instanceof File) ? (
-                      URL.createObjectURL(image)
-                    ) : (
-                      httpURL(image)
-                    )
-                  }
-                  maxH={60} mt={0} bg={color}
-                  onClick={() => imageRef.current?.click()}
-                />)}
+                {image && (
+                  <Image
+                    alt="NFT Display Image"
+                    src={
+                      (image instanceof File) ? (
+                        URL.createObjectURL(image)
+                      ) : (
+                        httpURL(image)
+                      )
+                    }
+                    maxH={60} mt={0} bg={color}
+                    onClick={() => imageRef.current?.click()}
+                  />
+                )}
               </Box>
             </ExpandShow>
           </ListItem>
-          <ListItem ref={refs.background}>
+          <ListItem>
             <FormControl mt={3}>
               <Flex align="center">
-                <Label name="Background Color" box={refs.background}/>
+                <Label name="Background Color"/>
                 <Input
                   type="color" value={color}
-                  onChange={({ target: { value }}) => setColor(value)}
+                  onChange={({ target: { value } }) => setColor(value)}
                 />
               </Flex>
             </FormControl>
           </ListItem>
-          <ListItem ref={refs.homepage}>
+          <ListItem>
             <FormControl mt={3}>
               <Flex align="center">
-                <Label name="Homepage" box={refs.homepage}/>
+                <Label name="Homepage"/>
                 <Input
                   value={homepage}
                   onChange={({ target: { value } }) => (
@@ -662,7 +672,7 @@ import { useRouter } from 'next/router'
                 />
                 {homepage?.length > 0 && (
                   <chakra.a ml={2} href={homepage} target="_blank">
-                    <ExternalLinkIcon/>
+                    <ExternalLinkIcon />
                   </chakra.a>
                 )}
               </Flex>
@@ -705,18 +715,18 @@ import { useRouter } from 'next/router'
                       ))}
                     </Text>
                     <chakra.a href={httpURL(animation)} ml={3} mb={5}>
-                      <ExternalLinkIcon/>
+                      <ExternalLinkIcon />
                     </chakra.a>
                   </Flex>
                 )}
-                {animation instanceof File && (
+                {typeof File !== 'undefined' && animation instanceof File && (
                   <Flex>
                     <Text>{animation.name}</Text>
                     <chakra.a
                       href={URL.createObjectURL(animation)}
                       target="_blank" ml={3} mb={5}
                     >
-                      <ExternalLinkIcon/>
+                      <ExternalLinkIcon />
                     </chakra.a>
                   </Flex>
                 )}
@@ -733,7 +743,7 @@ import { useRouter } from 'next/router'
             <ExpandShow
               name="Attributes"
               button={<Button ml={2} onClick={addRow} size="xs">
-                <AddIcon/>
+                <AddIcon />
               </Button>}
             >
               {attributes.length > 0 && (
@@ -749,10 +759,12 @@ import { useRouter } from 'next/router'
                   </Thead>
                   <Tbody>
                     {attributes.map((_, index) => (
-                      <AttrRow {...{
-                        attributes, setAttributes,
-                        index, key: index,
-                      }}/>
+                      <AttrRow
+                        key={index}
+                        {...{
+                          attributes, setAttributes, index,
+                        }}
+                      />
                     ))}
                   </Tbody>
                 </Table>
@@ -763,7 +775,7 @@ import { useRouter } from 'next/router'
             <ExpandShow
               name="Models"
               button={<Button ml={2} onClick={onOpen} size="xs">
-                <AddIcon/>
+                <AddIcon />
               </Button>}
             >
               {Object.keys(wearables).length === 0 ? (
@@ -773,7 +785,7 @@ import { useRouter } from 'next/router'
                   {Object.entries(wearables).map(
                     ([mimetype, model], idx) => (
                       <ListItem key={idx}>
-                        <a href={httpURL(model)}>{mimetype}</a>
+                        <a href={httpURL(model as string)}>{mimetype}</a>
                       </ListItem>
                     )
                   )}
@@ -787,7 +799,9 @@ import { useRouter } from 'next/router'
             </ExpandShow>
           </ListItem>
         </UnorderedList>
-        <Submit {...{ purpose, desiredNetwork }} mt={3}/>
+        <Submit {...{ purpose, desiredNetwork }} mt={3} />
       </Container>
     )
   }
+
+  export default NFTForm
