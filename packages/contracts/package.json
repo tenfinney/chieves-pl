@@ -15,6 +15,7 @@
     "@tenderly/hardhat-tenderly": "^1.0.13",
     "ethereum-waffle": "^3.2.0",
     "ethers": "^5.6.0",
+    "glob": "^7.2.0",
     "hardhat": "^2.9.1",
     "qrcode-terminal": "^0.12.0",
     "ramda": "^0.28.0",

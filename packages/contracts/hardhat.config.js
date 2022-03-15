@@ -1,5 +1,6 @@
 const { utils } = require('ethers')
 const fs = require('fs')
+const glob = require('glob')
 const chalk = require('chalk')
 require('@nomiclabs/hardhat-waffle')
 require('@tenderly/hardhat-tenderly')
@@ -73,7 +74,6 @@ module.exports = {
     },
     matic: {
       url: 'https://polygon-rpc.com',
-      // gasPrice: 8000000000,
       accounts: { mnemonic },
     },
   },
@@ -109,7 +109,36 @@ const debug = (...info) => {
 }
 
 task('env', 'Display the execution environment', async () => {
-  console.info({ __dirname, env: process.env })
+  console.info({ __dirname, env: process.env, config })
+})
+
+task('su', 'Add a superuser')
+.addParam('address', 'Address of the user to promote')
+.setAction(async (args, { ethers }) => {
+  const [, srcDir] = config.paths.sources.match(/^.*\/([^\/]+)\/?$/)
+  const contractsHome = `${config.paths.artifacts}/${srcDir}/`
+  const [contractFile] = (
+    glob
+    .sync(`${contractsHome}/*/*`)
+    .filter((name) => !/\.dbg\.json$/.test(name))
+  )
+  const { abi, contractName } = JSON.parse(
+    fs.readFileSync(contractFile)
+  )
+  const address = (
+    fs
+    .readFileSync(
+      `${config.paths.artifacts}/${contractName}.address`
+    )
+    .toString()
+    .trim()
+  )
+  const contract = (
+    new ethers.Contract(address , abi, ethers.provider.getSigner())
+  )
+  const { address: user } = args
+  console.log(` 🍏 Setting ${user} as superuser on ${contractName} (${address})`)
+  await contract.addSuperuser(user)
 })
 
 task('wallet', 'Create a wallet (pk) link', async (_, { ethers }) => {
@@ -188,8 +217,8 @@ task('generate', 'Create a mnemonic for builder deploys', async (_, { ethers }) 
 })
 
 task('mineContractAddress', 'Looks for a deployer account that will give leading zeros')
-  .addParam('searchFor', 'String to search for')
-  .setAction(async (taskArgs, { network, ethers }) => {
+.addParam('searchFor', 'String to search for')
+.setAction(async (taskArgs, { network, ethers }) => {
 
   let contract_address = ''
   let address
