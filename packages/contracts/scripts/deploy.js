@@ -1,4 +1,5 @@
 const fs = require('fs')
+const path = require('path')
 const chalk = require('chalk')
 const { config, ethers, tenderly, run, upgrades } = require('hardhat')
 const { utils } = require('ethers')
@@ -30,12 +31,6 @@ const main = async () => {
     await upgrades.erc1967.getImplementationAddress(proxy.address)
   )
 
-  console.log(chalk.blue(' 🎙 Persisting Tenderly Artifacts…'))
-  await tenderly.persistArtifacts({
-    name,
-    address: implementationAddress,
-  })
-
   const verification = (
     await tenderlyVerify({ contract: name, address: implementationAddress })
   )
@@ -43,7 +38,7 @@ const main = async () => {
   console.debug({ verification })
 
   try {
-    console.log(chalk.blue(' 🔍 Verifying on Etherscan…'))
+    console.log(chalk.hex('#FFD25E')(' 🔍 Verifying on Etherscan…'))
     await run('verify:verify', {
       address: implementationAddress,
       constructorArguments: [],
@@ -83,7 +78,10 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
 
   let deployed
   if(!fs.existsSync(files.address)) {
-    console.log(`${chalk.hex('#FF7D31')(files.address)} doesn't exist; creating a new proxy…`)
+    console.log(
+      `${chalk.hex('#FF7D31')(files.address)} doesn't exist;`
+      + ' creating a new proxy…'
+    )
     deployed = await upgrades.deployProxy(
       artifacts,
       ['MetaGame Achievements', 'MG’s 🏅'],
@@ -91,7 +89,10 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
     )
   } else {
     const existing = await fs.readFileSync(files.address).toString().trim()
-    console.log(`Existing deployment at ${chalk.hex('#AD4EFF')(existing)}; upgrading`)
+    console.log(
+      ` ⚇ Existing deployment at ${chalk.hex('#AD4EFF')(existing)};`
+      + ' upgrading'
+    )
     deployed = await upgrades.upgradeProxy(existing, artifacts)
   }
 
@@ -111,7 +112,7 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
       implementation = (
         await upgrades.erc1967.getImplementationAddress(address)
       )
-    } catch(err) {}
+    } catch(err) {} // fails if the proxy isn't yet connected
     if(!implementation) {
       console.info(
         `${chalk.hex('#FF0606')(loops)}: No contract found`
@@ -129,7 +130,7 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
     + ` deployed as a proxy at ${chalk.magenta(address)}`
     + ` to the implementation at ${chalk.hex('#DE307E')(implementation)}`
     + ` by ${chalk.hex('#5A5FA5')(signer)}`
-    + ` on chain ${chalk.yellow(`#${chain}`)}`
+    + ` on chain ${chalk.bold.yellowBright(`#${chain}`)}`
     + ` ${chalk.green(`(saved to ${files.address})`)}.`
   )
   fs.writeFileSync(files.address, address)
@@ -144,7 +145,7 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
     )
   }
 
-  console.log(` ⛽ ${chalk.grey(gasInfo)}`)
+  console.log(` ⛽ ${chalk.greyBright(gasInfo)}`)
 
   const encoded = abiEncodeArgs(deployed, args)
 
@@ -202,15 +203,16 @@ const tenderlyVerify = async ({
   if(!tenderlyNetworks.includes(network)) {
     console.error(chalk.grey(
       ` 🧐 Contract verification not supported`
-      + ` on ${chalk.blue(network)}.`
+      + ` on ${chalk.hex('#98FFC1')(network)}.`
     ))
   } else {
     console.log(
       ' 📁 Attempting tenderly verification of'
-      + ` ${chalk.blue(name)} on`
+      + ` ${chalk.hex('#98FFC1')(name)} on`
       + ` ${chalk.green(network)}.`
     )
 
+    console.log(chalk.hex('#00AAFF')(' 🎙 Persisting Tenderly Artifacts…'))
     await tenderly.persistArtifacts({ name, address })
 
     return (
