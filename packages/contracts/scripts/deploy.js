@@ -38,7 +38,10 @@ const main = async () => {
   console.debug({ verification })
 
   try {
-    console.log(chalk.hex('#FFD25E')(' 🔍 Verifying on Etherscan…'))
+    console.log(chalk.hex('#FFD25E')(
+      ` 🔍 Verifying ${chalk.hex('#8454FF')(implementationAddress)}`
+      + ' on Etherscan…'
+    ))
     await run('verify:verify', {
       address: implementationAddress,
       constructorArguments: [],
@@ -208,7 +211,8 @@ const tenderlyVerify = async ({
   } else {
     console.log(
       ' 📁 Attempting tenderly verification of'
-      + ` ${chalk.hex('#98FFC1')(name)} on`
+      + ` ${chalk.hex('#98FFC1')(name)}`
+      + ` (${chalk.hex('#FF2EFC')(address)}) on`
       + ` ${chalk.green(network)}.`
     )
 

@@ -63,6 +63,14 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     return balanceOf(_msgSender(), id) > 0;
   }
 
+  function _isSuper()
+    internal
+    view
+    returns (bool super)
+  {
+    return _hasRole(Role.Superuser) || _msgSender() == owner()
+  }
+
   function uri(uint256 tokenId)
     public
     view
@@ -78,7 +86,7 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     virtual
   {
     require(
-      _hasRole(Role.Superuser) || _hasRole(Role.DataSetter),
+      _hasRole(Role.DataSetter) || _isSuper(),
       "You must have a DataSetter token to change metadata."
     );
     uris[tokenId] = newuri;
@@ -113,12 +121,12 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
   {
     if((id & LOWER248) == LOWER248) { // token gate
       require(
-        _hasRole(Role.Superuser) || _hasRole(Role.RoleGiver),
+        _hasRole(Role.RoleGiver) || _isSuper(),
         "You must have a RoleGiver token to mint token gates."
       );
     } else {
       require(
-        _hasRole(Role.Superuser) || _hasRole(Role.Minter),
+        _hasRole(Role.Minter) || _isSuper(),
         "You must have a Minter token to mint tokens."
       );
     }
@@ -157,7 +165,7 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     override
   {
     require(
-      _hasRole(Role.Superuser) || _hasRole(Role.Maintainer),
+      _hasRole(Role.Maintainer) || _isSuper(),
       "You must have a Maintainer token to upgrade the contract."
     );
   }
@@ -175,7 +183,7 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     override(ERC1155Upgradeable, ERC1155SupplyUpgradeable)
   {
     require(
-      _hasRole(Role.Superuser) || _hasRole(Role.Transferer),
+      _hasRole(Role.Transferer) || _isSuper(),
       "You must have a Transferer token to transfer tokens."
     );
     super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
