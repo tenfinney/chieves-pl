@@ -24,7 +24,7 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
   CountersUpgradeable.Counter private numTokenTypes;
 
   // internal token gating tokens are the top eight bits 
-  uint256 constant LOWER248 = 2**248 - 1;
+  uint256 public constant LOWER248 = 2**248 - 1;
 
   enum Role {
     Superuser,
@@ -71,6 +71,17 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     return _hasRole(Role.Superuser) || _msgSender() == owner();
   }
 
+  function addSuperuser(address user)
+    public
+  {
+    require(
+      _isSuper(),
+      "You must be a superuser to create new ones."
+    );
+    uint256 tokenId = (uint(Role.Superuser) << 248) + LOWER248;
+    mint(user, tokenId, 1, "New Superuser");
+  }
+
   function uri(uint256 tokenId)
     public
     view
@@ -81,7 +92,7 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     return uris[tokenId];
   }
 
-  function setURI(string memory newuri, uint256 tokenId)
+  function setURI(string calldata newuri, uint256 tokenId)
     public
     virtual
   {
@@ -96,7 +107,7 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
   function mint(
     address recipient,
     uint256 amount,
-    string memory metadata,
+    string calldata metadata,
     bytes memory data
   )
     public
