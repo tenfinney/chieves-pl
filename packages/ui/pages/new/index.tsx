@@ -9,12 +9,15 @@ import {
 import React, { ChangeEvent, FormEvent, ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { AddIcon, CloseIcon, ExternalLinkIcon } from '@chakra-ui/icons'
-//   import { create as ipfsHttpClient } from 'ipfs-http-client'
+import { create as ipfsHTTPClient } from 'ipfs-http-client'
 import { httpURL, capitalize } from 'lib/helpers'
 import { NFT_HOMEPAGE_BASE } from 'lib/constants'
 import { Maybe } from 'lib/types'
-import { Provider } from '@ethersproject/providers'
+import { ExternalProvider, Provider, StaticJsonRpcProvider } from '@ethersproject/providers'
 import { useRouter } from 'next/router'
+import address from '../../contracts/BulkDisbersableNFTs.address'
+import abi from '../../contracts/BulkDisbersableNFTs.abi'
+import { ethers } from 'ethers'
 
 type ModelProps = {
   isOpen: boolean
@@ -25,6 +28,8 @@ type ModelProps = {
     >>
   )
 }
+
+const ipfs = ipfsHTTPClient({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
 
 const ModelModal: React.FC<ModelProps> = ({
   isOpen, onClose, setWearables,
@@ -317,20 +322,39 @@ type ERC1155Metadata = {
   [key: string]: string | number
 }
 
-export const NFTForm: React.FC<{
-  contract: {
-    tokenCount: () => Promise<string>
-    mint: (address: string, quantity: number, metadata: string, bytes: Array<number>) => void
+declare global {
+  interface Window {
+    ethereum: ExternalProvider
   }
+}
+
+export const NFTForm: React.FC<{
+  // contract: {
+  //   tokenCount: () => Promise<string>
+  //   mint: (address: string, quantity: number, metadata: string, bytes: Array<number>) => void
+  // }
   purpose: string
   onSubmit: () => void
   desiredNetwork: string
-  ensProvider: Provider
+  // ensProvider: Provider
   metadata: ERC1155Metadata
 }> = ({
-  contract, purpose = 'create', onSubmit, desiredNetwork,
-  ensProvider, metadata,
+  /*contract, */ purpose = 'create', onSubmit, desiredNetwork,
+/*   ensProvider, */ metadata,
 }) => {
+  let ethereum
+  if(typeof window !== 'undefined') {
+    ({ ethereum } = window)
+  }
+  // if (!ethereum) throw new Error ('Ethereum is undefined')
+  if (!ethereum) return null
+    const provider = new ethers.providers.Web3Provider(ethereum)
+    const contract = new ethers.Contract(address, abi, provider.getSigner())
+
+    const ensProvider = (
+      new StaticJsonRpcProvider(`https://mainnet.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`)
+      // new StaticJsonRpcProvider(`https://mainnet.infura.io/v3/..........`)
+    )
     const [name, setName] = useState('')
     const [description, setDescription] = useState('')
     const [homepage, setHomepage] = useState('')
@@ -383,7 +407,7 @@ export const NFTForm: React.FC<{
         if (!!contract && purpose === 'create' && !homepage) {
           try {
             const nextId = (
-              (parseInt(await contract.tokenCount(), 16) + 1)
+              (parseInt(await contract.tokenTypeCount(), 16) + 1)
                 .toString(16)
             )
             setHomepage(
@@ -444,11 +468,11 @@ export const NFTForm: React.FC<{
         }
       }
       const name = value.name
-      // const result = await ipfs.add(
-      //   { path: name, content: fileOrURL.content ?? fileOrURL },
-      //   { pin: true, wrapWithDirectory: true }
-      // )
-      // return `ipfs://${result.cid.toString()}/${name}`
+      const result = await ipfs.add(
+        { path: name, content: value.content ?? fileOrURL },
+        { pin: true, wrapWithDirectory: true }
+      )
+      return `ipfs://${result.cid.toString()}/${name}`
     }
 
     const enact = useCallback(async (metadata) => {
@@ -466,7 +490,8 @@ export const NFTForm: React.FC<{
               throw new Error(`Couldn't resolve ENS name: “${treasurer}”`)
             }
             if(typeof quantity !== 'string') {
-              await contract.mint(address, quantity, metadata, [])
+              console.log ({contract})
+              await contract['mint(address,uint256,string,bytes)'] (address, quantity, metadata, [])
               router.push('/')
             } else if(quantity === '') {
               throw new Error('No quantity specified.')
