@@ -12,8 +12,8 @@ const { isAddress, getAddress, formatUnits, parseUnits } = utils
 //
 // Select the network you want to deploy to here:
 //
-const defaultNetwork = 'localhost'
-// const defaultNetwork = 'matic'
+// const defaultNetwork = 'localhost'
+const defaultNetwork = 'matic'
 
 const mnemonic = (() => {
   try {
@@ -72,8 +72,8 @@ module.exports = {
       accounts: { mnemonic },
     },
     matic: {
-      url: 'https://rpc-mainnet.maticvigil.com',
-      gasPrice: 1000000000,
+      url: 'https://polygon-rpc.com',
+      // gasPrice: 8000000000,
       accounts: { mnemonic },
     },
   },
@@ -104,11 +104,8 @@ module.exports = {
 }
 
 const DEBUG = false
-
-function debug(...info) {
-  if (DEBUG) {
-    console.debug(...info)
-  }
+const debug = (...info) => {
+  if (DEBUG) console.debug(...info)
 }
 
 task('env', 'Display the execution environment', async () => {

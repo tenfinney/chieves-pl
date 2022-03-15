@@ -6,6 +6,12 @@ const R = require('ramda')
 
 const name = 'BulkDisbersableNFTs'
 
+const DEBUG = false
+const debug = (...info) => {
+  if (DEBUG) console.debug(...info)
+}
+
+
 const main = async () => {
   console.log(`\n\n 📡 Deploying: ${name}…\n`)
 
@@ -20,23 +26,31 @@ const main = async () => {
   })
   */
 
+  const implementationAddress = (
+    await upgrades.erc1967.getImplementationAddress(proxy.address)
+  )
+
   console.log(chalk.blue(' 🎙 Persisting Tenderly Artifacts…'))
   await tenderly.persistArtifacts({
-    name: contract,
-    address: proxy.address,
+    name,
+    address: implementationAddress,
   })
 
   const verification = (
-    await tenderlyVerify({ contract: name, address: proxy.address })
+    await tenderlyVerify({ contract: name, address: implementationAddress })
   )
 
   console.debug({ verification })
 
-  console.log(chalk.blue(' 🔍 Verifying on Etherscan…'))
-  await run('verify:verify', {
-    address: proxy.address,
-    constructorArguments: [],
-  })
+  try {
+    console.log(chalk.blue(' 🔍 Verifying on Etherscan…'))
+    await run('verify:verify', {
+      address: implementationAddress,
+      constructorArguments: [],
+    })
+  } catch(err) {
+    console.error(err.message)
+  }
 
   console.log(
     ' 💾  Artifacts (address, abi, and args) saved to:'
@@ -70,7 +84,11 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
   let deployed
   if(!fs.existsSync(files.address)) {
     console.log(`${chalk.hex('#FF7D31')(files.address)} doesn't exist; creating a new proxy…`)
-    deployed = await upgrades.deployProxy(artifacts, { kind: 'uups' })
+    deployed = await upgrades.deployProxy(
+      artifacts,
+      ['MetaGame Achievements', 'MG’s 🏅'],
+      { kind: 'uups', timeout: 10 * 60 * 1000 },
+    )
   } else {
     const existing = await fs.readFileSync(files.address).toString().trim()
     console.log(`Existing deployment at ${chalk.hex('#AD4EFF')(existing)}; upgrading`)
@@ -83,9 +101,26 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
     deployTransaction: { gasPrice, hash: tx, chainId: chain },
   } = deployed
 
-  const implementation = (
-    await upgrades.erc1967.getImplementationAddress(address)
-  )
+  let implementation = null
+  let loops = 0
+  const timeout = 0.5 * 60 * 1000
+  const maxLoops = 40
+
+  while(!implementation && ++loops <= maxLoops) {
+    try {
+      implementation = (
+        await upgrades.erc1967.getImplementationAddress(address)
+      )
+    } catch(err) {}
+    if(!implementation) {
+      console.info(
+        `${chalk.hex('#FF0606')(loops)}: No contract found`
+        + ` at ${chalk.hex('#FFF013')(address)};`
+        + ` sleeping ${timeout}ms`
+      )
+      await sleep(timeout)
+    }
+  }
 
   debug({ deployed, implementation })
 

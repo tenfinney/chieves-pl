@@ -1,3 +1,4 @@
 mnemonic.txt
 .env
 cache/
+*.dbg.json
