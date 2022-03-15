@@ -12,6 +12,9 @@ const debug = (...info) => {
   if (DEBUG) console.debug(...info)
 }
 
+const chain = (
+  process.env.HARDHAT_NETWORK ?? config.defaultNetwork
+)
 
 const main = async () => {
   console.log(`\n\n 📡 Deploying: ${name}…\n`)
@@ -39,8 +42,8 @@ const main = async () => {
 
   try {
     console.log(chalk.hex('#FFD25E')(
-      ` 🔍 Verifying ${chalk.hex('#8454FF')(implementationAddress)}`
-      + ' on Etherscan…'
+      `\n 🔍 Verifying ${chalk.hex('#8454FF')(implementationAddress)}`
+      + ` on ${chain === 'matic' ? 'Polygon' : 'Ether'}scan…\n`
     ))
     await run('verify:verify', {
       address: implementationAddress,
@@ -50,10 +53,13 @@ const main = async () => {
     console.error(err.message)
   }
 
+  let saveDir = path.join(__dirname, '../artifacts/')
+  if(saveDir.startsWith(process.env.PWD)) {
+    saveDir = saveDir.substring(process.env.PWD.length + 1)
+  }
   console.log(
-    ' 💾  Artifacts (address, abi, and args) saved to:'
-    + chalk.blue(__dirname)
-    + "\n\n"
+    '\n 💾  Artifacts (address, abi, and args) saved to:'
+    + ` ${chalk.hex('#87FF37')(saveDir)}\n\n` 
   )
 }
 
@@ -70,7 +76,7 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
     ]))
   )
 
-  console.log(` 🛰  Deploying: ${contract}`)
+  console.log(`\n 🛰  Deploying: ${contract}`)
 
   if(!ethers) throw new Error('`ethers` is not defined.')
 
@@ -82,7 +88,7 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
   let deployed
   if(!fs.existsSync(files.address)) {
     console.log(
-      `${chalk.hex('#FF7D31')(files.address)} doesn't exist;`
+      `\n 🥂 ${chalk.hex('#FF7D31')(files.address)} doesn't exist;`
       + ' creating a new proxy…'
     )
     deployed = await upgrades.deployProxy(
@@ -93,7 +99,7 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
   } else {
     const existing = await fs.readFileSync(files.address).toString().trim()
     console.log(
-      ` ⚇ Existing deployment at ${chalk.hex('#AD4EFF')(existing)};`
+      `\n ⚇ Existing deployment at ${chalk.hex('#AD4EFF')(existing)};`
       + ' upgrading'
     )
     deployed = await upgrades.upgradeProxy(existing, artifacts)
@@ -118,7 +124,7 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
     } catch(err) {} // fails if the proxy isn't yet connected
     if(!implementation) {
       console.info(
-        `${chalk.hex('#FF0606')(loops)}: No contract found`
+        ` ${chalk.hex('#FF0606')(loops)}: No contract found`
         + ` at ${chalk.hex('#FFF013')(address)};`
         + ` sleeping ${timeout}ms`
       )
@@ -129,7 +135,7 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
   debug({ deployed, implementation })
 
   console.log(
-    ` 📄 ${chalk.cyan(contract)},`
+    `\n 📄 ${chalk.cyan(contract)},`
     + ` deployed as a proxy at ${chalk.magenta(address)}`
     + ` to the implementation at ${chalk.hex('#DE307E')(implementation)}`
     + ` by ${chalk.hex('#5A5FA5')(signer)}`
@@ -148,14 +154,14 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
     )
   }
 
-  console.log(` ⛽ ${chalk.greyBright(gasInfo)}`)
+  console.log(`\n ⛽ ${chalk.hex('#C6A831')(gasInfo)}`)
 
   const encoded = abiEncodeArgs(deployed, args)
 
   if (encoded.length > 2) {
     console.log(
-      ` 📚 Serializing ${encoded.length}`
-      + ` arguments to ${chalk.blue(files.args)}.`
+      `\n 📚 Serializing ${encoded.length}`
+      + ` arguments to ${chalk.hex('#6FBCFF')(files.args)}.`
     )
     fs.writeFileSync(files.args, encoded.slice(2))
   }
@@ -199,9 +205,7 @@ const tenderlyVerify = async ({
     'kovan', 'goerli', 'mainnet', 'rinkeby', 'ropsten',
     'matic', 'mumbai', 'xDai', 'POA',
   ]
-  network ??= (
-    process.env.HARDHAT_NETWORK ?? config.defaultNetwork
-  )
+  network ??= chain
 
   if(!tenderlyNetworks.includes(network)) {
     console.error(chalk.grey(
@@ -210,13 +214,15 @@ const tenderlyVerify = async ({
     ))
   } else {
     console.log(
-      ' 📁 Attempting tenderly verification of'
+      '\n 📁 Attempting tenderly verification of'
       + ` ${chalk.hex('#98FFC1')(name)}`
       + ` (${chalk.hex('#FF2EFC')(address)}) on`
       + ` ${chalk.green(network)}.`
     )
 
-    console.log(chalk.hex('#00AAFF')(' 🎙 Persisting Tenderly Artifacts…'))
+    console.log(chalk.hex('#00AAFF')(
+      '\n 🎙 Persisting Tenderly artifacts…\n'
+    ))
     await tenderly.persistArtifacts({ name, address })
 
     return (

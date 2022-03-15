@@ -66,9 +66,9 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
   function _isSuper()
     internal
     view
-    returns (bool super)
+    returns (bool superuser)
   {
-    return _hasRole(Role.Superuser) || _msgSender() == owner()
+    return _hasRole(Role.Superuser) || _msgSender() == owner();
   }
 
   function uri(uint256 tokenId)
