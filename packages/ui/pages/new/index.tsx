@@ -11,18 +11,18 @@ import React, {
   ChangeEvent, FormEvent, ReactElement, useCallback, useEffect,
   useMemo, useRef, useState,
 } from 'react'
-import ReactMarkdown from 'react-markdown'
+import Markdown from 'react-markdown'
 import { AddIcon, CloseIcon, ExternalLinkIcon } from '@chakra-ui/icons'
 import { create as ipfsHTTPClient } from 'ipfs-http-client'
-import { httpURL, capitalize, isEmpty } from 'lib/helpers'
-import { NFT_HOMEPAGE_BASE } from 'lib/constants'
-import { Maybe } from 'lib/types'
-import { ExternalProvider, Provider, StaticJsonRpcProvider } from '@ethersproject/providers'
-import { useRouter } from 'next/router'
-import address from '../../contracts/BulkDisbersableNFTs.address'
-import abi from '../../contracts/BulkDisbersableNFTs.abi'
 import { ethers } from 'ethers'
 import Head from 'next/head'
+import { httpURL, capitalize, isEmpty } from 'lib/helpers'
+import { NFT_HOMEPAGE_BASE } from 'lib/constants'
+import type { Maybe, ERC1155Metadata, Attribute } from 'lib/types'
+import { ExternalProvider, Provider, StaticJsonRpcProvider } from '@ethersproject/providers'
+import { useRouter } from 'next/router'
+import address from 'contracts/BulkDisbersableNFTs.address'
+import abi from 'contracts/BulkDisbersableNFTs.abi'
 
 type ModelProps = {
   isOpen: boolean
@@ -299,30 +299,9 @@ const Submit: React.FC<InputProps & {
   />
 )
 
-type Attribute = {
-  trait_type?: string
-  value?: string | number
-  display_type?: string
-}
-
 type NamedString = {
   name: string
   content: string
-}
-
-type ERC1155Metadata = {
-  name?: string
-  description?: string
-  decimals?: number
-  attributes?: Array<Attribute>
-  properties?: { wearables?: Record<string, string> }
-  external_url?: string
-  image?: string
-  animation_url?: string
-  background_color?: string
-
-} & {
-  [key: string]: string | number
 }
 
 declare global {
@@ -733,9 +712,9 @@ export const NFTForm: React.FC<{
                   />
                 </TabPanel>
                 <TabPanel>
-                  <ReactMarkdown>
+                  <Markdown>
                     {description}
-                  </ReactMarkdown>
+                  </Markdown>
                 </TabPanel>
               </TabPanels>
             </Tabs>
