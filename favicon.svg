@@ -7,7 +7,7 @@
    sodipodi:docname="favicon.svg"
    inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
    xml:space="preserve"
-   id="svg1256"
+   id="svg1392"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -107,7 +107,10 @@
      inkscape:label="ink_ext_XXXXXX"
      transform="matrix(1.3333333,0,0,-1.3333333,-1857.6198,3325.8888)"><g
        id="g5068"
-       transform="matrix(1.1457299,0,0,1.1457299,-1094.0961,456.19545)"><g
+       transform="matrix(1.1457299,0,0,1.1457299,-1094.0961,456.19545)"
+       inkscape:export-filename="/home/dys/tip/program/achievements/packages/ui/public/favicon.png"
+       inkscape:export-xdpi="14.6032"
+       inkscape:export-ydpi="14.6032"><g
          id="g444"
          transform="matrix(0.1,0,0,0.1,1708.1184,75.995631)"><g
            id="g446"
