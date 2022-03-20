@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "next lint",
     "deploy": "gh-pages -d out/ --dotfiles",
-    "pub": "yarn build && next export && yarn deploy"
+    "pub": "yarn build && next export && yarn deploy",
+    "clean": "rm -rf .next/ out/"
   },
   "dependencies": {
     "@chakra-ui/icons": "^1.1.7",
@@ -19,6 +20,8 @@
     "@emotion/styled": "^11",
     "@ethersproject/contracts": "^5.5.0",
     "@ethersproject/providers": "^5.5.3",
+    "babel-plugin-inline-react-svg": "^2.0.1",
+    "babel-plugin-transform-define": "^2.0.1",
     "cid": "multiformats/cid",
     "ethers": "^5.6.0",
     "framer-motion": "^6",
@@ -29,7 +32,7 @@
     "nft.storage": "^6.0.2",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "react-markdown": "^8.0.0"
+    "react-markdown": "^8.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",

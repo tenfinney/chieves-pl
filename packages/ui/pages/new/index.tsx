@@ -14,7 +14,7 @@ import React, {
 import ReactMarkdown from 'react-markdown'
 import { AddIcon, CloseIcon, ExternalLinkIcon } from '@chakra-ui/icons'
 import { create as ipfsHTTPClient } from 'ipfs-http-client'
-import { httpURL, capitalize } from 'lib/helpers'
+import { httpURL, capitalize, isEmpty } from 'lib/helpers'
 import { NFT_HOMEPAGE_BASE } from 'lib/constants'
 import { Maybe } from 'lib/types'
 import { ExternalProvider, Provider, StaticJsonRpcProvider } from '@ethersproject/providers'
@@ -34,7 +34,9 @@ type ModelProps = {
   )
 }
 
-const ipfs = ipfsHTTPClient({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
+const ipfs = ipfsHTTPClient({
+  host: 'ipfs.infura.io', port: 5001, protocol: 'https'
+})
 
 const ModelModal: React.FC<ModelProps> = ({
   isOpen, onClose, setWearables,
