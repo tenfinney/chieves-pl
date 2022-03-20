@@ -1,8 +1,8 @@
 {
-  name: 'MetaGame Achievements Transferer',
-  description: 'By default achievements cannot be transfered.\n\nHolders of this token can do transfers.',
+  name: '’Chievemints Transferer',
+  description: 'By default ’chievemints cannot be transfered.\n\nHolders of this token can do transfers.',
   decimals: 0,
-  external_url: 'https://dysbulic.github.io/achievements/disberse/',
+  external_url: 'https://metafam.github.io/chievemints/disberse/',
   image: 'ipfs://{assets-cid}/transfer.svg',
   background_color: 'FFB273',
   properties: {},

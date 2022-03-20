@@ -52,7 +52,7 @@ const View: NextPage = () => {
         <title>View A NFT</title>
         <meta
           name="description"
-          content="Pick One Of MetaGame’s Achievements NFTs To View"
+          content="Pick one of MetaGame’s ’Chievemint NFTs to view."
         />
       </Head>
 

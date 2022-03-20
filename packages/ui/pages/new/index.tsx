@@ -590,7 +590,7 @@ export const NFTForm: React.FC<{
       sx={{ a: { textDecoration: 'underline' } }}
     >
       <Head>
-        <title>{capitalize(purpose)} Achievement NFT</title>
+        <title>{capitalize(purpose)} ’hievemint NFT</title>
       </Head>
       <Submit {...{ purpose, desiredNetwork }} mb={3} />
       <UnorderedList listStyleType="none">

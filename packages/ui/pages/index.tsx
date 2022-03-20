@@ -42,8 +42,6 @@ const Home: NextPage = () => {
   )
 
   const setToken = (index: number, info: Record<string, unknown>) => {
-    console.info({ index, info })
-
     setTokens((tkns) => ([
       ...tkns.slice(0, index),
       { ...tkns[index], ...info },
@@ -89,8 +87,8 @@ const Home: NextPage = () => {
   return (
     <Container maxW="full">
       <Head>
-        <title>MetaGame’s NFTs</title>
-        <meta name="description" content="MetaGame’s Achievements NFTs" />
+        <title>’Chievemint NFTs</title>
+        <meta name="description" content="MetaGame’s ’Chievemint NFTs" />
       </Head>
 
       <Flex h="33vh" maxW="40rem" margin="auto">
@@ -201,7 +199,7 @@ const Home: NextPage = () => {
                   <Td>{token.total?.toString() ?? <Spinner/>}</Td>
                   <Td>
                     <Flex justify="center" fontSize="150%">
-                    <NextLink href={`/edit/${token.id}`} passHref>
+                      <NextLink href={`/edit/${token.id}`} passHref>
                         <ChakraLink>
                           <Tooltip label="Edit Metadata" hasArrow>
                             ✏️

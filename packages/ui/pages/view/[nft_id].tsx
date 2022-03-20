@@ -73,9 +73,8 @@ const View: NextPage = () => {
   return (
     <Container>
       <Head>
-        <title>View NFT {}</title>
-        <meta name="description" content="MetaGame’s Achievements NFTs" />
-        <link rel="icon" href="/favicon.ico" />
+        <title>View NFT</title>
+        <meta name="description" content="MetaGame’s ’Chievemint NFTs" />
       </Head>
 
       <pre>

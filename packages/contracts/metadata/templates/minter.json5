@@ -1,8 +1,8 @@
 {
-  name: 'MetaGame Achievements Minter',
-  description: 'The holder of this NFT has the ability to create new achievements.',
+  name: '’Chievemints Minter',
+  description: 'The holder of this NFT has the ability to create new ’chievemints.',
   decimals: 0,
-  external_url: 'https://dysbulic.github.io/achievements/new/',
+  external_url: 'https://metafam.github.io/chievemints/new/',
   image: 'ipfs://{assets-cid}/purple mint.svg',
   background_color: 'E1FFD0',
   properties: {},
