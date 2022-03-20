@@ -1,0 +1,15 @@
+{
+  name: 'MetaGame Achievements Minter',
+  description: 'The holder of this NFT has the ability to create new achievements.',
+  decimals: 0,
+  external_url: 'https://dysbulic.github.io/achievements/new/',
+  image: 'ipfs://{assets-cid}/purple mint.svg',
+  background_color: 'E1FFD0',
+  properties: {},
+  attributes: [
+    {
+      trait_type: 'Token Type',
+      value: 'Permission Gating',
+    },
+  ],
+}

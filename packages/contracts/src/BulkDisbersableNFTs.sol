@@ -23,19 +23,38 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
   mapping (uint256 => string) private uris;
   CountersUpgradeable.Counter private numTokenTypes;
 
-  // internal token gating tokens are the top eight bits 
-  uint256 public constant LOWER248 = 2**248 - 1;
-
   enum Role {
     Superuser,
     Minter,
     RoleGiver,
     Transferer,
-    DataSetter,
+    MetadataConfig,
     Maintainer,
     Reserved2,
     Reserved1
   }
+
+  // internal token gating tokens are the top eight bits 
+  uint256 public constant LOWER248 = 2**248 - 1;
+  uint256 public constant SUPERUSER_TOKEN = (
+    (uint(Role.Superuser) << 248) + LOWER248
+  );
+  uint256 public constant MINTER_TOKEN = (
+    (uint(Role.Minter) << 248) + LOWER248
+  );
+  uint256 public constant ROLE_GIVER_TOKEN = (
+    (uint(Role.RoleGiver) << 248) + LOWER248
+  );
+  uint256 public constant TRANSFERER_TOKEN = (
+    (uint(Role.Transferer) << 248) + LOWER248
+  );
+  uint256 public constant METADATA_CONFIG_TOKEN = (
+    (uint(Role.MetadataConfig) << 248) + LOWER248
+  );
+  uint256 public constant MAINTAINER_TOKEN = (
+    (uint(Role.Maintainer) << 248) + LOWER248
+  );
+
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
@@ -97,8 +116,8 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     virtual
   {
     require(
-      _hasRole(Role.DataSetter) || _isSuper(),
-      "You must have a DataSetter token to change metadata."
+      _hasRole(Role.MetadataConfig) || _isSuper(),
+      "You must have a MetadataConfig token to change metadata."
     );
     uris[tokenId] = newuri;
     emit URI(newuri, tokenId);

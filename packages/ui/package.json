@@ -1,6 +1,6 @@
 {
   "name": "@metagame/achievements-ui",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "license": "CC0-1.0",
   "homepage": "https://dysbulic.github.io/achievements/",
@@ -8,7 +8,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "deploy": "gh-pages -d out/ --dotfiles",
+    "pub": "yarn build && next export && yarn deploy"
   },
   "dependencies": {
     "@chakra-ui/icons": "^1.1.7",
@@ -20,6 +22,7 @@
     "cid": "multiformats/cid",
     "ethers": "^5.6.0",
     "framer-motion": "^6",
+    "gh-pages": "^3.2.3",
     "ipfs-http-client": "^56.0.1",
     "mime": "^3.0.0",
     "next": "12.1.0",

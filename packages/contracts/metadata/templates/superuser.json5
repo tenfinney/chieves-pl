@@ -1,0 +1,15 @@
+{
+  name: 'MetaGame Achievements Superuser',
+  description: 'The holder of this NFT has permission to perform nearly all the functions on the Achievements NFT contract.\n\nThey are not able to transfer other user’s Achievements.',
+  decimals: 0,
+  external_url: 'https://dysbulic.github.io/achievements/',
+  image: "ipfs://{assets-cid}/cop's hat.svg",
+  background_color: 'D2BBFF',
+  properties: {},
+  attributes: [
+    {
+      trait_type: 'Token Type',
+      value: 'Permission Gating',
+    },
+  ],
+}

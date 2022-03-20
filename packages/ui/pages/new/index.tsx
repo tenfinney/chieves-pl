@@ -4,9 +4,13 @@ import {
   Tabs, Tab, TabList, TabPanels, TabPanel, Textarea, Flex,
   Text, ModalOverlay, ModalContent, ModalHeader,
   ModalCloseButton, ModalBody, Select, ModalFooter, Modal,
-  useDisclosure, Table, Thead, Tbody, Tr, Th, Td, Tooltip, useToast, Heading, Link, InputProps
+  useDisclosure, Table, Thead, Tbody, Tr, Th, Td, Tooltip,
+  useToast, Heading, Link, InputProps,
 } from '@chakra-ui/react'
-import React, { ChangeEvent, FormEvent, ReactElement, useCallback, useEffect, useRef, useState } from 'react'
+import React, {
+  ChangeEvent, FormEvent, ReactElement, useCallback, useEffect,
+  useMemo, useRef, useState,
+} from 'react'
 import ReactMarkdown from 'react-markdown'
 import { AddIcon, CloseIcon, ExternalLinkIcon } from '@chakra-ui/icons'
 import { create as ipfsHTTPClient } from 'ipfs-http-client'
@@ -18,6 +22,7 @@ import { useRouter } from 'next/router'
 import address from '../../contracts/BulkDisbersableNFTs.address'
 import abi from '../../contracts/BulkDisbersableNFTs.abi'
 import { ethers } from 'ethers'
+import Head from 'next/head'
 
 type ModelProps = {
   isOpen: boolean
@@ -122,9 +127,8 @@ const Anchor = ({ name }: { name: string }) => {
     <Link
       id={anchor}
       href={`#${anchor}`}
-      style={{
-        textDecoration: 'none',
-      }}
+      style={{ textDecoration: 'none' }}
+      tabIndex={-1}
     >
       <chakra.span role="img" aria-label="Link">🔗</chakra.span>
     </Link>
@@ -205,17 +209,22 @@ const AttrRow: React.FC<{
       /></Td>
       <Td>{(() => {
         switch (type) {
-          case 'date':
+          case 'date': {
             return (
               <Input
                 type="date"
-                value={(new Date(value)).toISOString().split('T')[0]}
+                value={isEmpty(value) ? (
+                  ''
+                ) : (
+                  (new Date(value)).toISOString().split('T')[0]
+                )}
                 onChange={({ target: { value } }) => (
                   setValue((new Date(value)).getTime())
                 )}
               />
             )
-          case 'string':
+          }
+          case 'string': {
             return (
               <Input
                 {...{ value }}
@@ -224,16 +233,18 @@ const AttrRow: React.FC<{
                 )}
               />
             )
-          default:
+          }
+          default: {
             return (
               <Input
                 type="number"
                 {...{ value }}
                 onChange={({ target: { value } }) => (
-                  setValue(!!value ? parseInt(value, 10) : '')
+                  setValue(!!value ? Number(value) : '')
                 )}
               />
             )
+          }
         }
       })()}</Td>
       <Td>
@@ -286,16 +297,6 @@ const Submit: React.FC<InputProps & {
   />
 )
 
-const hasValue = (val: unknown) => {
-  if (Array.isArray(val)) {
-    return val.length > 0
-  }
-  if (val instanceof Object) {
-    return Object.keys(val).length > 0
-  }
-  return Boolean(val)
-}
-
 type Attribute = {
   trait_type?: string
   value?: string | number
@@ -339,494 +340,503 @@ export const NFTForm: React.FC<{
   // ensProvider: Provider
   metadata: ERC1155Metadata
 }> = ({
-  /*contract, */ purpose = 'create', onSubmit, desiredNetwork,
-/*   ensProvider, */ metadata,
+  purpose = 'create', onSubmit, desiredNetwork, metadata,
 }) => {
-  let ethereum
-  if(typeof window !== 'undefined') {
+  let ethereum: Maybe<ExternalProvider> = null
+  if (typeof window !== 'undefined') {
     ({ ethereum } = window)
   }
-  // if (!ethereum) throw new Error ('Ethereum is undefined')
-  if (!ethereum) return null
-    const provider = new ethers.providers.Web3Provider(ethereum)
-    const contract = new ethers.Contract(address, abi, provider.getSigner())
+  const provider = useMemo(
+    () => (
+      ethereum ? new ethers.providers.Web3Provider(ethereum) : null
+    ),
+    [ethereum],
+  )
+  const contract = useMemo(
+    () => (provider ? (
+      new ethers.Contract(address, abi, provider.getSigner())
+    ) : (
+      null
+    )),
+    [provider],
+  )
 
-    const ensProvider = (
-      new StaticJsonRpcProvider(`https://mainnet.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`)
-      // new StaticJsonRpcProvider(`https://mainnet.infura.io/v3/..........`)
-    )
-    const [name, setName] = useState('')
-    const [description, setDescription] = useState('')
-    const [homepage, setHomepage] = useState('')
-    const [image, setImage] = useState<Maybe<File | string>>()
-    const imageRef = useRef<HTMLInputElement>(null)
-    const [animation, setAnimation] = useState<Maybe<File | string>>()
-    const [wearables, setWearables] = useState({})
-    const [attributes, setAttributes] = (
-      useState<Array<AttrProps>>([])
-    )
-    const [color, setColor] = useState('#FFFFFF')
-    const [quantity, setQuantity] = useState<string | number>(1)
-    const [treasurer, setTreasurer] = useState('')
-    const { isOpen, onOpen, onClose } = useDisclosure()
-    const [ipfsURI] = useState(
-      process.env.REACT_APP_IPFS_URI ?? '/ip4/127.0.0.1/tcp/5001'
-    )
-    // const ipfs = ipfsHttpClient(ipfsURI)
-    const router = useRouter()
-    // const location = useLocation()
-    const toast = useToast()
+  const ensProvider = useMemo(
+    () => new StaticJsonRpcProvider(`https://mainnet.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID}`),
+    [],
+  )
+  const [name, setName] = useState('')
+  const [tokenId, setTokenId] = useState<string>()
+  const [description, setDescription] = useState('')
+  const [homepage, setHomepage] = useState('')
+  const [image, setImage] = useState<Maybe<File | string>>()
+  const imageRef = useRef<HTMLInputElement>(null)
+  const [animation, setAnimation] = useState<Maybe<File | string>>()
+  const [wearables, setWearables] = useState({})
+  const [attributes, setAttributes] = (
+    useState<Array<AttrProps>>([])
+  )
+  const [color, setColor] = useState('#FFFFFF')
+  const [quantity, setQuantity] = useState<string | number>(1)
+  const [treasurer, setTreasurer] = useState('')
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const router = useRouter()
+  const toast = useToast()
 
-    useEffect(() => {
-      if (metadata) {
-        Object.entries({
-          name: setName, description: setDescription,
-          external_url: setHomepage, animation_url: setAnimation,
-          image: setImage, treasurer: setTreasurer,
-        })
-          .forEach(([prop, setter]) => {
-            setter(metadata[prop] as string)
-          })
+  useEffect(() => {
+    if (metadata) {
+      Object.entries({
+        name: setName, description: setDescription,
+        external_url: setHomepage, animation_url: setAnimation,
+        image: setImage, treasurer: setTreasurer,
+      })
+      .forEach(([prop, setter]) => {
+        setter(metadata[prop] as string)
+      })
 
-        const attrs = metadata.attributes
-        if (hasValue(attrs)) {
-          setAttributes((attrs ?? []).map(({
-            trait_type: name, value, display_type: type = 'string',
-          }: Attribute) => ({ name, value, type })))
-        }
-
-        setWearables(metadata.properties?.wearables ?? {})
-
-        const bg = metadata.background_color
-        setColor(prev => bg ? `#${bg}` : prev)
+      const attrs = metadata.attributes
+      if (!isEmpty(attrs)) {
+        setAttributes((attrs ?? []).map(({
+          trait_type: name, value, display_type: type = 'string',
+        }: Attribute) => ({ name, value, type })))
       }
-    }, [metadata])
 
-    useEffect(() => {
-      ((async () => {
-        if (!!contract && purpose === 'create' && !homepage) {
-          try {
-            const nextId = (
-              (parseInt(await contract.tokenTypeCount(), 16) + 1)
-                .toString(16)
-            )
-            setHomepage(
-              `${NFT_HOMEPAGE_BASE}/0x${nextId}`
-            )
-          } catch (err) {
-            console.error('Get Token Id', (err as Error).message)
-          }
-        }
-      })())
-    }, [contract, purpose, homepage])
+      setWearables(metadata.properties?.wearables ?? {})
 
-    useEffect(() => {
-      if (window.location.hash) {
-        const elem = document.getElementById(
-          window.location.hash.substring(1)
-        )
-        window.scroll({
-          top: (elem?.offsetTop ?? 0) - 120,
-          behavior: 'smooth',
-        })
-      }
-    }, [])
-
-    const configImage = ({ target: { files } }: { target: { files: Maybe<FileList> } }) => {
-      if (files?.length === 1) {
-        setImage(files[0])
-      } else {
-        setImage(null)
-      }
+      const bg = metadata.background_color
+      setColor(prev => bg ? `#${bg}` : prev)
     }
+  }, [metadata])
 
-    const configAnimation = (
-      (evt: ChangeEvent & { target: { files: Maybe<FileList> } }) => {
-        const { target: { files } } = evt
-        if (files?.length === 1) {
-          setAnimation(files[0])
-        } else {
-          setAnimation(null)
-        }
-        evt.preventDefault()
-      }
-    )
-
-    const addRow = () => {
-      setAttributes(attrs => [...attrs, {}])
-    }
-
-    const ipfsify = async (fileOrURL: File | string | NamedString) => {
-      let value: File | NamedString = fileOrURL as NamedString
-      if(typeof fileOrURL === 'string') {
-        if(fileOrURL.startsWith?.('ipfs://')) {
-          return fileOrURL
-        }
-        value = {
-          name: 'Unknown',
-          content: fileOrURL,
-        }
-      }
-      const name = value.name
-      const result = await ipfs.add(
-        { path: name, content: value.content ?? fileOrURL },
-        { pin: true, wrapWithDirectory: true }
-      )
-      return `ipfs://${result.cid.toString()}/${name}`
-    }
-
-    const enact = useCallback(async (metadata) => {
-      try {
-        if (purpose === 'create') {
-          const enact = (
-            window.confirm(
-              `¿Mint ${quantity} token${quantity === 1 ? '' : 's'
-              } to ${treasurer}?`
-            )
+  useEffect(() => {
+    ((async () => {
+      if (!!contract && purpose === 'create' && !homepage) {
+        try {
+          let nextId = (
+            (parseInt(await contract.tokenTypeCount(), 16) + 1)
+              .toString(16)
           )
-          if (enact) {
-            const address = await ensProvider.resolveName(treasurer)
-            if (!address) {
-              throw new Error(`Couldn't resolve ENS name: “${treasurer}”`)
-            }
-            if(typeof quantity !== 'string') {
-              console.log ({contract})
-              await contract['mint(address,uint256,string,bytes)'] (address, quantity, metadata, [])
-              router.push('/')
-            } else if(quantity === '') {
-              throw new Error('No quantity specified.')
-            } else {
-              throw new Error(`Quantity: “${quantity}”`)
-            }
-          }
-        } else if (purpose === 'update') {
-          // const [tokenId] = router.query.id.split('-').slice(-1)
-          // await contract.setURI(metadata, parseInt(tokenId, 16))
+          nextId = `0x${nextId}`
+          setTokenId(nextId)
+          setHomepage(
+            `${NFT_HOMEPAGE_BASE}/${nextId}`
+          )
+        } catch (err) {
+          console.error('Get Token Id', (err as Error).message)
         }
-      } catch (err) {
-        toast({
-          title: 'Contract Error',
-          description: (err as Error).message,
-          status: 'error',
-          isClosable: true,
-          duration: 10000
-        })
       }
-    }, [purpose, contract, quantity, router, treasurer, ensProvider, toast])
+    })())
+  }, [contract, purpose, homepage])
 
-    const submit = async (evt: FormEvent) => {
+  useEffect(() => {
+    if (window.location.hash) {
+      const elem = document.getElementById(
+        window.location.hash.substring(1)
+      )
+      window.scroll({
+        top: (elem?.offsetTop ?? 0) - 120,
+        behavior: 'smooth',
+      })
+    }
+  }, [])
+
+  const configImage = ({ target: { files } }: { target: { files: Maybe<FileList> } }) => {
+    if (files?.length === 1) {
+      setImage(files[0])
+    } else {
+      setImage(null)
+    }
+  }
+
+  const configAnimation = (
+    (evt: ChangeEvent & { target: { files: Maybe<FileList> } }) => {
+      const { target: { files } } = evt
+      if (files?.length === 1) {
+        setAnimation(files[0])
+      } else {
+        setAnimation(null)
+      }
       evt.preventDefault()
+    }
+  )
 
-      const metadata: ERC1155Metadata = {
-        name: name ?? 'Untitled', description, decimals: 0,
+  const addRow = () => {
+    setAttributes(attrs => [...attrs, {}])
+  }
+
+  const ipfsify = async (fileOrURL: File | string | NamedString) => {
+    let value: File | NamedString = fileOrURL as NamedString
+    if (typeof fileOrURL === 'string') {
+      if (fileOrURL.startsWith?.('ipfs://')) {
+        return fileOrURL
       }
-
-      if (!!homepage) {
-        metadata.external_url = homepage
+      value = {
+        name: 'Unknown',
+        content: fileOrURL,
       }
+    }
+    const name = value.name
+    const result = await ipfs.add(
+      { path: name, content: value.content ?? fileOrURL },
+      { pin: true, wrapWithDirectory: true }
+    )
+    return `ipfs://${result.cid.toString()}/${name}`
+  }
 
-      if (image instanceof File) {
-        metadata.image = await ipfsify(image)
-      } else if (typeof image === 'string') {
-        metadata.image = image
-      } else if (image !== undefined) {
-        console.warn(`Unknown Image Type: ${typeof image}`)
-      }
-
-      if (animation instanceof File) {
-        metadata.animation_url = await ipfsify(animation)
-      } else if (typeof animation === 'string') {
-        metadata.animation_url = animation
-      } else if (animation !== undefined) {
-        console.warn(`Unknown Animation Type: ${typeof animation}`)
-      }
-
-      if (color.startsWith('#')) {
-        metadata.background_color = (
-          color.substring(1).toUpperCase()
+  const enact = useCallback(async (metadata) => {
+    try {
+      if (purpose === 'create') {
+        const enact = (
+          window.confirm(
+            `¿Mint ${quantity} token${quantity === 1 ? '' : 's'
+            } to ${treasurer}?`
+          )
         )
+        if (enact) {
+          const address = await ensProvider.resolveName(treasurer)
+          if (!address) {
+            throw new Error(`Couldn't resolve ENS name: “${treasurer}”`)
+          }
+          if (typeof quantity !== 'string') {
+            const tokenId = (
+              await contract?.['mint(address,uint256,string,bytes)'](
+                address, quantity, metadata, []
+              )
+            )
+            router.push(`/view/${tokenId}`)
+          } else if (quantity === '') {
+            throw new Error('No quantity specified.')
+          } else {
+            throw new Error(`Quantity: “${quantity}”`)
+          }
+        }
+      } else if (purpose === 'update') {
+        // const [tokenId] = router.query.id.split('-').slice(-1)
+        // await contract.setURI(metadata, parseInt(tokenId, 16))
       }
+    } catch (err) {
+      toast({
+        title: 'Contract Error',
+        description: (err as Error).message,
+        status: 'error',
+        isClosable: true,
+        duration: 10000
+      })
+    }
+  }, [purpose, contract, quantity, router, treasurer, ensProvider, toast])
 
-      metadata.properties = {}
+  const submit = async (evt: FormEvent) => {
+    evt.preventDefault()
 
-      if (Object.keys(wearables).length > 0) {
-        metadata.properties.wearables = (
-          Object.fromEntries(
-            await Promise.all(
-              Object.entries(wearables).map(
-                async ([type, value]) => (
-                  [type, await ipfsify(value as string | File)]
-                )
+    const metadata: ERC1155Metadata = {
+      name: name ?? 'Untitled', description, decimals: 0,
+    }
+
+    if (!!homepage) {
+      metadata.external_url = homepage
+    }
+
+    if (image instanceof File || typeof image === 'string') {
+      metadata.image = await ipfsify(image)
+    } else if (image !== undefined) {
+      console.warn(`Unknown Image Type: ${typeof image}`)
+    }
+
+    if (animation instanceof File || typeof animation === 'string') {
+      metadata.animation_url = await ipfsify(animation)
+    } else if (animation !== undefined) {
+      console.warn(`Unknown Animation Type: ${typeof animation}`)
+    }
+
+    if (color.startsWith('#')) {
+      metadata.background_color = (
+        color.substring(1).toUpperCase()
+      )
+    }
+
+    metadata.properties = {}
+
+    if (Object.keys(wearables).length > 0) {
+      metadata.properties.wearables = (
+        Object.fromEntries(
+          await Promise.all(
+            Object.entries(wearables).map(
+              async ([type, value]) => (
+                [type, await ipfsify(value as string | File)]
               )
             )
           )
         )
-      }
-
-      if (attributes.length > 0) {
-        metadata.attributes = (
-          attributes.map(({ name, value, type }) => {
-            const attr: Attribute = {
-              trait_type: name,
-              value,
-            }
-            // including a string type causes nothing to render
-            if (type !== 'string') {
-              attr.display_type = type
-            }
-            return attr
-          })
-        )
-      }
-
-      const dataURI = await ipfsify({
-        name: `metadata.${(new Date()).toISOString()}.json`,
-        content: JSON.stringify(metadata, null, '  '),
-      })
-
-      await enact(dataURI)
-    }
-
-    if (desiredNetwork) {
-      return (
-        <Heading size="sm" mt={20} textAlign="center">
-          Please change your network to {desiredNetwork}.
-        </Heading>
       )
     }
 
+    if (attributes.length > 0) {
+      metadata.attributes = (
+        attributes.map(({ name, value, type }) => {
+          const attr: Attribute = {
+            trait_type: name,
+            value,
+          }
+          // including a string type causes nothing to render
+          if (type !== 'string') {
+            attr.display_type = type
+          }
+          return attr
+        })
+      )
+    }
+
+    const dataURI = await ipfsify({
+      name: `metadata.${(new Date()).toISOString()}.json`,
+      content: JSON.stringify(metadata, null, '  '),
+    })
+
+    await enact(dataURI)
+  }
+
+  if (desiredNetwork) {
     return (
-      <Container
-        as="form" onSubmit={submit}
-        mt={10} maxW={['100%', 'min(85vw, 50em)']}
-        sx={{ a: { textDecoration: 'underline' } }}
-      >
-        <Submit {...{ purpose, desiredNetwork }} mb={3} />
-        <UnorderedList listStyleType="none">
-          {purpose === 'create' && (
-            <ListItem>
-              <FormControl isRequired>
-                <Flex align="center">
-                  <Label name="Quantity to Mint"/>
-                  <Input
-                    type="number" autoFocus
-                    value={quantity}
-                    onChange={({ target: { value } }) => {
-                      setQuantity(value ? parseInt(value, 10) : '')
-                    }}
-                    placeholder="¿How many tokens to mint?"
-                  />
-                </Flex>
-              </FormControl>
-            </ListItem>
-          )}
-          {purpose === 'create' && (
-            <ListItem>
-              <FormControl isRequired mt={3}>
-                <Flex align="center">
-                  <Label name="Treasurer"/>
-                  <Input
-                    type="text"
-                    value={treasurer}
-                    onChange={({ target: { value } }) => (
-                      setTreasurer(value)
-                    )}
-                    placeholder="¿Who should receive the new tokens?"
-                  />
-                </Flex>
-              </FormControl>
-            </ListItem>
-          )}
-          <ListItem>
-            <FormControl mt={3}>
-              <Flex align="center">
-                <Label name="Name"/>
-                <Input
-                  value={name} autoFocus={purpose !== 'create'}
-                  onChange={({ target: { value } }) => setName(value)}
-                />
-              </Flex>
-            </FormControl>
-          </ListItem>
-          <ListItem>
-            <ExpandShow name="Image">
-              <Box m={3}>
-                <Input
-                  type="file" accept="image/*"
-                  ref={imageRef} onChange={configImage}
-                  display={image ? 'none' : 'inherit'}
-                  h="auto"
-                />
-                {image && (
-                  <Image
-                    alt="NFT Display Image"
-                    src={
-                      (image instanceof File) ? (
-                        URL.createObjectURL(image)
-                      ) : (
-                        httpURL(image)
-                      )
-                    }
-                    maxH={60} mt={0} bg={color}
-                    onClick={() => imageRef.current?.click()}
-                  />
-                )}
-              </Box>
-            </ExpandShow>
-          </ListItem>
-          <ListItem>
-            <FormControl mt={3}>
-              <Flex align="center">
-                <Label name="Background Color"/>
-                <Input
-                  type="color" value={color}
-                  onChange={({ target: { value } }) => setColor(value)}
-                />
-              </Flex>
-            </FormControl>
-          </ListItem>
-          <ListItem>
-            <FormControl mt={3}>
-              <Flex align="center">
-                <Label name="Homepage"/>
-                <Input
-                  value={homepage}
-                  onChange={({ target: { value } }) => (
-                    setHomepage(value)
-                  )}
-                />
-                {homepage?.length > 0 && (
-                  <chakra.a ml={2} href={homepage} target="_blank">
-                    <ExternalLinkIcon />
-                  </chakra.a>
-                )}
-              </Flex>
-            </FormControl>
-          </ListItem>
-          <ListItem>
-            <ExpandShow name="Description">
-              <Tabs ml={5} isFitted variant="enclosed">
-                <TabList mb="1em">
-                  <Tab>Markdown</Tab>
-                  <Tab>Preview</Tab>
-                </TabList>
-                <TabPanels>
-                  <TabPanel>
-                    <Textarea
-                      placeholder="Enter a markdown formatted description."
-                      value={description} minH={32}
-                      onChange={({ target: { value } }) => (
-                        setDescription(value)
-                      )}
-                    />
-                  </TabPanel>
-                  <TabPanel>
-                    <ReactMarkdown>
-                      {description}
-                    </ReactMarkdown>
-                  </TabPanel>
-                </TabPanels>
-              </Tabs>
-            </ExpandShow>
-          </ListItem>
-          <ListItem>
-            <ExpandShow name="Animation">
-              <Box m={3}>
-                {typeof animation === 'string' && (
-                  <Flex>
-                    <Text>
-                      {decodeURI(animation.replace(
-                        /^ipfs:\/\/[^/]+\//, ''
-                      ))}
-                    </Text>
-                    <chakra.a href={httpURL(animation)} ml={3} mb={5}>
-                      <ExternalLinkIcon />
-                    </chakra.a>
-                  </Flex>
-                )}
-                {typeof File !== 'undefined' && animation instanceof File && (
-                  <Flex>
-                    <Text>{animation.name}</Text>
-                    <chakra.a
-                      href={URL.createObjectURL(animation)}
-                      target="_blank" ml={3} mb={5}
-                    >
-                      <ExternalLinkIcon />
-                    </chakra.a>
-                  </Flex>
-                )}
-                <Input
-                  type="file"
-                  accept="model/gltf+json,model/gltf-binary,video/*,.gltf,.glb"
-                  onChange={configAnimation}
-                  h="auto"
-                />
-              </Box>
-            </ExpandShow>
-          </ListItem>
-          <ListItem id="attributes">
-            <ExpandShow
-              name="Attributes"
-              button={<Button ml={2} onClick={addRow} size="xs">
-                <AddIcon />
-              </Button>}
-            >
-              {attributes.length > 0 && (
-                <Table
-                  sx={{ 'th, td': { textAlign: 'center' } }}
-                >
-                  <Thead>
-                    <Tr>
-                      <Th>Name</Th>
-                      <Th>Value</Th>
-                      <Th>Type</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {attributes.map((_, index) => (
-                      <AttrRow
-                        key={index}
-                        {...{
-                          attributes, setAttributes, index,
-                        }}
-                      />
-                    ))}
-                  </Tbody>
-                </Table>
-              )}
-            </ExpandShow>
-          </ListItem>
-          <ListItem>
-            <ExpandShow
-              name="Models"
-              button={<Button ml={2} onClick={onOpen} size="xs">
-                <AddIcon />
-              </Button>}
-            >
-              {Object.keys(wearables).length === 0 ? (
-                <em>None</em>
-              ) : (
-                <UnorderedList>
-                  {Object.entries(wearables).map(
-                    ([mimetype, model], idx) => (
-                      <ListItem key={idx}>
-                        <a href={httpURL(model as string)}>{mimetype}</a>
-                      </ListItem>
-                    )
-                  )}
-                </UnorderedList>
-              )}
-              <ModelModal
-                {...{
-                  isOpen, onClose, setWearables,
-                }}
-              />
-            </ExpandShow>
-          </ListItem>
-        </UnorderedList>
-        <Submit {...{ purpose, desiredNetwork }} mt={3} />
-      </Container>
+      <Heading size="sm" mt={20} textAlign="center">
+        Please change your network to {desiredNetwork}.
+      </Heading>
     )
   }
 
-  export default NFTForm
+  return (
+    <Container
+      as="form" onSubmit={submit}
+      mt={10} maxW={['100%', 'min(85vw, 50em)']}
+      sx={{ a: { textDecoration: 'underline' } }}
+    >
+      <Head>
+        <title>{capitalize(purpose)} Achievement NFT</title>
+      </Head>
+      <Submit {...{ purpose, desiredNetwork }} mb={3} />
+      <UnorderedList listStyleType="none">
+        {purpose === 'create' && (
+          <ListItem>
+            <FormControl isRequired>
+              <Flex align="center">
+                <Label name="Quantity to Mint" />
+                <Input
+                  type="number" autoFocus
+                  value={quantity}
+                  onChange={({ target: { value } }) => {
+                    setQuantity(value ? parseInt(value, 10) : '')
+                  }}
+                  placeholder="¿How many tokens to mint?"
+                />
+              </Flex>
+            </FormControl>
+          </ListItem>
+        )}
+        {purpose === 'create' && (
+          <ListItem>
+            <FormControl isRequired mt={3}>
+              <Flex align="center">
+                <Label name="Treasurer" />
+                <Input
+                  type="text"
+                  value={treasurer}
+                  onChange={({ target: { value } }) => (
+                    setTreasurer(value)
+                  )}
+                  placeholder="¿Who should receive the new tokens?"
+                />
+              </Flex>
+            </FormControl>
+          </ListItem>
+        )}
+        <ListItem>
+          <FormControl mt={3}>
+            <Flex align="center">
+              <Label name="Name" />
+              <Input
+                value={name} autoFocus={purpose !== 'create'}
+                onChange={({ target: { value } }) => setName(value)}
+              />
+            </Flex>
+          </FormControl>
+        </ListItem>
+        <ListItem>
+          <ExpandShow name="Image">
+            <Box m={3}>
+              <Input
+                type="file" accept="image/*"
+                ref={imageRef} onChange={configImage}
+                display={image ? 'none' : 'inherit'}
+                h="auto"
+              />
+              {image && (
+                <Image
+                  alt="NFT Display Image"
+                  src={
+                    (image instanceof File) ? (
+                      URL.createObjectURL(image)
+                    ) : (
+                      httpURL(image)
+                    )
+                  }
+                  maxH={60} mt={0} bg={color}
+                  onClick={() => imageRef.current?.click()}
+                />
+              )}
+            </Box>
+          </ExpandShow>
+        </ListItem>
+        <ListItem>
+          <FormControl mt={3}>
+            <Flex align="center">
+              <Label name="Background Color" />
+              <Input
+                type="color" value={color}
+                onChange={({ target: { value } }) => setColor(value)}
+              />
+            </Flex>
+          </FormControl>
+        </ListItem>
+        <ListItem>
+          <FormControl mt={3}>
+            <Flex align="center">
+              <Label name="Homepage" />
+              <Input
+                value={homepage}
+                onChange={({ target: { value } }) => (
+                  setHomepage(value)
+                )}
+              />
+              {homepage?.length > 0 && (
+                <chakra.a ml={2} href={homepage} target="_blank">
+                  <ExternalLinkIcon />
+                </chakra.a>
+              )}
+            </Flex>
+          </FormControl>
+        </ListItem>
+        <ListItem>
+          <ExpandShow name="Description">
+            <Tabs ml={5} isFitted variant="enclosed">
+              <TabList mb="1em">
+                <Tab>Markdown</Tab>
+                <Tab>Preview</Tab>
+              </TabList>
+              <TabPanels>
+                <TabPanel>
+                  <Textarea
+                    placeholder="Enter a markdown formatted description."
+                    value={description} minH={32}
+                    onChange={({ target: { value } }) => (
+                      setDescription(value)
+                    )}
+                  />
+                </TabPanel>
+                <TabPanel>
+                  <ReactMarkdown>
+                    {description}
+                  </ReactMarkdown>
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
+          </ExpandShow>
+        </ListItem>
+        <ListItem>
+          <ExpandShow name="Animation">
+            <Box m={3}>
+              {typeof animation === 'string' && (
+                <Flex>
+                  <Text>
+                    {decodeURI(animation.replace(
+                      /^ipfs:\/\/[^/]+\//, ''
+                    ))}
+                  </Text>
+                  <chakra.a href={httpURL(animation)} ml={3} mb={5}>
+                    <ExternalLinkIcon />
+                  </chakra.a>
+                </Flex>
+              )}
+              {typeof File !== 'undefined' && animation instanceof File && (
+                <Flex>
+                  <Text>{animation.name}</Text>
+                  <chakra.a
+                    href={URL.createObjectURL(animation)}
+                    target="_blank" ml={3} mb={5}
+                  >
+                    <ExternalLinkIcon />
+                  </chakra.a>
+                </Flex>
+              )}
+              <Input
+                type="file"
+                accept="model/gltf+json,model/gltf-binary,video/*,.gltf,.glb"
+                onChange={configAnimation}
+                h="auto"
+              />
+            </Box>
+          </ExpandShow>
+        </ListItem>
+        <ListItem id="attributes">
+          <ExpandShow
+            name="Attributes"
+            button={<Button ml={2} onClick={addRow} size="xs">
+              <AddIcon />
+            </Button>}
+          >
+            {attributes.length > 0 && (
+              <Table
+                sx={{ 'th, td': { textAlign: 'center' } }}
+              >
+                <Thead>
+                  <Tr>
+                    <Th>Name</Th>
+                    <Th>Value</Th>
+                    <Th>Type</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {attributes.map((_, index) => (
+                    <AttrRow
+                      key={index}
+                      {...{
+                        attributes, setAttributes, index,
+                      }}
+                    />
+                  ))}
+                </Tbody>
+              </Table>
+            )}
+          </ExpandShow>
+        </ListItem>
+        <ListItem>
+          <ExpandShow
+            name="Models"
+            button={<Button ml={2} onClick={onOpen} size="xs">
+              <AddIcon />
+            </Button>}
+          >
+            {Object.keys(wearables).length === 0 ? (
+              <em>None</em>
+            ) : (
+              <UnorderedList>
+                {Object.entries(wearables).map(
+                  ([mimetype, model], idx) => (
+                    <ListItem key={idx}>
+                      <a href={httpURL(model as string)}>{mimetype}</a>
+                    </ListItem>
+                  )
+                )}
+              </UnorderedList>
+            )}
+            <ModelModal
+              {...{
+                isOpen, onClose, setWearables,
+              }}
+            />
+          </ExpandShow>
+        </ListItem>
+      </UnorderedList>
+      <Submit {...{ purpose, desiredNetwork }} mt={3} />
+    </Container>
+  )
+}
+
+export default NFTForm

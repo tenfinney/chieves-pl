@@ -2,3 +2,6 @@ mnemonic.txt
 .env
 cache/
 *.dbg.json
+metadata/assets.car
+artifacts/build-info/
+.openzeppelin/

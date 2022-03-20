@@ -10,7 +10,7 @@
   "scripts": {
     "ui:start": "yarn workspace @metagame/achievements-ui dev",
     "ui:test": "yarn workspace @metagame/achievements-ui test",
-    "ui:deploy": "yarn workspace @metagame/achievements-ui deploy",
+    "ui:pub": "yarn workspace @metagame/achievements-ui pub",
     "build": "yarn workspace @metagame/achievements-ui build --max-old-space-size=12288",
     "fork": "yarn workspace @metagame/achievements-contracts fork",
     "hh:node": "yarn workspace @metagame/achievements-contracts chain",

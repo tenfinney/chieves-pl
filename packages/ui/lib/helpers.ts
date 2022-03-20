@@ -1,4 +1,3 @@
-// export { default as Transactor } from "./Transactor";
 import { Maybe } from 'lib/types'
 import { CID } from 'multiformats/cid'
 import { IPFS_LINK_PATTERN } from 'lib/constants';
@@ -33,4 +32,17 @@ export const capitalize = (str: string) => {
     }`))
     .join(' ')
   )
+}
+
+export const isEmpty = (val: unknown) => {
+  if (Array.isArray(val)) {
+    return val.length === 0
+  }
+  if (val instanceof Object) {
+    return Object.keys(val).length === 0
+  }
+  if (val === '') {
+    return true
+  }
+  return false
 }
