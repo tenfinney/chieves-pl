@@ -1,5 +1,5 @@
 {
-  "name": "@metagame/chievemints-contracts",
+  "name": "@metagame-chievemints/contracts",
   "version": "0.1.0",
   "main": "index.js",
   "license": "CC0-1.0",
