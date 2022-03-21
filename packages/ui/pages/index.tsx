@@ -6,7 +6,7 @@ import NextLink from 'next/link'
 import {
   Box, Container, Flex, Image, Stack, Tooltip,
   Table, Thead, Tbody, Tr, Th, Td,
-  Spinner, Text, Link as ChakraLink,
+  Spinner, Text, Link as ChakraLink, chakra,
 } from '@chakra-ui/react'
 import Markdown from 'react-markdown'
 import { httpURL } from 'lib/helpers'
@@ -42,7 +42,7 @@ const Home: NextPage = () => {
   )
 
   const setToken = (index: number, info: Record<string, unknown>) => {
-    setTokens((tkns) => ([
+    setTokens((tkns: Array<TokenState>) => ([
       ...tkns.slice(0, index),
       { ...tkns[index], ...info },
       ...tkns.slice(index + 1),
@@ -87,8 +87,11 @@ const Home: NextPage = () => {
   return (
     <Container maxW="full">
       <Head>
-        <title>’Chievemint NFTs</title>
-        <meta name="description" content="MetaGame’s ’Chievemint NFTs" />
+        <chakra.title>’Chievemint NFTs</chakra.title>
+        <chakra.meta
+          name="description"
+          content="MetaGame’s ’Chievemint NFTs"
+        />
       </Head>
 
       <Flex h="33vh" maxW="40rem" margin="auto">
@@ -118,7 +121,7 @@ const Home: NextPage = () => {
           </Tr>
         </Thead>
         <Tbody>
-          {tokens.map((token) => {
+          {tokens.map((token: TokenState) => {
             if(token.state === 'loaded') {
               return (
                 <Tr key={token.id}>

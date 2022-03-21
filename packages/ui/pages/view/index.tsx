@@ -1,5 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Box, Button, Container, Input } from '@chakra-ui/react'
+import {
+  useEffect, useMemo, useState, ChangeEvent, FormEvent
+} from 'react'
+import {
+  chakra, Box, Button, Container, Input, Stack, Heading,
+} from '@chakra-ui/react'
 import { ethers } from 'ethers'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
@@ -14,19 +18,27 @@ const View: NextPage = () => {
   const [value, setValue] = useState<string | number>()
   const router = useRouter()
 
-  let ethereum: Maybe<ethers.providers.ExternalProvider> = null
-  if (typeof window !== 'undefined') {
-    ({ ethereum } = window)
-  }
+  // let ethereum: Maybe<ethers.providers.ExternalProvider> = null
+  // if (typeof window !== 'undefined') {
+  //   ({ ethereum } = window)
+  // }
+  // const provider = useMemo(
+  //   () => (
+  //     ethereum ? new ethers.providers.Web3Provider(ethereum) : null
+  //   ),
+  //   [ethereum],
+  // )
   const provider = useMemo(
     () => (
-      ethereum ? new ethers.providers.Web3Provider(ethereum) : null
+      new ethers.providers.JsonRpcProvider(
+        process.env.NEXT_PUBLIC_TOKEN_RPC
+      )
     ),
-    [ethereum],
+    [],
   )
   const contract = useMemo(
     () => (provider ? (
-      new ethers.Contract(address, abi, provider.getSigner())
+      new ethers.Contract(address, abi, provider)
     ) : (
       null
     )),
@@ -49,25 +61,32 @@ const View: NextPage = () => {
   return (
     <Container>
       <Head>
-        <title>View A NFT</title>
-        <meta
+        <chakra.title>View A NFT</chakra.title>
+        <chakra.meta
           name="description"
           content="Pick one of MetaGame’s ’Chievemint NFTs to view."
         />
       </Head>
 
-      <Box
+      <Stack
         as="form"
-        onSubmit={(evt: React.FormEvent) => {
+        align="center"
+        justify="center"
+        h="100vh"
+        onSubmit={(evt: FormEvent) => {
           evt.preventDefault()
           router.push(`/view/0x${Number(value).toString(16)}`)
         }}
       >
+        <Heading textAlign="center">
+          Enter the ID of a ’Chievemint NFT to view.
+        </Heading>
         <Input
           type="number"
           min={1}
           {...{ max, value }}
-          onChange={({ target: { value }}) => {
+          autoFocus
+          onChange={({ target: { value }}: ChangeEvent) => {
             setValue(isEmpty(value) ? value : Number(value))
           }}
         />
@@ -75,9 +94,9 @@ const View: NextPage = () => {
           type="submit"
           isDisabled={[undefined, ''].includes(value as string)}
         >
-          View{!isEmpty(value) ? ` #0x${Number(value).toString(16)}` : ''}
+          View{(value && !isEmpty(value)) ? ` #0x${Number(value).toString(16)}` : ''}
         </Button>
-      </Box>
+      </Stack>
     </Container>
   )
 }
