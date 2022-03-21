@@ -29,7 +29,7 @@
     "hh:wallet": "yarn workspace @metagame-chievemints/contracts hardhat wallet",
     "hh:funded": "yarn workspace @metagame-chievemints/contracts hardhat fundedwallet",
     "clean": "yarn workspace @metagame-chievemints/ui clean",
-    "clean:full": "yarn clean && rm -rf node_modules/ packages/*/node_modules/",
+    "clean:full": "yarn clean && rm -rf node_modules/ packages/ui/node_modules/ packages/contracts/node_modules/",
     "graph:run-node": "cd docker/graph-node && docker-compose up",
     "graph:remove-node": "cd docker/graph-node && docker-compose down",
     "graph:prepare": "mustache packages/subgraph/config/config.json packages/subgraph/src/subgraph.template.yaml > packages/subgraph/subgraph.yaml",
@@ -52,5 +52,11 @@
       "**/@graphprotocol/graph-ts/**"
     ]
   },
-  "packageManager": "yarn@3.2.0"
+  "packageManager": "yarn@3.2.0",
+  "installConfig": {
+    "pnp": true
+  },
+  "dependencies": {
+    "@yarnpkg/pnpify": "^3.1.1"
+  }
 }

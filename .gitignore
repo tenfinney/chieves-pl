@@ -13,5 +13,4 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-.yarn/cache/
 .yarn/install-state.gz
