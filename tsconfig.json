@@ -16,13 +16,12 @@
     "incremental": true,
   },
   "references": [
-    { "path": "packages/ui" },
-    { "path": "packages/contracts" }
+    { "path": "packages/ui" }
   ],
   "include": [],
   "exclude": [
     "packages/**/tests/**",
-    "packages/**/out/**",
-    "**/node_modules/"
+    "packages/ui/out/**",
+    "packages/ui/.next/**"
   ],
 }

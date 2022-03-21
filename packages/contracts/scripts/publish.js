@@ -59,14 +59,14 @@ const publishContract = (contractName) => {
     // graphConfig[contractName + 'Address'] = address
 
     const outs = {
-      [`${publishDir}/${contractName}.address.js`]: (
-        `module.exports = '${address}'`
+      [`${publishDir}/${contractName}.address.ts`]: (
+        `export default '${address}'`
       ),
-      [`${publishDir}/${contractName}.abi.js`]: (
-        `module.exports = ${JSON.stringify(contract.abi, null, 2)}`
+      [`${publishDir}/${contractName}.abi.ts`]: (
+        `export default ${JSON.stringify(contract.abi, null, 2)}`
       ),
-      [`${publishDir}/${contractName}.bytecode.js`]: (
-        `module.exports = '${contract.bytecode}'`
+      [`${publishDir}/${contractName}.bytecode.ts`]: (
+        `export default '${contract.bytecode}'`
       ),
       // [graphConfigPath]: JSON.stringify(graphConfig, null, 2),
       // [`${graphDir}/abis/${contractName}.json`]: (

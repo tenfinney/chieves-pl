@@ -4,10 +4,10 @@ import { ethers } from 'ethers'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import type { NextPage } from 'next'
-import { isEmpty } from '../../lib/helpers'
-import { Maybe } from '../../lib/types'
-import address from '../../contracts/BulkDisbersableNFTs.address'
-import abi from '../../contracts/BulkDisbersableNFTs.abi'
+import { isEmpty } from 'lib/helpers'
+import { Maybe } from 'lib/types'
+import address from 'contracts/BulkDisbersableNFTs.address'
+import abi from 'contracts/BulkDisbersableNFTs.abi'
 
 const View: NextPage = () => {
   const [max, setMax] = useState(10)
