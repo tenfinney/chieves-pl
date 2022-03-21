@@ -19,6 +19,7 @@
     { "path": "packages/ui" },
     { "path": "packages/contracts" }
   ],
+  "include": [],
   "exclude": [
     "packages/**/tests/**",
     "packages/**/out/**",

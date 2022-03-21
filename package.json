@@ -52,5 +52,8 @@
   "packageManager": "yarn@3.2.0",
   "installConfig": {
     "pnp": true
+  },
+  "devDependencies": {
+    "typescript": "4.6.2"
   }
 }
