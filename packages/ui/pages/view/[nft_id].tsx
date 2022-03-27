@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   Alert, AlertDescription, AlertIcon, AlertTitle, Box,
-  Button, Container, Image, Input, chakra, Heading,
+  Button, Image, Input, chakra, Heading, Stack,
   Flex, Spinner, Text,
 } from '@chakra-ui/react'
 import { ethers } from 'ethers'
@@ -10,7 +10,7 @@ import { useRouter } from 'next/router'
 import type { NextPage } from 'next'
 import ReactMarkdown from 'react-markdown'
 import { httpURL, isEmpty } from 'lib/helpers'
-import { Maybe } from 'lib/types'
+import type { Maybe, ERC1155Metadata } from 'lib/types'
 import address from 'contracts/BulkDisbersableNFTs.address'
 import abi from 'contracts/BulkDisbersableNFTs.abi'
 
@@ -19,7 +19,7 @@ const Markdown = chakra(ReactMarkdown)
 const View: NextPage = () => {
   const router = useRouter()
   const tokenId = router.query.nft_id
-  const [metadata, setMetadata] = useState<Record<string, unknown>>()
+  const [metadata, setMetadata] = useState<ERC1155Metadata>()
   const [error, setError] = useState<string>()
 
   // let ethereum: Maybe<ethers.providers.ExternalProvider> = null
@@ -97,7 +97,7 @@ const View: NextPage = () => {
   } = metadata
 
   return (
-    <Container maxW="full" align="center">
+    <Stack align="center">
       <Head>
         <title>View NFT #{tokenId}</title>
         <meta
@@ -110,8 +110,8 @@ const View: NextPage = () => {
         <Image
           src={httpURL(image)}
           alt={name}
-          maxW={64}
-          maxH={64}
+          maxW={72}
+          maxH={72}
         />
       )}
       {description && (
@@ -123,13 +123,13 @@ const View: NextPage = () => {
       )}
       {animationURL && (
         <chakra.video
-          maxW={60} maxH={60}
+          maxW={96} maxH={96}
           controls autoPlay loop muted
         >
           <chakra.source src={httpURL(animationURL)}/>
         </chakra.video>
       )}
-    </Container>
+    </Stack>
   )
 }
 

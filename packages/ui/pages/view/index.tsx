@@ -61,8 +61,8 @@ const View: NextPage = () => {
   return (
     <Container>
       <Head>
-        <chakra.title>View A NFT</chakra.title>
-        <chakra.meta
+        <title>View A NFT</title>
+        <meta
           name="description"
           content="Pick one of MetaGame’s ’Chievemint NFTs to view."
         />
@@ -86,7 +86,9 @@ const View: NextPage = () => {
           min={1}
           {...{ max, value }}
           autoFocus
-          onChange={({ target: { value }}: ChangeEvent) => {
+          onChange={(
+            { target: { value }}: ChangeEvent<HTMLInputElement>
+          ) => {
             setValue(isEmpty(value) ? value : Number(value))
           }}
         />

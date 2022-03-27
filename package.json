@@ -7,7 +7,6 @@
   "version": "0.3.0",
   "license": "CC0-1.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "ui:start": "yarn workspace @metagame-chievemints/ui dev",
     "ui:test": "yarn workspace @metagame-chievemints/ui test",
@@ -50,9 +49,6 @@
     ]
   },
   "packageManager": "yarn@3.2.0",
-  "installConfig": {
-    "pnp": true
-  },
   "devDependencies": {
     "typescript": "4.6.2"
   }

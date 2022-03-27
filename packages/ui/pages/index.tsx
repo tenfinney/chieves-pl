@@ -87,8 +87,8 @@ const Home: NextPage = () => {
   return (
     <Container maxW="full">
       <Head>
-        <chakra.title>’Chievemint NFTs</chakra.title>
-        <chakra.meta
+        <title>’Chievemint NFTs</title>
+        <meta
           name="description"
           content="MetaGame’s ’Chievemint NFTs"
         />

@@ -3,22 +3,32 @@ import { CID } from 'multiformats/cid'
 import { IPFS_LINK_PATTERN } from 'lib/constants';
 
 export const httpURL = (uri?: Maybe<string>) => {
-    const [, origCID, path] =
-      uri?.match(/^(?:ipfs|dweb):(?:\/\/)?([^/]+)(?:\/(.*))?$/) ?? [];
+    const [, origCID, path] = (
+      uri?.match(/^(?:ipfs|dweb):(?:\/\/)?([^/]+)(?:\/(.*))?$/) ?? []
+    )
   
     if (origCID) {
-      const cid = CID.parse(origCID);
-      const v0CID = cid.toV0().toString();
-      const v1CID = cid.toV1().toString();
-      const pattern = IPFS_LINK_PATTERN;
-      return pattern
-        .replace(/{cid}/g, origCID)
-        .replace(/{v0cid}/g, v0CID)
-        .replace(/{v1cid}/g, v1CID)
-        .replace(/{path}/g, path ?? '');
+      const cid = CID.parse(origCID)
+      const v0CID = cid.toV0().toString()
+      const v1CID = cid.toV1().toString()
+      const pattern = IPFS_LINK_PATTERN
+      return (
+        encodeURI(
+          pattern
+          .replace(/{cid}/g, origCID)
+          .replace(/{v0cid}/g, v0CID)
+          .replace(/{v1cid}/g, v1CID)
+          .replace(/{path}/g, path ?? '')
+        )
+        .replace(/#/g, '%23')
+      )
     }
   
-    return uri ?? undefined; // Image.src won't take null
+    if(!uri) {
+      throw new Error(`URI undefined for ${uri}`)
+    }
+
+    return uri
   };
 
 export const capitalize = (str: string) => {
