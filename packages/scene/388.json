@@ -1,0 +1,94 @@
+{
+"attributes": [
+{
+"trait_type": "rarity",
+"value": "super-rare"
+},
+{
+"trait_type": "artist",
+"value": "Web3 Legal Engineering inspired by MetaGame Artists and Builders Tenfinney, Beti, Biuxmaster, Dysbulic, Luxumbra, Misanth."
+},
+{
+"trait_type": "platform",
+"value": "Polygon"
+},
+{
+"trait_type": "tag",
+"value": "MetaGame"
+},
+{
+"trait_type": "tag",
+"value": "Players Season 5"
+},
+{
+"trait_type": "tag",
+"value": "Season 5"
+},
+{
+"trait_type": "tag",
+"value": "Player"
+},
+{
+"trait_type": "ip1",
+"value": "digital_rights_metagame"
+
+},
+{
+"trait_type": "dna",
+"value": "0xf3b1b6e83be4d55695f1d30ac3d307d9d5ca98ff 292e75c5-3ede-4d1a-9f3b-d6dbdf8f8915"
+
+},
+{
+"trait_type": "uuid",
+"value": "292e75c5-3ede-4d1a-9f3b-d6dbdf8f8915"
+
+},
+{
+"trait_type": "season",
+"value": "true"
+},
+{
+"trait_type": "rank",
+"value": "100",
+"display_type": "boost_percentage"
+},
+{
+"trait_type": "guild",
+"value": "100",
+"display_type": "boost_number"
+},
+{
+"trait_type": "xplevel",
+"value": "BRONZE"
+
+},
+{
+"trait_type": "spx1",
+"value": "This non-fungible digital asset is part of the MetaGame project."
+
+}
+],
+"background_color": "f7f7f7",
+"name": "MetaGame Season 5 Player Token",
+"image": "https://clones.web3bits.com/metedata/377.png",
+"description": "Player token for the MetaGame project. Web3Skills Clone for Player defidude. See: https://clones.web3bits.com/metedata/gc/player-game-card-256.png ",
+"external_url": "https://clones.web3bits.com/metedata/",
+"animation_url": "ipfs://QmXhY7G7nKgwpqifDcife6SuyUGmN2qoZ8H4KZ75ZCCvoR/index.html",
+"youtube_url": "https://youtu.be/Jh5WJrCf05Y",
+"decimals": 0,
+"external_3dr_url": "https://www.cryptovoxels.com/play?coords=N@309E,111S",
+"external_fre_url": "https://www.uscourts.gov/sites/default/files/Rules%20of%20Evidence.",
+"image_sm": "https://bafkreigl2izqrpzmftu5jarnyb5xe4lellpyfueja7hhp5lchi3ek42qqy.ipfs.infura-ipfs.io",
+"image_md": "https://bafkreic5mdegc7kyvhfonrteh7khvkprc6yc7lc4mdqinfjdkz2o3uwl2u.ipfs.infura-ipfs.io",
+"image_lg": "https://bafybeihmrcyr7mopi3vyqbvi3ximh57eiaannxouyw3rrj4lssx4wxg76a.ipfs.infura-ipfs.io",
+"document1": "https://metagame.wtf/community/players",
+"document2": "https://wiki.metagame.wtf",
+"avfile1": "https://www.youtube.com/watch?v=1ZxPcyeHrMc",
+"avfile2": "https://clones.web3bits.com/",
+"chainId": "137",
+"chainBridge": "https://wallet.polygon.technology/bridge",
+"hash1": " 0x2bf098b53fd74bac5f0fc4e0d07c12420ba4a884f7e8daab9d07096f252c8634 ",
+"hash2": "0xeB35aD206c57a0Ef62Ccabe9043Dc4bA7F21182e",
+"matic": "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0",
+"date":1648302750000
+}
