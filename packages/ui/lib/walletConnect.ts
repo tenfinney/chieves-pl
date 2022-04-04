@@ -1,8 +1,6 @@
 import WalletConnectProvider from '@walletconnect/web3-provider'
 import { NETWORKS } from 'lib/networks'
 
-console.debug({ NETWORKS })
-
 const rpcUrls = Object.fromEntries(
   Object.entries(NETWORKS).map(
     ([hexId, { rpc }]) => [Number(hexId), rpc]

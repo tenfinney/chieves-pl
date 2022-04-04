@@ -26,7 +26,7 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
   enum Role {
     Superuser,
     Minter,
-    RoleGiver,
+    Caster,
     Transferer,
     MetadataConfig,
     Maintainer,
@@ -34,26 +34,104 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     Reserved1
   }
 
-  // internal token gating tokens are the top eight bits 
-  uint256 public constant LOWER248 = 2**248 - 1;
+  // 13 publicity bits defining groups to which
+  // the the token information is accessible
+  uint256 public constant TEAM = [
+    binstr("0b0000000000001") << 243,
+    binstr("0b0000000000010") << 243,
+    binstr("0b0000000000100") << 243,
+    binstr("0b0000000001000") << 243,
+    binstr("0b0000000010000") << 243,
+    binstr("0b0000000100000") << 243,
+    binstr("0b0000001000000") << 243,
+    binstr("0b0000010000000") << 243,
+    binstr("0b0000100000000") << 243,
+    binstr("0b0001000000000") << 243,
+    binstr("0b0010000000000") << 243,
+    binstr("0b0100000000000") << 243,
+    binstr("0b1000000000000") << 243
+  ];
+
+  // The three alliances are combinations of the
+  // 13 teams. Marking an alliance publicity might
+  // give moderated access to an information stream.
+  uint256 public constant RED_ALLAIANCE    = binstr("0x100") << 240;
+  uint256 public constant PURPLE_ALLAIANCE = binstr("0x010") << 240;
+  uint256 public constant BLUE_ALLAIANCE   = binstr("0x001") << 240;
+
+  // Gating tokens control access to contract
+  // functionality.
+  uint256 public constant GATING_TYPE       = 0x1 << 236;
+  // Membership tokens represent being given
+  // access to a team's information.
+  uint256 public constant MEMBERSHIP_TYPE   = 0x2 << 236;
+  // Address tokens have a lower 160 bits which
+  // correspond to an Ethereum address.
+  uint256 public constant ADDRESS_TYPE      = 0x3 << 236; // ¿?
+  // Experimental tokens are meant to demonstrate
+  // properties of the system. Thje flag may be used
+  // in conjunction with other types.
+  uint256 public constant EXPERIMENTAL_TYPE = binstr("0b1000") << 253;
+
+  // Superusers have access to the bulk of the
+  // functions of the contract.  
+  uint256 public constant SUPERUSER_ROLE  = uint(Role.Minter) << 248;
+  // Minters have the capacity to create new tokens
+  // subject to restrictions on quantity and whether
+  // an individual may hold duplicates.
+  uint256 public constant MINTER_ROLE     = uint(Role.Minter) << 248;
+  // Casters may cast roles upon other users except
+  // for superusers who may only be created by
+  // other superusers (or the owner).
+  uint256 public constant CASTER_ROLE     = uint(Role.Caster) << 248;
+  // Transferers have the ability to move certain
+  // tokens between accounts.
+  uint256 public constant TRANSFERER_ROLE = uint(Role.Transferer) << 248;
+
   uint256 public constant SUPERUSER_TOKEN = (
-    (uint(Role.Superuser) << 248) + LOWER248
+    GATING_TYPE + SUPERUSER_ROLE
   );
   uint256 public constant MINTER_TOKEN = (
-    (uint(Role.Minter) << 248) + LOWER248
+    GATING_TYPE + MINTER_ROLE
   );
-  uint256 public constant ROLE_GIVER_TOKEN = (
-    (uint(Role.RoleGiver) << 248) + LOWER248
+  uint256 public constant CASTER_TOKEN = (
+    GATING_TYPE + MINTER_ROLE
   );
   uint256 public constant TRANSFERER_TOKEN = (
-    (uint(Role.Transferer) << 248) + LOWER248
+    GATING_TYPE + TRANSFERER_ROLE
   );
   uint256 public constant METADATA_CONFIG_TOKEN = (
-    (uint(Role.MetadataConfig) << 248) + LOWER248
+    (uint(Role.MetadataConfig) << 248) + GATING_BYTE
   );
   uint256 public constant MAINTAINER_TOKEN = (
-    (uint(Role.Maintainer) << 248) + LOWER248
+    (uint(Role.Maintainer) << 248) + GATING_BYTE
   );
+
+function binstr(
+  bytes5 input
+)
+  public
+  pure
+  returns (uint8 value)
+{
+  uint8 n = 0;
+  uint8 i = 0;
+
+  if(input[0] == "0" && input[1] == "b") {
+    i = 2;
+  }
+
+  for(i; i < 5; i++) {
+    n *= 2;
+    if(input[i] == "1") {
+      n += 1;
+    } else {
+      require(input[i] == "0");
+    }
+  }
+
+  return n;
+}
 
 
   /// @custom:oz-upgrades-unsafe-allow constructor
@@ -73,45 +151,86 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     __UUPSUpgradeable_init();
   }
 
-  function _hasRole(Role role)
-    internal
+  function hasRole(Role role)
+    public
+    virtual
     view
     returns (bool has)
   {
-    uint256 id = (uint(role) << 248) + LOWER248;
-    return balanceOf(_msgSender(), id) > 0;
+    return hasRole(role, _msgSender());
   }
 
-  function _isSuper()
-    internal
+  function hasRole(Role role, address user)
+    public
+    virtual
+    view
+    returns (bool has)
+  {
+    return hasRole(role, user, 0);
+  }
+
+  function hasRole(Role role, address user, uint256 id)
+    public
+    virtual
+    view
+    returns (bool has)
+  {
+    uint256 gate = (uint(role) << 248) + GATING_BYTE;
+    return balanceOf(user, gate) > 0 || balanceOf(user, gate + id) > 0;
+  }
+
+  function isSuper()
+    public
+    virtual
     view
     returns (bool superuser)
   {
-    return _hasRole(Role.Superuser) || _msgSender() == owner();
+    return hasRole(Role.Superuser) || _msgSender() == owner();
   }
 
-  function addSuperuser(address user)
+  function grantRole(Role role, address user)
     public
+    virtual
+    returns (uint8 assignments)
   {
-    require(
-      _isSuper(),
-      "You must be a superuser to create new ones."
-    );
-    uint256 tokenId = (uint(Role.Superuser) << 248) + LOWER248;
-    mint(user, tokenId, 1, "New Superuser");
+    return grantRole(role, user, 0)
   }
 
-  function uri(uint256 tokenId)
+  function grantRole(Role role, address user, uint256 id)
+    public
+    virtual
+    returns (uint8 assignments)
+  {
+    if(role == Role.Superuser) {
+      require(
+        _isSuper(),
+        "You must be a superuser to create new ones."
+      );
+    } else {
+      require(
+        hasRole(Role.Caster) || _isSuper(),
+        "You must have the Caster role to assign new roles."
+      );
+    }
+    if(!hasRole(role, user, id)) {
+      uint256 id = (uint(role) << 248) + GATING_BYTE + id;
+      mint(user, id, 1, []);
+      return 1;
+    }
+    return 0;
+  }
+
+  function uri(uint256 id)
     public
     view
     virtual
     override
     returns (string memory)
   {
-    return uris[tokenId];
+    return uris[id];
   }
 
-  function setURI(string calldata newuri, uint256 tokenId)
+  function setURI(uint256 id, string calldata uri)
     public
     virtual
   {
@@ -119,15 +238,31 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
       _hasRole(Role.MetadataConfig) || _isSuper(),
       "You must have a MetadataConfig token to change metadata."
     );
-    uris[tokenId] = newuri;
-    emit URI(newuri, tokenId);
+    uris[id] = uri;
+    emit URI(uri, id);
   }
 
-  function mint(
-    address recipient,
-    uint256 amount,
-    string calldata metadata,
-    bytes memory data
+  function setMax(
+    uint256 id,
+    uint256 max
+  )
+    public
+    virtual
+    returns (uint256 tokenId)
+  {
+
+  }
+
+  function create()
+    public
+    virtual
+    returns (uint256 tokenId)
+  {
+    return create(0);
+  }
+
+  function create(
+    uint256 max
   )
     public
     virtual
@@ -135,10 +270,17 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
   {
     numTokenTypes.increment();
     uint256 id = numTokenTypes.current();
-    mint(recipient, id, amount, data);
-    setURI(metadata, id);
+    setMax(max, id);
     return id;
   }
+
+  function configure(
+    uint256 id,
+    string calldata metadataURI,
+    uint256 max
+  )
+    public
+    virtual
 
   function mint(
     address recipient,

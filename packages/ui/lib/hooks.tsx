@@ -92,17 +92,15 @@ export const Web3ContextProvider: React.FC = (
     )
 
     const roContract = useMemo(
-      () => {
-        console.debug({ contractAddress, abi, contractProvider })
-        return new Contract(contractAddress, abi, contractProvider)
-      },
+      () => (
+        new Contract(contractAddress, abi, contractProvider)
+      ),
       [contractProvider],
     )
 
     const rwContract = useMemo(
       () => {
-        console.info({ chain })
-        if(userProvider && chain) {
+        if(userProvider && chain === NETWORKS.contract.chainId) {
           return new Contract(contractAddress, abi, userProvider.getSigner())
         } else {
           return undefined

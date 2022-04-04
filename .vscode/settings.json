@@ -1,7 +1,9 @@
 {
   "cSpell.words": [
     "chakra",
-    "Disbersable"
+    "Chievemint",
+    "Disbersable",
+    "ipfsify"
   ],
   "search.exclude": {
     "**/.yarn": true,
@@ -9,7 +11,12 @@
   },
   "typescript.tsdk": ".yarn/sdks/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
-  "editor.tabSize": 3,
-  "editor.cursorStyle": "block-outline",
-  "javascript.inlayHints.functionLikeReturnTypes.enabled": true
+  "editor.tabSize": 2,
+  "javascript.inlayHints.functionLikeReturnTypes.enabled": true,
+  "editor.cursorBlinking": "phase",
+  "workbench.preferredDarkColorTheme": "Default High Contrast",
+  "window.autoDetectColorScheme": true,
+  "workbench.colorTheme": "Default High Contrast",
+  "window.closeWhenEmpty": true,
+  "window.zoomLevel": 3
 }

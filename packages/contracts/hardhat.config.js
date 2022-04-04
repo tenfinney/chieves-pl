@@ -172,7 +172,7 @@ task('fundedwallet', 'Create a wallet (pk) link and fund it with deployer?')
     value: ethers.utils.parseEther(amount)
   }
 
-  //SEND USING LOCAL DEPLOYER MNEMONIC IF THERE IS ONE
+  // SEND USING LOCAL DEPLOYER MNEMONIC IF THERE IS ONE
   // IF NOT SEND USING LOCAL HARDHAT NODE:
   if(localDeployerMnemonic){
     let deployerWallet = new ethers.Wallet.fromMnemonic(localDeployerMnemonic)
@@ -181,7 +181,7 @@ task('fundedwallet', 'Create a wallet (pk) link and fund it with deployer?')
     let sendresult = await deployerWallet.sendTransaction(tx)
     console.log("\n"+url+'/pk#'+privateKey+"\n")
     return
-  }else{
+  } else {
     console.log('💵 Sending '+amount+' ETH to '+randomWallet.address+' using local node')
     console.log("\n"+url+'/pk#'+privateKey+"\n")
     return send(ethers.provider.getSigner(), tx)
@@ -227,7 +227,7 @@ task('mineContractAddress', 'Looks for a deployer account that will give leading
   const hdkey = require('ethereumjs-wallet/hdkey')
 
   let mnemonic = ''
-  while(contract_address.indexOf(taskArgs.searchFor)!=0){
+  while(contract_address.indexOf(taskArgs.searchFor) != 0) {
 
     mnemonic = bip39.generateMnemonic()
     debug('mnemonic', mnemonic)
@@ -305,7 +305,6 @@ task('account', 'Get balance informations for the deployment account.', async (_
       }
     }
   }
-
 })
 
 
@@ -327,14 +326,14 @@ task('accounts', 'Prints the list of accounts', async (_, { ethers }) => {
 
 task('blockNumber', 'Prints the block number', async (_, { ethers }) => {
   const blockNumber = await ethers.provider.getBlockNumber()
-  console.log(blockNumber)
+  console.log({ blockNumber })
 })
 
 task('balance', "Prints an account's balance")
 .addPositionalParam('account', "The account's address")
 .setAction(async (taskArgs, { ethers }) => {
   const balance = await ethers.provider.getBalance(
-      await addr(ethers, taskArgs.account)
+    await addr(ethers, taskArgs.account)
   )
   console.log(formatUnits(balance, 'ether'), 'ETH')
 })
@@ -391,4 +390,21 @@ task('send', 'Send ETH')
   debug(JSON.stringify(txRequest, null, 2))
 
   return send(fromSigner, txRequest)
+})
+
+task('sign', 'Sign the contents of a file')
+.addParam('toSign', 'File whose contents to sign')
+.setAction(async (taskArgs, { ethers }) => {
+  const { toSign: file } = taskArgs
+  if(!file || file === '') {
+    console.info('Usage: $0 sign file.txt')
+  } else if(!fs.existsSync(file)) {
+    throw new Error(`File “${file}” doesn't exist.`)
+  } else {
+    const content = fs.readFileSync(file).toString()
+    const indented = `>   ${content.replace("\n", "\n>   ")}`
+    console.info(`Signing: \n${indented}`)
+    const sig = await ethers.provider.getSigner().signMessage(content)
+    console.info(`Signature: “${sig}”`)
+  }
 })

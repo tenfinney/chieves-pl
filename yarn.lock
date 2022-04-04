@@ -2123,6 +2123,7 @@ __metadata:
     "@ethersproject/contracts": ^5.5.0
     "@ethersproject/providers": ^5.5.3
     "@types/node": 17.0.21
+    "@types/pluralize": ^0.0.29
     "@types/react": 17.0.39
     "@walletconnect/encoding": ^1.0.1
     "@walletconnect/web3-provider": "*"
@@ -2134,12 +2135,15 @@ __metadata:
     framer-motion: ^6
     gh-pages: ^3.2.3
     ipfs-http-client: ^56.0.1
+    it-all: ^1.0.6
     mime: ^3.0.0
     multiformats: ^9.6.4
     next: 12.1.0
     nft.storage: ^6.0.2
+    pluralize: ^8.0.0
     react: 17.0.2
     react-dom: 17.0.2
+    react-hook-form: ^7.28.1
     react-markdown: ^8.0.1
     tslib: ^2.3.1
     typescript: 4.6.2
@@ -2930,6 +2934,13 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: d15024b1957c21cf3b8887329d9bd8dfde754cf13a09d76ae25f1391cfc62bb8b8d7b760773c5dbaa748172fba8b3e0c3dbe962af6ccbd69b76df12a48dfba40
+  languageName: node
+  linkType: hard
+
+"@types/pluralize@npm:^0.0.29":
+  version: 0.0.29
+  resolution: "@types/pluralize@npm:0.0.29"
+  checksum: db7732b733ba1dc59f080f87364c9f985c1ae9f1e5ec5fcefb83c1327149e01ecac42766352eb7b19b117cf39defa99cf514629f3666968a3bdeb00e74f2a97e
   languageName: node
   linkType: hard
 
@@ -10081,7 +10092,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"it-all@npm:^1.0.4, it-all@npm:^1.0.5":
+"it-all@npm:^1.0.4, it-all@npm:^1.0.5, it-all@npm:^1.0.6":
   version: 1.0.6
   resolution: "it-all@npm:1.0.6"
   checksum: 7ca9a528c08ebe2fc8a3c93a41409219d18325ed31fedb9834ebac2822f0b2a96d7abcb6cbfa092114ab4d5f08951e694c7a2c3929ce4b5300769e710ae665db
@@ -13038,6 +13049,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"pluralize@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "pluralize@npm:8.0.0"
+  checksum: 08931d4a6a4a5561a7f94f67a31c17e6632cb21e459ab3ff4f6f629d9a822984cf8afef2311d2005fbea5d7ef26016ebb090db008e2d8bce39d0a9a9d218736e
+  languageName: node
+  linkType: hard
+
 "pngjs@npm:^3.3.0":
   version: 3.4.0
   resolution: "pngjs@npm:3.4.0"
@@ -13604,6 +13622,15 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0
   checksum: 520b12a4496be21b3228bbf938657f6c33f868e486a0cd355d8bec918129d2c1bf7aabecb20aecdb446a1fbdb61b16f680b5d15b998f544f1b5c0dc5c8914c40
+  languageName: node
+  linkType: hard
+
+"react-hook-form@npm:^7.28.1":
+  version: 7.28.1
+  resolution: "react-hook-form@npm:7.28.1"
+  peerDependencies:
+    react: ^16.8.0 || ^17
+  checksum: 176e653f3c5c1882125b6d51d3b2258c7120202227b91edbf74708eb3f0d455b3c827f1b6c236cdf208de82871b14e86d9aeacbd44c418bcf591b2346721156f
   languageName: node
   linkType: hard
 

@@ -1,6 +1,7 @@
-import { Maybe } from 'lib/types'
+import { CodedError, Maybe } from 'lib/types'
 import { CID } from 'multiformats/cid'
 import { IPFS_LINK_PATTERN } from 'lib/constants';
+import { NETWORKS } from './networks';
 
 export const httpURL = (uri?: Maybe<string>) => {
     const [, origCID, path] = (
@@ -55,4 +56,23 @@ export const isEmpty = (val: unknown) => {
     return true
   }
   return false
+}
+
+export const switchTo = async (chain: string) => {
+  try {
+    await window.ethereum.request?.({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: chain }],
+    })
+  } catch (switchError) {
+    if ((switchError as CodedError).code === 4902) {
+      throw new Error(
+        `The network “${NETWORKS[chain].name ?? 'Unknown'}”`
+        + ' is not yet available in your MetaMask.\n\n'
+        + ' Please add it.'
+      )
+    } else {
+      throw switchError
+    }
+  }
 }

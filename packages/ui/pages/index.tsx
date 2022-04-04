@@ -10,15 +10,12 @@ import {
 } from '@chakra-ui/react'
 import Markdown from 'react-markdown'
 import { httpURL } from 'lib/helpers'
-import Logo from '../public/logo.svg'
-import Header from '../public/header.svg'
 import type { Maybe, ERC1155Metadata } from 'lib/types'
 import abi from 'contracts/BulkDisbersableNFTs.abi'
 import address from 'contracts/BulkDisbersableNFTs.address'
 
 type TokenState = {
   id: string
-  state: 'premetadata' | 'prefetch' | 'loaded' | 'error'
   uri?: string
   metadata?: ERC1155Metadata
   total?: number
@@ -58,22 +55,34 @@ const Home: NextPage = () => {
           await Promise.all(
             Array.from({ length: typeCount }).map(async (_, index) => {
               const id = `0x${(index + 1).toString(16)}`
-              setToken(index, { id, state: 'premetadata' })
+              setToken(index, { id })
               const uri = await contract.uri(id)
-              setToken(index, { uri, state: 'prefetch' })
-              await Promise.all([
-                (async () => {
-                  const url = httpURL(uri)
-                  if(!url) throw new Error(`Missing URI for token #${id}.`)
-                  const response = await fetch(url)
-                  const metadata = await response.json()
-                  setToken(index, { metadata, state: 'loaded' })
-                })(),
-                (async () => {
-                  const total = await contract.totalSupply(id)
-                  setToken(index, { total })
-                })(),
-              ])
+              setToken(index, { uri })
+
+              const url = httpURL(uri)
+              if(!url) throw new Error(
+                `Missing URI for token #${id}.`
+              )
+              // this is throwing & it escapes the catch
+              fetch(url)
+              .then((response) => {
+                console.debug({ response })
+                return response.text()
+              })
+              .then((data) => {
+                console.debug({ data })
+                const metadata = JSON.parse(data ?? '{}')
+                setToken(index, { metadata })
+              })
+              .catch((err) => {
+                console.warn({ err })
+                setToken(index, {
+                  error: (err as Error).message ?? err
+                })
+              })
+
+              contract.totalSupply(id)
+              .then((total: string) => setToken(index, { total }))
             })
           )
         }
@@ -95,8 +104,25 @@ const Home: NextPage = () => {
       </Head>
 
       <Flex h="33vh" maxW="40rem" margin="auto">
-        <Logo style={{ height: '-webkit-fill-available', width: '40%' }}/>
-        <Header style={{ height: '-webkit-fill-available', width: '60%' }}/>
+        <NextLink href="/new" passHref>
+          <ChakraLink
+            w="60%" h="-webkit-fill-available"
+            position="relative"
+            zIndex={1}
+          >
+            <Box display="inline-block" w="full" h="full">
+              <chakra.object
+                data="logo.svg"
+                position="relative"
+                zIndex={-1}
+              />
+            </Box>
+          </ChakraLink>
+        </NextLink>
+        <chakra.object
+          data="header.svg"
+          h="-webkit-fill-available" w="60%"
+        />
       </Flex>
 
       <Table
@@ -122,60 +148,73 @@ const Home: NextPage = () => {
         </Thead>
         <Tbody>
           {tokens.map((token: TokenState) => {
-            if(token.state === 'loaded') {
+            if(token.id && token.uri) {
               return (
                 <Tr key={token.id}>
                   <Td>{token.id}</Td>
-                  <Td>
-                    <Stack><NextLink href={`/view/${token.id}`} passHref>
-                      <ChakraLink>
-                        <Box
-                          bg={
-                            token.metadata?.background_color ? (
-                              `#${token.metadata.background_color}`
-                            ) : (
-                              'transparent'
-                            )
-                          }
-                        >
-                          {token.metadata?.image && (
-                            <Image
-                              src={httpURL(token.metadata.image)}
-                              alt={token.metadata?.name ?? 'Untitled'}
-                              maxW={32}
-                              maxH={32}
-                              objectFit="contain"
-                              margin="auto"
-                            />
-                          )}
-                        </Box>
-                        <Text>{token.metadata?.name ?? (
-                          <Text as="em">Untitled</Text>
-                        )}</Text>
-                      </ChakraLink>
-                    </NextLink></Stack>
-                  </Td>
-                  <Td
-                    flexGrow={1}
-                    sx={{ a: { textDecoration: 'underline' } }}
-                  >
-                    <Markdown>{token.metadata?.description ?? (
-                      '*No Description*'
-                    )}</Markdown>
-                  </Td>
-                  <Td>
-                    {token.metadata?.external_url && (
-                      <ChakraLink
-                        href={token.metadata.external_url}
-                        isExternal
-                        fontSize="150%"
+                  {!token.metadata ? (
+                    <Td colSpan={3}>
+                      <Flex justify="center">
+                        <Spinner thickness="4px"/>
+                        <Text ml={3}>Loading Metadata…</Text>
+                      </Flex>
+                    </Td>
+                  ) : (
+                    <>
+                      <Td>
+                        <Stack>
+                          <NextLink href={`/view/${token.id}`} passHref>
+                            <ChakraLink>
+                              <Box
+                                bg={
+                                  token.metadata?.background_color ? (
+                                    `#${token.metadata.background_color}`
+                                  ) : (
+                                    'transparent'
+                                  )
+                                }
+                              >
+                                {token.metadata?.image && (
+                                  <Image
+                                    src={httpURL(token.metadata.image)}
+                                    alt={token.metadata?.name ?? 'Untitled'}
+                                    maxW={32}
+                                    maxH={32}
+                                    objectFit="contain"
+                                    margin="auto"
+                                  />
+                                )}
+                              </Box>
+                              <Text>{token.metadata?.name ?? (
+                                <Text as="em">Untitled</Text>
+                              )}</Text>
+                            </ChakraLink>
+                          </NextLink>
+                        </Stack>
+                      </Td>
+                      <Td
+                        flexGrow={1}
+                        sx={{ a: { textDecoration: 'underline' } }}
                       >
-                        <Tooltip label={token.metadata.external_url} hasArrow>
-                          🌐
-                        </Tooltip>
-                      </ChakraLink>
-                    )}
-                  </Td>
+                        <Markdown>{token.metadata?.description ?? (
+                          '*No Description*'
+                        )}</Markdown>
+                      </Td>
+                      <Td>
+                        {token.metadata?.external_url && (
+                          <ChakraLink
+                            href={token.metadata.external_url}
+                            isExternal
+                            fontSize="150%"
+                          >
+                            <Tooltip label={token.metadata.external_url} hasArrow>
+                              🌐
+                            </Tooltip>
+                          </ChakraLink>
+                        )}
+                      </Td>
+                    </>
+                  )}
                   <Td>
                     {token.uri && (
                       <Flex justify="center" fontSize="150%">
@@ -233,34 +272,22 @@ const Home: NextPage = () => {
                 <Td>{token.id}</Td>
                 <Td colSpan={4}>
                   {(() => {
-                    switch(token.state) {
-                      case 'premetadata': {
-                        return (
-                          <Flex>
-                            <Spinner thickness="4px"/>
-                            <Text ml={3}>Retrieving Token URI…</Text>
-                          </Flex>
-                        )
-                      }
-                      case 'prefetch': {
-                        return (
-                          <Flex>
-                            <Spinner thickness="4px"/>
-                            <Text ml={3}>Loading Metadata…</Text>
-                          </Flex>
-                        )
-                      }
-                      case 'error': {
-                        return (
-                          <Text colorScheme="red">{token.error}</Text>
-                        )
-                      }
-                      default: {
-                        return (
-                          <Text>Unknown Token State: {token.state}</Text>
-                        )
-                      }
+                    if(token.error) {
+                      return (
+                        <Text colorScheme="red">{token.error}</Text>
+                      )
                     }
+                    if(!token.uri) {
+                      return (
+                        <Flex>
+                          <Spinner thickness="4px"/>
+                          <Text ml={3}>Retrieving Token URI…</Text>
+                        </Flex>
+                      )
+                    }
+                    return (
+                      <Text>Unknown Token State</Text>
+                    )
                   })()}
                 </Td>
               </Tr>

@@ -21,3 +21,5 @@ export type ERC1155Metadata = {
 } & {
   [key: string]: string | number
 }
+
+export type CodedError = Error & { code: number }
