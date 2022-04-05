@@ -13,28 +13,25 @@ export const Edit: NextPage = () => {
   const tokenId = `0x${Number(nftId).toString(16)}`
   const { roContract } = useWeb3()
 
-  useEffect(
-    () => {
-      const getMetadata = async () => {
-        if(roContract && tokenId) {
-          try {
-            const meta = await roContract.uri(tokenId)
-            if(!meta) {
-              setMetadata(null)
-            } else {
-              const response = await fetch(httpURL(meta))
-              setMetadata(await response.json())
-            }
-          } catch(err) {
-            setError((err as Error).message)
+  useEffect(() => {
+    const getMetadata = async () => {
+      if(roContract && tokenId) {
+        try {
+          const meta = await roContract.uri(tokenId)
+          if(!meta) {
+            setMetadata(null)
+          } else {
+            const response = await fetch(httpURL(meta))
+            setMetadata(await response.json())
           }
+        } catch(err) {
+          setError((err as Error).message)
         }
       }
+    }
 
-      getMetadata()
-    },
-    [roContract, tokenId],
-  )
+    getMetadata()
+  }, [roContract, tokenId])
 
   return (
     <OptionsForm

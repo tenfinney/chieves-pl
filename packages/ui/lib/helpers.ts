@@ -26,7 +26,7 @@ export const httpURL = (uri?: Maybe<string>) => {
     }
   
     if(!uri) {
-      throw new Error(`URI undefined for ${uri}`)
+      throw new Error(`URI Undefined`)
     }
 
     return uri

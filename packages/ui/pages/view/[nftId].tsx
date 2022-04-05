@@ -1,18 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  Alert, AlertDescription, AlertIcon, AlertTitle, Box,
-  Button, Image, Input, chakra, Heading, Stack,
-  Flex, Spinner, Text,
+  Alert, AlertDescription, AlertIcon, AlertTitle,
+  Image, chakra, Heading, Stack, Flex, Spinner, Text,
 } from '@chakra-ui/react'
 import { ethers } from 'ethers'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import type { NextPage } from 'next'
 import ReactMarkdown from 'react-markdown'
-import { httpURL, isEmpty } from 'lib/helpers'
-import type { Maybe, ERC1155Metadata } from 'lib/types'
+import { httpURL } from 'lib/helpers'
+import type { ERC1155Metadata } from 'lib/types'
 import address from 'contracts/BulkDisbersableNFTs.address'
 import abi from 'contracts/BulkDisbersableNFTs.abi'
+import { HomeLink } from 'components'
 
 const Markdown = chakra(ReactMarkdown)
 
@@ -21,16 +21,6 @@ const View: NextPage = () => {
   const [metadata, setMetadata] = useState<ERC1155Metadata>()
   const [error, setError] = useState<string>()
 
-  // let ethereum: Maybe<ethers.providers.ExternalProvider> = null
-  // if (typeof window !== 'undefined') {
-  //   ({ ethereum } = window)
-  // }
-  // const provider = useMemo(
-  //   () => (
-  //     ethereum ? new ethers.providers.Web3Provider(ethereum) : null
-  //   ),
-  //   [ethereum],
-  // )
   const provider = useMemo(
     () => (
       new ethers.providers.JsonRpcProvider(
@@ -96,7 +86,7 @@ const View: NextPage = () => {
   } = metadata
 
   return (
-    <Stack align="center">
+    <Stack align="center" position="relative">
       <Head>
         <title>’𝖈𝖍𝖎𝖊𝖛𝖊: 𝓥ⲓⲉⲱ #{nftId}</title>
         <meta
@@ -104,6 +94,7 @@ const View: NextPage = () => {
           content="MetaGame’s ’Chievemint NFTs"
         />
       </Head>
+      <HomeLink/>
       {name && <Heading>{name}</Heading>}
       {image && (
         <Image

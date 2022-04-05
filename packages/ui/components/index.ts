@@ -1,2 +1,5 @@
 export * from './Header'
 export * from './OptionsForm'
+export * from './TokensTable'
+export * from './LinkedSVG'
+export * from './HomeLink'

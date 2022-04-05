@@ -2,27 +2,7 @@ import {
   Box, chakra, Flex, Link as ChakraLink,
   LinkProps, FlexProps, Tooltip,
 } from '@chakra-ui/react'
-import NextLink from 'next/link'
-
-export const LinkedSVG: React.FC<
-  LinkProps & { href: string, svg: string }
-> = ({ href, svg: data, ...props }) => (
-  <NextLink {...{ href }} passHref>
-    <ChakraLink
-      {...props}
-      position="relative"
-      zIndex={1}
-    >
-      <Box display="inline-block" w="full" h="full">
-        <chakra.object
-          {...{ data }}
-          position="relative"
-          zIndex={-1}
-        />
-      </Box>
-    </ChakraLink>
-  </NextLink>
-)
+import { LinkedSVG } from 'components'
 
 export const Header: React.FC<
   FlexProps & { links?: Record<'cup' | 'sign', string> }

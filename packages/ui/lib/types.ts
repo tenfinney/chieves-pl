@@ -23,3 +23,11 @@ export type ERC1155Metadata = {
 }
 
 export type CodedError = Error & { code: number }
+
+export type TokenState = {
+  id: string
+  uri?: string
+  metadata?: ERC1155Metadata
+  total?: number
+  error?: string
+}

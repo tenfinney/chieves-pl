@@ -12,6 +12,7 @@ import type { NextPage } from 'next'
 import { httpURL } from 'lib/helpers'
 import { Maybe, ERC1155Metadata } from 'lib/types'
 import { useWeb3 } from 'lib/hooks'
+import { HomeLink } from 'components'
 
 const Address: React.FC<{ name: string }> = ({ name }) => {
   const { ensProvider } = useWeb3()
@@ -63,44 +64,38 @@ const Disberse: NextPage = () => {
   } = useWeb3()
   const [addresses, setAddresses] = useState<Array<string | ReactNode>>([])
   
-  useEffect(
-    () => {
-      const parse = async () => {
-        setAddresses(
-          raw.split(/\s*[\s,;:/\|]+\s*/)
-          .filter((str) => str && str !== '')
-          .map((name, idx) => <Address key={idx} {...{ name }}/>)
-        )
-      }
+  useEffect(() => {
+    const parse = async () => {
+      setAddresses(
+        raw.split(/\s*[\s,;:/\|]+\s*/)
+        .filter((str) => str && str !== '')
+        .map((name, idx) => <Address key={idx} {...{ name }}/>)
+      )
+    }
 
-      parse()
-    },
-    [ensProvider, raw],
-  )
+    parse()
+  }, [ensProvider, raw])
 
   const name = useMemo(
     () => metadata?.name ?? `#${tokenId}`,
     [metadata, tokenId],
   )
 
-  useEffect(
-    () => {
-      const getBalance = async () => {
-        if(roContract && address && tokenId) {
-          try {
-            setBalance(Number(
-              (await roContract.balanceOf(address, tokenId)).toString()
-            ))
-          } catch(err) {
-            setError((err as Error).message)
-          }
+  useEffect(() => {
+    const getBalance = async () => {
+      if(roContract && address && tokenId) {
+        try {
+          setBalance(Number(
+            (await roContract.balanceOf(address, tokenId)).toString()
+          ))
+        } catch(err) {
+          setError((err as Error).message)
         }
       }
+    }
 
-      getBalance()
-    },
-    [address, roContract, tokenId],
-  )
+    getBalance()
+  }, [address, roContract, tokenId])
 
   useEffect(
     () => {
@@ -141,6 +136,8 @@ const Disberse: NextPage = () => {
         <title>Disberse NFT #{tokenId}</title>
         <meta name="description" content="Distribute A ’Chievemint NFT" />
       </Head>
+
+      <HomeLink/>
 
       <Stack>
         {(() => {

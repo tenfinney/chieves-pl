@@ -9,7 +9,7 @@ import Head from 'next/head'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/router'
 import pluralize from 'pluralize'
-import { CodedError } from 'lib/types'
+import { CodedError, ERC1155Metadata } from 'lib/types'
 
 const Submit: React.FC<ButtonProps & {
   purpose: string
@@ -73,10 +73,11 @@ const Submit: React.FC<ButtonProps & {
 }
 
 export const OptionsForm: React.FC<{
-  purpose?: 'create' | 'update',
-  tokenId: string,
+  purpose?: 'create' | 'update'
+  tokenId: string
+  metadata: ERC1155Metadata
 }> = ({
-  purpose = 'create', tokenId
+  purpose = 'create', tokenId, metadata
 }) => {
   const { roContract, rwContract, ensProvider } = useWeb3()
   const router = useRouter()
@@ -232,7 +233,11 @@ export const OptionsForm: React.FC<{
           {[NFTForm, URIForm, JSONForm].map((Form) => (
             <TabPanel key={Form.displayName}>
               <Form {...{
-                register, watch, setValue, tokenId,
+                register,
+                watch,
+                setValue,
+                tokenId,
+                metadata,
               }}/>
             </TabPanel>
           ))}
@@ -242,7 +247,7 @@ export const OptionsForm: React.FC<{
         <Flex align="center">
           <FormLabel>Maximum Mintable</FormLabel>
           <Input
-            type="number" autoFocus
+            type="number"
             placeholder="¿Maximum number of tokens allowed?"
             {...register('maximum')}
           />

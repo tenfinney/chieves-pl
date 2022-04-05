@@ -27,11 +27,10 @@ const nextConfig = {
         permanent: true,
       },
       {
-        source: '/disberse',
+        source: '/view',
         destination: '/',
         permanent: true,
       },
-
     ]
   },
 }
