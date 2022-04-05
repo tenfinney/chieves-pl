@@ -217,7 +217,7 @@ export const FormOptions: React.FC<{
   return (
     <Container
       as="form" onSubmit={handleSubmit(submit)}
-      mt={10} maxW={['100%', 'min(85vw, 50em)']}
+      mt={10} mb="20rem" maxW={['100%', 'min(85vw, 50em)']}
       sx={{ a: { textDecoration: 'underline' } }}
     >
       <Submit {...{ purpose, processing }} mb={3} />

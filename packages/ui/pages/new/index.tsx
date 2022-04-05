@@ -2,7 +2,7 @@ import { NextPage } from 'next'
 import FormOptions from 'components/FormOptions'
 import { Button, Center, Flex, Heading, Spinner, Text, chakra, Stack, Container } from '@chakra-ui/react';
 import { useWeb3 } from 'lib/hooks'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { NETWORKS } from '../../lib/networks';
 import { switchTo } from 'lib/helpers';
 import Head from 'next/head';
@@ -34,41 +34,35 @@ const Content: React.FC = () => {
   const [tokenId, setTokenId] = (
     useState(Array.isArray(id) ? id[0] : id)
   )
+  console.info({ id })
   const [working, setWorking] = useState(false)
+
+  useEffect(() => {
+    if(typeof id === 'string') {
+      setTokenId(id)
+    }
+  }, [id])
 
   const reserve = useCallback(async () => {
     try {
       setWorking(true)
 
       if(!rwContract) {
-        throw new Error('Connect your wallet to reserve an id.')
+        throw new Error(
+          'Connect your wallet to reserve an id.'
+        )
       }
       const tx = await rwContract['create()']()
-      console.debug({ tx })
       const receipt = await tx.wait()
-      console.debug({ receipt })
       let event = receipt.events.find(
         (evt: Event) => evt.event === 'Created'
       )
       if(!event) {
-        console.warn(
-          'Couldn’t find a creation event;'
-          + ' attempting manual lookup.'
+        throw new Event(
+          'Couldn’t find a creation event.'
         )
-        const iface = new ethUtils.Interface([
-          "event Created(uint256 id, address controller)"
-        ])
-        const [{ data, topics }] = receipt.logs
-        event = iface.decodeEventLog(
-          'Created', data, topics
-        )
-        if(!event) {
-          throw new Error('Couldn’t parse event.')
-        }
       }
-      console.debug({ event })
-      const [id, controller] = event.args
-      console.info({ id })
+      const [id, _controller] = event.args
       setTokenId(id.toHexString())
     } finally {
       setWorking(false)

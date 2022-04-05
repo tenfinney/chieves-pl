@@ -7,7 +7,10 @@ export const URIForm: React.FC<{
 }> = ({
   register
 }) => {
-   return (
-     <Input/>
-   )
+  return (
+    <Input
+      placeholder="Enter a URI for the token…"
+      {...register('uri')}
+    />
+  )
 }
