@@ -2,7 +2,6 @@ const { utils } = require('ethers')
 const fs = require('fs')
 const glob = require('glob')
 const chalk = require('chalk')
-const { config } = require('hardhat')
 const { task } = require('hardhat/config')
 require('@nomiclabs/hardhat-waffle')
 require('@tenderly/hardhat-tenderly')
@@ -142,6 +141,42 @@ task('su', 'Add a superuser')
   const { address: user } = args
   console.log(` 🍏 Setting ${user} as superuser on ${contractName} (${address})`)
   const tx = await contract['grantRole(uint8,address)'](0, user)
+  console.info(` 🕋 Tx: ${tx.hash}`)
+})
+
+task('grant', 'Grant a role')
+.addParam('address', 'Address of the user to promote')
+.addParam('role', 'Role to grant')
+.setAction(async (args, { ethers }) => {
+  const [, srcDir] = config.paths.sources.match(/^.*\/([^\/]+)\/?$/)
+  const contractsHome = `${config.paths.artifacts}/${srcDir}/`
+  const [contractFile] = (
+    glob
+    .sync(`${contractsHome}/*/*`)
+    .filter((name) => !/\.dbg\.json$/.test(name))
+  )
+  const { abi, contractName } = JSON.parse(
+    fs.readFileSync(contractFile).toString()
+  )
+  console.debug(
+    ` 🦐 Loaded ${chalk.hex('#88C677')(contractName)} From:`
+    + ` ${chalk.hex('#E59AF9')(contractFile)}`
+  )
+  const local = false
+  const address = (
+    fs
+    .readFileSync(
+      `${config.paths.artifacts}/${local ? 'local/' : ''}${contractName}.address`
+    )
+    .toString()
+    .trim()
+  )
+  const contract = (
+    new ethers.Contract(address , abi, ethers.provider.getSigner())
+  )
+  const { address: user } = args
+  console.log(` 🍏 Setting ${user} as superuser on ${contractName} (${address})`)
+  const tx = await contract['grantRole(uint8,address)'](Number(args.role), user)
   console.info(` 🕋 Tx: ${tx.hash}`)
 })
 
