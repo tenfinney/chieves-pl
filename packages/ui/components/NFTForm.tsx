@@ -23,32 +23,29 @@ import {
   UseFormWatch,
 } from 'react-hook-form'
 
-type AttrProps = {
-  name?: string
-  value?: string | number
-  type?: string
-}
-
 const AttrRow: React.FC<{
-  attributes: Array<AttrProps>
-  setAttributes: (
-    React.Dispatch<React.SetStateAction<Array<AttrProps>>>
+  attributes: Array<Attribute>
+  setValue: (
+    UseFormSetValue<FieldValues>
   )
   index: number
-}> = ({ attributes, setAttributes, index }) => {
+}> = ({ attributes = [], setValue: setFormValue, index }) => {
   const { name = '', value = '', type = 'string' } = (
     attributes[index]
   )
   const setter = useCallback(
     (prop: string) => (
-      (value: string | number) => setAttributes(
-        (attrs: Array<AttrProps>) => ([
-          ...attrs.slice(0, index),
-          { ...attrs[index], [prop]: value },
-          ...attrs.slice(index + 1)
-        ])
-      )
-    ), [setAttributes, index]
+      (value: string | number) => {
+        setFormValue(
+          'attributes',
+          [
+            ...attributes.slice(0, index),
+            { ...attributes[index], [prop]: value },
+            ...attributes.slice(index + 1)
+          ],
+        )
+      }
+    ), [setFormValue, index, attributes]
   )
   const setName = setter('name')
   const setValue = setter('value')
@@ -119,11 +116,12 @@ const AttrRow: React.FC<{
       <Td><Tooltip label="Remove" hasArrow>
         <Button
           size="sm" ml={2}
-          onClick={() => setAttributes(
-            (attrs) => ([
-              ...attrs.slice(0, index),
-              ...attrs.slice(index + 1)
-            ])
+          onClick={() => setFormValue(
+            'attributes',
+            [
+              ...attributes.slice(0, index),
+              ...attributes.slice(index + 1)
+            ]
           )}
         >
           <CloseIcon />
@@ -148,14 +146,12 @@ export const NFTForm: React.FC<{
   tokenId = '𝘜𝘯𝘬𝘯𝘰𝘸𝘯',
   metadata,
 }) => {
-  const [primaryImageIdx, setPrimaryImageIdx] = useState(0)
-  const imageRef = useRef<HTMLInputElement>(null)
-  const { homepage, description, color, images } = watch()
-  const [animation, setAnimation] = useState<Maybe<File | string>>()
-  const [wearables, setWearables] = useState({})
-  const [attributes, setAttributes] = (
-    useState<Array<AttrProps>>([])
+  const [primaryImageIdx, setPrimaryImageIdx] = (
+    useState<number | undefined>(0)
   )
+  const imageRef = useRef<HTMLInputElement>(null)
+  const { homepage, description, color, images, attributes, animation } = watch()
+  const [wearables, setWearables] = useState({})
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   const setImage = useCallback(
@@ -177,10 +173,17 @@ export const NFTForm: React.FC<{
 
       const { attributes: attrs } = metadata
       if(!isEmpty(attrs)) {
-        setAttributes((attrs ?? []).map(({
-          trait_type: name, value,
-          display_type: type = 'string',
-        }: OpenSeaAttribute) => ({ name, value, type })))
+        setValue(
+          'attributes',
+          ((attrs ?? []).map(({
+            trait_type: name,
+            value,
+            display_type: type = 'string',
+          }: OpenSeaAttribute) => (
+            { name, value, type }
+            )
+          ))
+        )
       }
 
       setWearables(metadata.properties?.wearables ?? {})
@@ -218,7 +221,7 @@ export const NFTForm: React.FC<{
   )) => {
     console.info({ files, images })
     if(files?.length && files?.length >= 1) {
-      setValue('images', [...images, ...Array.from(files)])
+      setValue('images', [...(images ?? []), ...Array.from(files)])
     }
   }
 
@@ -239,16 +242,16 @@ export const NFTForm: React.FC<{
     (evt: ChangeEvent & { target: { files: Maybe<FileList> } }) => {
       const { target: { files } } = evt
       if (files?.length === 1) {
-        setAnimation(files[0])
+        setValue('animation', files[0])
       } else {
-        setAnimation(null)
+        setValue('animation', null)
       }
       evt.preventDefault()
     }
   )
 
   const addRow = () => {
-    setAttributes(attrs => [...attrs, {}])
+    setValue('attributes', [...attributes, {}])
   }
 
   return (
@@ -466,7 +469,7 @@ export const NFTForm: React.FC<{
                 <AddIcon />
               </Button>
             </Flex>
-            {attributes.length > 0 && (
+            {attributes?.length > 0 && (
               <Table
                 sx={{ 'th, td': { textAlign: 'center' } }}
               >
@@ -478,11 +481,11 @@ export const NFTForm: React.FC<{
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {attributes.map((_, index) => (
+                  {attributes.map((_: Attribute, index: number) => (
                     <AttrRow
                       key={index}
                       {...{
-                        attributes, setAttributes, index,
+                        attributes, setValue, index,
                       }}
                     />
                   ))}

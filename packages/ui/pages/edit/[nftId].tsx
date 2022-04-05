@@ -12,9 +12,10 @@ export const Edit: NextPage = () => {
   const { query: { nftId } } = useRouter()
   const [metadata, setMetadata] = useState<Maybe<ERC1155Metadata>>()
   const [error, setError] = useState<ReactNode>()
-  const tokenId = `0x${Number(nftId).toString(16)}`
+  const [tokenId, setTokenId] = useState(nftId)
   const { roContract } = useWeb3()
 
+  useEffect(() => { setTokenId(nftId) }, [])
   useEffect(() => {
     const getMetadata = async () => {
       if(roContract && tokenId) {

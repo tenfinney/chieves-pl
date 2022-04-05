@@ -49,7 +49,8 @@ const View: NextPage = () => {
               throw new Error(`Couldn't find metadata for token #${nftId}.`)
             }
             const response = await fetch(metadataURL)
-            setMetadata(await response.json())
+            const data = await response.text()
+            setMetadata(JSON.parse(data))
           } catch(err) {
             setError((err as Error).message)
           }
@@ -112,7 +113,7 @@ const View: NextPage = () => {
           {description}
         </Markdown>
       )}
-      {animationURL && (
+      {animationURL?.endsWith('.mp4') && (
         <chakra.video
           maxW={96} maxH={96}
           controls autoPlay loop muted
@@ -120,6 +121,13 @@ const View: NextPage = () => {
           <chakra.source src={httpURL(animationURL)}/>
         </chakra.video>
       )}
+       {animationURL?.endsWith('.webp') && (
+        <Image
+          src={httpURL(animationURL)}
+          maxW={96} maxH={96}
+        />
+      )}
+
     </Stack>
   )
 }

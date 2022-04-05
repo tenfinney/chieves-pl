@@ -129,7 +129,7 @@ export const ipfsify = async (filesOrURL: FileListish) => {
   console.debug({ list, cid, result })
   const out = list.map((entry) => (
     `ipfs://${cid.toString()}/`
-    + encodeURIComponent((entry as File).name)
+    + (entry as File).name
   ))
   return out
 }

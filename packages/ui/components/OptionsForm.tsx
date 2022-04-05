@@ -191,7 +191,9 @@ export const OptionsForm: React.FC<{
             case FIELD_FORM: {
               return {
                 name,
-                content: await buildMeta(data),
+                content: JSON.stringify(
+                  await buildMeta(data), null, 2
+                )
               }
             }
             case URI_FORM: {
@@ -218,10 +220,10 @@ export const OptionsForm: React.FC<{
           isSet(data.maximum) ? data.maximum : null
         )
 
-        console.info({ metadata })
-
+       if(!metadata) {
+         throw new Error('Metadata is undefined')
+       }
         ;[metadata] = await ipfsify(metadata)
-
         await configure({ metadata, max })
       } catch(error) {
         const msg = (
