@@ -17,6 +17,7 @@
     "test": "yarn workspace @metagame-chievemints/contracts test",
     "hh:build": "yarn workspace @metagame-chievemints/contracts compile",
     "hh:deploy": "yarn workspace @metagame-chievemints/contracts deploy",
+    "hh:publish": "yarn workspace @metagame-chievemints/contracts publish",
     "hh:watch": "yarn workspace @metagame-chievemints/contracts watch",
     "hh:accounts": "yarn workspace @metagame-chievemints/contracts accounts",
     "hh:balance": "yarn workspace @metagame-chievemints/contracts balance",

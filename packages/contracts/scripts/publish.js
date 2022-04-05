@@ -11,7 +11,13 @@ const shortDir = (path) => {
   return path
 }
 
-const publishDir = path.join(process.cwd(), '../ui/contracts')
+let publishDir = path.join(process.cwd(), '../ui/contracts')
+let artifactsDir = hre.config.paths.artifacts
+if(hre.network.name === 'localhost') {
+  publishDir += '/local'
+  artifactsDir += '/local'
+}
+
 const graphDir = path.join(process.cwd(), '../subgraph')
 
 const publishContract = (contractName) => {
@@ -35,12 +41,14 @@ const publishContract = (contractName) => {
     )
 
     const addressJSON = (
-      `${hre.config.paths.artifacts}/${contractName}.address`
+      `${artifactsDir}/${contractName}.address`
     )
     console.log(
       ` 📖 Reading: ${chalk.greenBright(shortDir(addressJSON))}`
     )  
-    const address = fs.readFileSync(addressJSON).toString().trim()
+    const address = (
+      fs.readFileSync(addressJSON).toString().trim()
+    )
 
     // let graphConfigPath = `${graphDir}/config/config.json`
     // let graphConfig
@@ -79,7 +87,9 @@ const publishContract = (contractName) => {
         fs.mkdirSync(dir)
       }
   
-      console.info(` 💁 Writing: ${chalk.hex('#FF8D1A')(shortDir(file))}`)
+      console.info(
+        ` 💁 Writing: ${chalk.hex('#FF8D1A')(shortDir(file))}`
+      )
       fs.writeFileSync(file, content)
     })
 
@@ -116,8 +126,8 @@ async function main() {
     }
   )
   fs.writeFileSync(
-    `${publishDir}/contracts.js`,
-    `module.exports = ${JSON.stringify(finalContractList)}`
+    `${publishDir}/index.ts`,
+    `export default ${JSON.stringify(finalContractList, null, 2)}`
   )
 }
 

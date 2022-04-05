@@ -1,4 +1,5 @@
 import CONFIG from 'config'
+import { Maybe } from './types'
 
 export type NetworkInfo = {
   [chainId: string]: {
@@ -6,7 +7,7 @@ export type NetworkInfo = {
     name: string
     label: string
     symbol: string
-    explorer: string
+    explorer: Maybe<string>
     rpc: string
   }
 }
@@ -35,6 +36,14 @@ export const NETWORKS: NetworkInfo = {
     symbol: 'MATIC',
     explorer: 'https://polygonscan.com',
     rpc: 'https://polygon-rpc.com',
+  },
+  '0x7a69': {
+    chainId: '0x7a69',
+    name: 'Ganache',
+    label: 'Ganache',
+    symbol: '🄴🅃🄷',
+    explorer: null,
+    rpc: 'http://127.0.0.1:8545',
   },
   get mainnet() {
     return this['0x1']

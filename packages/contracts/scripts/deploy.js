@@ -63,17 +63,24 @@ const main = async () => {
   )
 }
 
+const local = chain === 'localhost'
 const fileTemplates = {
-  address: 'artifacts/{contract}.address',
-  args: 'artifacts/{contract}.args',
+  address: `artifacts/${local ? 'local/' : ''}{contract}.address`,
+  args: `artifacts/${local ? 'local/' : ''}{contract}.args`,
 }
 
 const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
   const files = Object.fromEntries(
-    Object.entries(fileTemplates).map(([name, template]) => ([
-      name,
-      template.replace(/\{contract\}/g, contract)
-    ]))
+    Object.entries(fileTemplates).map(
+      ([name, template]) => {
+        template = template.replace(/\{contract\}/g, contract)
+        const dir = path.dirname(template)
+        if(!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true })
+        }
+        return [name, template]
+      }
+    )
   )
 
   console.log(`\n 🛰  Deploying: ${contract}`)
@@ -131,8 +138,6 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
       await sleep(timeout)
     }
   }
-
-  debug({ deployed, implementation })
 
   console.log(
     `\n 📄 ${chalk.cyan(contract)},`

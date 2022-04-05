@@ -13,6 +13,7 @@ import { httpURL } from 'lib/helpers'
 import type { Maybe, ERC1155Metadata } from 'lib/types'
 import abi from 'contracts/BulkDisbersableNFTs.abi'
 import address from 'contracts/BulkDisbersableNFTs.address'
+import { Header } from 'components'
 
 type TokenState = {
   id: string
@@ -96,205 +97,191 @@ const Home: NextPage = () => {
   return (
     <Container maxW="full">
       <Head>
-        <title>’Chievemint NFTs</title>
+        <title>𝔐𝔢𝔱𝔞𝔊𝔞𝔪𝔢’𝔰 ’𝓒𝓱𝓲𝓮𝓿𝓮𝓶𝓲𝓷𝓽𝓼</title>
         <meta
           name="description"
           content="MetaGame’s ’Chievemint NFTs"
         />
       </Head>
 
-      <Flex h="33vh" maxW="40rem" margin="auto">
-        <NextLink href="/new" passHref>
-          <ChakraLink
-            w="60%" h="-webkit-fill-available"
-            position="relative"
-            zIndex={1}
-          >
-            <Box display="inline-block" w="full" h="full">
-              <chakra.object
-                data="logo.svg"
-                position="relative"
-                zIndex={-1}
-              />
-            </Box>
-          </ChakraLink>
-        </NextLink>
-        <chakra.object
-          data="header.svg"
-          h="-webkit-fill-available" w="60%"
-        />
-      </Flex>
+      <chakra.header>
+        <Flex maxW="40rem" margin="auto">
+          <Header mt="5vh" maxH="40vh"/>
+        </Flex>
+      </chakra.header>
 
-      <Table
-        sx={{
-          'th, td': { textAlign: 'center' },
-          a: { borderBottom: '2px dotted transparent' },
-          'a:hover': {
-            textDecoration: 'none',
-            borderBottom: '2px dotted',
-          },
-        }}
-      >
-        <Thead>
-          <Tr>
-            <Th>Id</Th>
-            <Th>Display</Th>
-            <Th flexGrow={1}>Description</Th>
-            <Th>Link</Th>
-            <Th>Metadata</Th>
-            <Th>Total</Th>
-            <Th>Actions</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {tokens.map((token: TokenState) => {
-            if(token.id && token.uri) {
+      <chakra.main>
+        <Table
+          sx={{
+            'th, td': { textAlign: 'center' },
+            a: { borderBottom: '2px dotted transparent' },
+            'a:hover': {
+              textDecoration: 'none',
+              borderBottom: '2px dotted',
+            },
+          }}
+        >
+          <Thead>
+            <Tr>
+              <Th>Id</Th>
+              <Th>Display</Th>
+              <Th flexGrow={1}>Description</Th>
+              <Th>Link</Th>
+              <Th>Metadata</Th>
+              <Th>Total</Th>
+              <Th>Actions</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {tokens.map((token: TokenState) => {
+              if(token.id && token.uri) {
+                return (
+                  <Tr key={token.id}>
+                    <Td>{token.id}</Td>
+                    {!token.metadata ? (
+                      <Td colSpan={3}>
+                        <Flex justify="center">
+                          <Spinner thickness="4px"/>
+                          <Text ml={3}>Loading Metadata…</Text>
+                        </Flex>
+                      </Td>
+                    ) : (
+                      <>
+                        <Td>
+                          <Stack>
+                            <NextLink href={`/view/${token.id}`} passHref>
+                              <ChakraLink>
+                                <Box
+                                  bg={
+                                    token.metadata?.background_color ? (
+                                      `#${token.metadata.background_color}`
+                                    ) : (
+                                      'transparent'
+                                    )
+                                  }
+                                >
+                                  {token.metadata?.image && (
+                                    <Image
+                                      src={httpURL(token.metadata.image)}
+                                      alt={token.metadata?.name ?? 'Untitled'}
+                                      maxW={32}
+                                      maxH={32}
+                                      objectFit="contain"
+                                      margin="auto"
+                                    />
+                                  )}
+                                </Box>
+                                <Text>{token.metadata?.name ?? (
+                                  <Text as="em">Untitled</Text>
+                                )}</Text>
+                              </ChakraLink>
+                            </NextLink>
+                          </Stack>
+                        </Td>
+                        <Td
+                          flexGrow={1}
+                          sx={{ a: { textDecoration: 'underline' } }}
+                        >
+                          <Markdown>{token.metadata?.description ?? (
+                            '*No Description*'
+                          )}</Markdown>
+                        </Td>
+                        <Td>
+                          {token.metadata?.external_url && (
+                            <ChakraLink
+                              href={token.metadata.external_url}
+                              isExternal
+                              fontSize="150%"
+                            >
+                              <Tooltip label={token.metadata.external_url} hasArrow>
+                                🌐
+                              </Tooltip>
+                            </ChakraLink>
+                          )}
+                        </Td>
+                      </>
+                    )}
+                    <Td>
+                      {token.uri && (
+                        <Flex justify="center" fontSize="150%">
+                          <ChakraLink href={httpURL(token.uri)} isExternal>
+                            <Tooltip label={token.uri} hasArrow>
+                              🔗
+                            </Tooltip>
+                          </ChakraLink>
+                          <ChakraLink
+                            ml={2}
+                            onClick={() => {
+                              if(token.uri) {
+                                navigator.clipboard.writeText(token.uri)
+                              }
+                            }}
+                          >
+                            <Tooltip label="Copy to Clipboard" hasArrow>
+                              📋
+                            </Tooltip>
+                          </ChakraLink>
+                        </Flex>
+                      )}
+                    </Td>
+                    <Td>{token.total?.toString() ?? <Spinner/>}</Td>
+                    <Td>
+                      <Flex justify="center" fontSize="150%">
+                        <NextLink href={`/edit/${token.id}`} passHref>
+                          <ChakraLink>
+                            <Tooltip label="Edit Metadata" hasArrow>
+                              ✏️
+                            </Tooltip>
+                          </ChakraLink>
+                        </NextLink>
+                        <NextLink href={`/view/${token.id}`} passHref>
+                          <ChakraLink ml={2}>
+                            <Tooltip label="View This NFT" hasArrow>
+                              👁
+                            </Tooltip>
+                          </ChakraLink>
+                        </NextLink>
+                        <NextLink href={`/disberse/${token.id}`} passHref>
+                          <ChakraLink ml={2}>
+                            <Tooltip label="Disberse This NFT" hasArrow>
+                              💸
+                            </Tooltip>
+                          </ChakraLink>
+                        </NextLink>
+                      </Flex>
+                    </Td>
+                  </Tr>
+                )
+              }
               return (
                 <Tr key={token.id}>
                   <Td>{token.id}</Td>
-                  {!token.metadata ? (
-                    <Td colSpan={3}>
-                      <Flex justify="center">
-                        <Spinner thickness="4px"/>
-                        <Text ml={3}>Loading Metadata…</Text>
-                      </Flex>
-                    </Td>
-                  ) : (
-                    <>
-                      <Td>
-                        <Stack>
-                          <NextLink href={`/view/${token.id}`} passHref>
-                            <ChakraLink>
-                              <Box
-                                bg={
-                                  token.metadata?.background_color ? (
-                                    `#${token.metadata.background_color}`
-                                  ) : (
-                                    'transparent'
-                                  )
-                                }
-                              >
-                                {token.metadata?.image && (
-                                  <Image
-                                    src={httpURL(token.metadata.image)}
-                                    alt={token.metadata?.name ?? 'Untitled'}
-                                    maxW={32}
-                                    maxH={32}
-                                    objectFit="contain"
-                                    margin="auto"
-                                  />
-                                )}
-                              </Box>
-                              <Text>{token.metadata?.name ?? (
-                                <Text as="em">Untitled</Text>
-                              )}</Text>
-                            </ChakraLink>
-                          </NextLink>
-                        </Stack>
-                      </Td>
-                      <Td
-                        flexGrow={1}
-                        sx={{ a: { textDecoration: 'underline' } }}
-                      >
-                        <Markdown>{token.metadata?.description ?? (
-                          '*No Description*'
-                        )}</Markdown>
-                      </Td>
-                      <Td>
-                        {token.metadata?.external_url && (
-                          <ChakraLink
-                            href={token.metadata.external_url}
-                            isExternal
-                            fontSize="150%"
-                          >
-                            <Tooltip label={token.metadata.external_url} hasArrow>
-                              🌐
-                            </Tooltip>
-                          </ChakraLink>
-                        )}
-                      </Td>
-                    </>
-                  )}
-                  <Td>
-                    {token.uri && (
-                      <Flex justify="center" fontSize="150%">
-                        <ChakraLink href={httpURL(token.uri)} isExternal>
-                          <Tooltip label={token.uri} hasArrow>
-                            🔗
-                          </Tooltip>
-                        </ChakraLink>
-                        <ChakraLink
-                          ml={2}
-                          onClick={() => {
-                            if(token.uri) {
-                              navigator.clipboard.writeText(token.uri)
-                            }
-                          }}
-                        >
-                          <Tooltip label="Copy to Clipboard" hasArrow>
-                            📋
-                          </Tooltip>
-                        </ChakraLink>
-                      </Flex>
-                    )}
-                  </Td>
-                  <Td>{token.total?.toString() ?? <Spinner/>}</Td>
-                  <Td>
-                    <Flex justify="center" fontSize="150%">
-                      <NextLink href={`/edit/${token.id}`} passHref>
-                        <ChakraLink>
-                          <Tooltip label="Edit Metadata" hasArrow>
-                            ✏️
-                          </Tooltip>
-                        </ChakraLink>
-                      </NextLink>
-                      <NextLink href={`/view/${token.id}`} passHref>
-                        <ChakraLink ml={2}>
-                          <Tooltip label="View This NFT" hasArrow>
-                            👁
-                          </Tooltip>
-                        </ChakraLink>
-                      </NextLink>
-                      <NextLink href={`/disberse/${token.id}`} passHref>
-                        <ChakraLink ml={2}>
-                          <Tooltip label="Disberse This NFT" hasArrow>
-                            💸
-                          </Tooltip>
-                        </ChakraLink>
-                      </NextLink>
-                    </Flex>
+                  <Td colSpan={4}>
+                    {(() => {
+                      if(token.error) {
+                        return (
+                          <Text colorScheme="red">{token.error}</Text>
+                        )
+                      }
+                      if(!token.uri) {
+                        return (
+                          <Flex>
+                            <Spinner thickness="4px"/>
+                            <Text ml={3}>Retrieving Token URI…</Text>
+                          </Flex>
+                        )
+                      }
+                      return (
+                        <Text>Unknown Token State</Text>
+                      )
+                    })()}
                   </Td>
                 </Tr>
               )
-            }
-            return (
-              <Tr key={token.id}>
-                <Td>{token.id}</Td>
-                <Td colSpan={4}>
-                  {(() => {
-                    if(token.error) {
-                      return (
-                        <Text colorScheme="red">{token.error}</Text>
-                      )
-                    }
-                    if(!token.uri) {
-                      return (
-                        <Flex>
-                          <Spinner thickness="4px"/>
-                          <Text ml={3}>Retrieving Token URI…</Text>
-                        </Flex>
-                      )
-                    }
-                    return (
-                      <Text>Unknown Token State</Text>
-                    )
-                  })()}
-                </Td>
-              </Tr>
-            )
-          })}
-        </Tbody>
-      </Table>
+            })}
+          </Tbody>
+        </Table>
+      </chakra.main>
     </Container>
   )
 }

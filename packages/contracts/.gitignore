@@ -5,3 +5,4 @@ cache/
 metadata/assets.car
 artifacts/build-info/
 .openzeppelin/
+artifacts/local/

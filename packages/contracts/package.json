@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "main": "index.js",
   "license": "CC0-1.0",
-  "type": "module",
   "devDependencies": {
     "@ethersproject/abi": "^5",
     "@ethersproject/bytes": "^5",
@@ -35,6 +34,7 @@
     "gating-metadata": "hardhat run scripts/gating-metadata.mjs",
     "deploy": "hardhat run scripts/deploy.js",
     "postdeploy": "hardhat run scripts/publish.js",
+    "publish": "hardhat run scripts/publish.js",
     "watch": "node scripts/watch.js",
     "accounts": "hardhat accounts",
     "balance": "hardhat balance",

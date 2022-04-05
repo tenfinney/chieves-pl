@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { ReactNode, useEffect, useState } from 'react'
 import { ERC1155Metadata, Maybe } from 'lib/types';
 import { httpURL } from 'lib/helpers'
+import { FormOptions } from 'components'
 
 export const Edit: NextPage = () => {
   const router = useRouter()
@@ -36,7 +37,7 @@ export const Edit: NextPage = () => {
     [roContract, tokenId],
   )
 
-  return <NFTForm purpose="update" {...{ metadata }}/>
+  return <FormOptions purpose="update" {...{ tokenId, metadata }}/>
 }
 
 export default Edit

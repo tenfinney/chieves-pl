@@ -1,5 +1,5 @@
 import { NextPage } from 'next'
-import { Button, ButtonProps, Container, Flex, Spinner, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from '@chakra-ui/react'
+import { Button, ButtonProps, Container, Flex, FormControl, FormLabel, Input, Spinner, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from '@chakra-ui/react'
 import { URIForm, JSONForm, NFTForm } from 'components/forms'
 import { capitalize, switchTo } from 'lib/helpers'
 import { NETWORKS } from 'lib/networks'
@@ -81,12 +81,14 @@ export const FormOptions: React.FC<{
   const { roContract, rwContract, ensProvider } = useWeb3()
   const router = useRouter()
   const {
-    register, handleSubmit, watch, formState: { errors }
+    register, handleSubmit, watch, setValue,
+    formState: {
+      errors, isSubmitting: processing, isDirty: dirty,
+    },
   } = useForm()
   const FIELD_FORM = 0
   const URI_FORM = 1
   const [tab, setTab] = useState(FIELD_FORM)
-  const [processing, setProcessing] = useState(false)
   const creating = purpose === 'create'
 
   const mint = useCallback(async ({ metadata, max = 0 }) => {
@@ -145,9 +147,7 @@ export const FormOptions: React.FC<{
   //   if(data.)
   // }
 
-  const submit = async (data) => {
-    setProcessing(true)
-
+  const submit = async (data: Record<string, unknown>) => {
     // const metadata: ERC1155Metadata = {
     //   name: name ?? 'Untitled', description, decimals: 0,
     // }
@@ -212,7 +212,6 @@ export const FormOptions: React.FC<{
     // })
 
     // await enact(dataURI)
-    setProcessing(false)
   }
 
   return (
@@ -231,11 +230,23 @@ export const FormOptions: React.FC<{
         <TabPanels>
           {[NFTForm, URIForm, JSONForm].map((Form) => (
             <TabPanel key={Form.displayName}>
-              <Form {...{ register }}/>
+              <Form {...{
+                register, watch, setValue, tokenId,
+              }}/>
             </TabPanel>
           ))}
         </TabPanels>
       </Tabs>
+      <FormControl isRequired>
+        <Flex align="center">
+          <FormLabel>Maximum Mintable</FormLabel>
+          <Input
+            type="number" autoFocus
+            placeholder="¿Maximum number of tokens allowed?"
+            {...register('maximum')}
+          />
+        </Flex>
+      </FormControl>
       <Submit {...{ purpose, processing }} mb={3} />
     </Container>
   )

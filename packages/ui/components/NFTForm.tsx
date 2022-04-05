@@ -11,6 +11,7 @@ import { useRouter } from 'next/router'
 import React, { ChangeEvent, FormEvent, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Markdown from 'react-markdown'
 import all from 'it-all'
+import { FieldValues, UseFormRegister, UseFormSetValue, UseFormWatch } from 'react-hook-form'
 
 type AttrProps = {
   name?: string
@@ -274,29 +275,29 @@ const ModelModal: React.FC<ModelProps> = ({
 
 export const NFTForm: React.FC<{
   purpose?: 'create' | 'update'
+  register: UseFormRegister<FieldValues>
+  watch: UseFormWatch<FieldValues>
+  setValue: UseFormSetValue<FieldValues>
+  tokenId: string
   metadata?: Maybe<ERC1155Metadata>
 }> = ({
-  purpose = 'create', metadata,
+  purpose = 'create',
+  register,
+  watch,
+  setValue,
+  tokenId = '𝘜𝘯𝘬𝘯𝘰𝘸𝘯',
+  metadata,
 }) => {
-    const { roContract, rwContract, ensProvider } = useWeb3()
-    const [name, setName] = useState('')
-    const [tokenId, setTokenId] = useState<string>('𝘜𝘯𝘬𝘯𝘰𝘸𝘯')
-    const [description, setDescription] = useState('')
-    const [homepage, setHomepage] = useState('')
     const [images, setImages] = useState<Maybe<Array<File | string>>>()
     const [primaryImageIdx, setPrimaryImageIdx] = useState(0)
     const imageRef = useRef<HTMLInputElement>(null)
+    const { homepage, description, color } = watch()
     const [animation, setAnimation] = useState<Maybe<File | string>>()
     const [wearables, setWearables] = useState({})
     const [attributes, setAttributes] = (
       useState<Array<AttrProps>>([])
     )
-    const [color, setColor] = useState('#FFFFFF')
-    const [quantity, setQuantity] = useState<string | number>(1)
-    const [treasurer, setTreasurer] = useState('')
-    const [processing, setProcessing] = useState(false)
     const { isOpen, onOpen, onClose } = useDisclosure()
-    const router = useRouter()
     const toast = useToast()
 
     const setImage = useCallback((file) => setImages([file]), [])
@@ -304,50 +305,34 @@ export const NFTForm: React.FC<{
     useEffect(() => {
       if (metadata) {
         Object.entries({
-          name: setName, description: setDescription,
-          external_url: setHomepage, animation_url: setAnimation,
-          image: setImage, treasurer: setTreasurer,
+          name: null, description: null,
+          external_url: 'homepage',
+          animation_url: 'animation',
         })
-          .forEach(([prop, setter]) => {
-            setter(metadata[prop] as string)
-          })
+        .forEach(([prop, name]) => {
+          setValue(name ?? prop, metadata[prop])
+        })
 
-        const attrs = metadata.attributes
-        if (!isEmpty(attrs)) {
+        const { attributes: attrs } = metadata
+        if(!isEmpty(attrs)) {
           setAttributes((attrs ?? []).map(({
-            trait_type: name, value, display_type: type = 'string',
+            trait_type: name, value,
+            display_type: type = 'string',
           }: Attribute) => ({ name, value, type })))
         }
 
         setWearables(metadata.properties?.wearables ?? {})
 
         const bg = metadata.background_color
-        setColor(prev => bg ? `#${bg}` : prev)
-      }
-    }, [metadata, setImage])
-
-    useEffect(() => {
-      const getId = async () => {
-        if (!!roContract && purpose === 'create' && !homepage) {
-          try {
-            let nextId = (
-              (parseInt(await roContract.tokenTypeCount(), 16) + 1)
-                .toString(16)
-            )
-            nextId = `0x${nextId}`
-            setTokenId(nextId)
-            setHomepage(
-              `${NFT_HOMEPAGE_BASE}/${nextId}`
-            )
-          } catch (err) {
-            console.error('Get Token Id', (err as Error).message)
-          }
-        } else if (purpose === 'update') {
-          setTokenId(router.query.nft_id as string)
+        if(bg && !isEmpty(bg)) {
+          setValue('color', `#${bg}`)
         }
       }
-      getId()
-    }, [roContract, purpose, homepage, router.query.nft_id])
+    }, [metadata, setImage, setValue])
+
+    useEffect(() => {
+      setValue('homepage', `${NFT_HOMEPAGE_BASE}/${tokenId}`)
+    }, [setValue, tokenId])
 
     useEffect(() => {
       if (window.location.hash) {
@@ -431,47 +416,13 @@ export const NFTForm: React.FC<{
 
     return (
       <UnorderedList listStyleType="none">
-        {purpose === 'create' && (
-          <ListItem>
-            <FormControl isRequired>
-              <Flex align="center">
-                <FormLabel>Quantity to Mint</FormLabel>
-                <Input
-                  type="number" autoFocus
-                  value={quantity}
-                  onChange={({ target: { value } }) => {
-                    setQuantity(value ? Number(value) : '')
-                  }}
-                  placeholder="¿How many tokens to mint?"
-                />
-              </Flex>
-            </FormControl>
-          </ListItem>
-        )}
-        {purpose === 'create' && (
-          <ListItem>
-            <FormControl isRequired mt={3}>
-              <Flex align="center">
-                <FormLabel>Treasurer</FormLabel>
-                <Input
-                  type="text"
-                  value={treasurer}
-                  onChange={({ target: { value } }) => (
-                    setTreasurer(value)
-                  )}
-                  placeholder="¿Who should receive the new tokens?"
-                />
-              </Flex>
-            </FormControl>
-          </ListItem>
-        )}
         <ListItem>
           <FormControl mt={3}>
             <Flex align="center">
               <FormLabel>Name</FormLabel>
               <Input
-                value={name} autoFocus={purpose !== 'create'}
-                onChange={({ target: { value } }) => setName(value)}
+                autoFocus
+                {...register('name')}
               />
             </Flex>
           </FormControl>
@@ -541,8 +492,8 @@ export const NFTForm: React.FC<{
             <Flex align="center">
               <Label name="Background Color" />
               <Input
-                type="color" value={color}
-                onChange={({ target: { value } }) => setColor(value)}
+                type="color"
+                {...register('color')}
               />
             </Flex>
           </FormControl>
@@ -552,10 +503,7 @@ export const NFTForm: React.FC<{
             <Flex align="center">
               <Label name="Homepage" />
               <Input
-                value={homepage}
-                onChange={({ target: { value } }) => (
-                  setHomepage(value)
-                )}
+                {...register('homepage')}
               />
               {homepage?.length > 0 && (
                 <chakra.a ml={2} href={homepage} target="_blank">
@@ -576,10 +524,8 @@ export const NFTForm: React.FC<{
                 <TabPanel>
                   <Textarea
                     placeholder="Enter a markdown formatted description."
-                    value={description} minH={32}
-                    onChange={({ target: { value } }) => (
-                      setDescription(value)
-                    )}
+                    minH={32}
+                    {...register('description')}
                   />
                 </TabPanel>
                 <TabPanel>

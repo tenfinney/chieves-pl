@@ -23,3 +23,6 @@
 
 # vercel
 .vercel
+
+# local contract deployment
+contracts/local/
