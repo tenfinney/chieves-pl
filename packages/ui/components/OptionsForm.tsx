@@ -89,7 +89,7 @@ export const OptionsForm: React.FC<{
 }> = ({
   purpose = 'create', tokenId, metadata
 }) => {
-    const { roContract, rwContract, ensProvider } = useWeb3()
+    const { rwContract } = useWeb3()
     const router = useRouter()
     const {
       register, handleSubmit, watch, setValue,
@@ -146,13 +146,13 @@ export const OptionsForm: React.FC<{
       }
 
       if(Array.isArray(images)) {
-        metadata.image = await ipfsify(images)
+        metadata.image = (await ipfsify(images))[0] // wrong
       } else if (images != null) {
         console.warn(`Unknown Image Type: ${typeof images}`)
       }
 
       if(animation instanceof File || typeof animation === 'string') {
-        metadata.animation_url = await ipfsify(animation)
+        metadata.animation_url = (await ipfsify(animation))[0]
       } else if (animation != null) {
         console.warn(`Unknown Animation Type: ${typeof animation}`)
       }
@@ -162,22 +162,6 @@ export const OptionsForm: React.FC<{
           color.substring(1).toUpperCase()
         )
       }
-
-      // metadata.properties = {}
-
-      // if (Object.keys(wearables).length > 0) {
-      //   metadata.properties.wearables = (
-      //     Object.fromEntries(
-      //       await Promise.all(
-      //         Object.entries(wearables).map(
-      //           async ([type, value]) => (
-      //             [type, await ipfsify(value as string | File)]
-      //           )
-      //         )
-      //       )
-      //     )
-      //   )
-      // }
 
       if(isSet(attributes) && !isEmpty(attributes)) {
         metadata.attributes = (
@@ -202,7 +186,7 @@ export const OptionsForm: React.FC<{
       console.info({ data, tab })
       try {
         const name = `metadata.${(new Date()).toISOString()}.json`
-        const metadata = await (async () => {
+        let metadata = await (async () => {
           switch (tab) {
             case FIELD_FORM: {
               return {
@@ -236,9 +220,9 @@ export const OptionsForm: React.FC<{
 
         console.info({ metadata })
 
-        await configure({
-          metadata: await ipfsify(metadata), max
-        })
+        ;[metadata] = await ipfsify(metadata)
+
+        await configure({ metadata, max })
       } catch(error) {
         const msg = (
           (error as MetaMaskError).data?.message

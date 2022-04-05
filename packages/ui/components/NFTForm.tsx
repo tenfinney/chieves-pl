@@ -8,7 +8,7 @@ import {
   Table, Thead, Th, Tbody, ModalFooter, Modal,
   ModalOverlay, ModalContent, ModalHeader,
   ModalCloseButton, ModalBody,
-  Radio, RadioGroup, SimpleGrid, Stack,
+  Radio, RadioGroup, SimpleGrid, Stack, Center,
 } from '@chakra-ui/react'
 import { NFT_HOMEPAGE_BASE } from 'lib/constants'
 import { httpURL, isEmpty } from 'lib/helpers'
@@ -148,10 +148,9 @@ export const NFTForm: React.FC<{
   tokenId = '𝘜𝘯𝘬𝘯𝘰𝘸𝘯',
   metadata,
 }) => {
-  const [images, setImages] = useState<Maybe<Array<File | string>>>()
   const [primaryImageIdx, setPrimaryImageIdx] = useState(0)
   const imageRef = useRef<HTMLInputElement>(null)
-  const { homepage, description, color } = watch()
+  const { homepage, description, color, images } = watch()
   const [animation, setAnimation] = useState<Maybe<File | string>>()
   const [wearables, setWearables] = useState({})
   const [attributes, setAttributes] = (
@@ -159,7 +158,9 @@ export const NFTForm: React.FC<{
   )
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  const setImage = useCallback((file) => setImages([file]), [])
+  const setImage = useCallback(
+    (file) => setValue('images', [file]), []
+  )
 
   useEffect(() => {
     if (metadata) {
@@ -171,6 +172,8 @@ export const NFTForm: React.FC<{
       .forEach(([prop, name]) => {
         setValue(name ?? prop, metadata[prop])
       })
+
+      setValue('images', [metadata.image])
 
       const { attributes: attrs } = metadata
       if(!isEmpty(attrs)) {
@@ -210,10 +213,25 @@ export const NFTForm: React.FC<{
     }
   }, [])
 
-  const configImage = ({ target: { files } }: { target: { files: Maybe<FileList> } }) => {
-    if (files?.length && files?.length >= 1) {
-      setPrimaryImageIdx(0)
-      setImages(Array.from(files))
+  const addImage = ({ target: { files } }: (
+    { target: { files: Maybe<FileList> } }
+  )) => {
+    console.info({ files, images })
+    if(files?.length && files?.length >= 1) {
+      setValue('images', [...images, ...Array.from(files)])
+    }
+  }
+
+  const removeImage = (idx: number) => {
+    const replacement = [
+      ...images.slice(0, idx),
+      ...images.slice(idx + 1)
+    ]
+    setValue('images', replacement)
+    if(primaryImageIdx === idx) {
+      setPrimaryImageIdx(
+        replacement.length > 0 ? 0 : undefined
+      )
     }
   }
 
@@ -253,13 +271,14 @@ export const NFTForm: React.FC<{
         <FormControl mt={3}>
           <Flex direction={{ base: 'column', md: 'row' }}>
             <FormLabel _after={{ content: '":"' }}>
-              Image
+              Images
             </FormLabel>
             <Input
-              type="file" accept="image/*"
-              ref={imageRef} onChange={configImage}
-              display={images ? 'none' : 'inherit'}
-              h="auto"
+              type="file"
+              accept="image/*"
+              ref={imageRef}
+              onChange={addImage}
+              display="none"
               multiple
             />
           </Flex>
@@ -270,8 +289,8 @@ export const NFTForm: React.FC<{
                 setPrimaryImageIdx(Number(value))
               }}
             >
-              <SimpleGrid columns={2} templateColumns="6rem 1fr">
-                {images.map((image, idx) => {
+              <SimpleGrid columns={3} templateColumns="6rem 1fr 2rem">
+                {images.map((image: File | string, idx: number) => {
                   const name = (
                     image instanceof File ? (
                       image.name
@@ -304,12 +323,28 @@ export const NFTForm: React.FC<{
                           />
                         </Tooltip>
                       </Flex>
+                      <Center>
+                        <Button
+                          size="xs"
+                          colorScheme="red"
+                          onClick={() => removeImage(idx)}
+                        >
+                          <CloseIcon/>
+                        </Button>
+                      </Center>
                     </React.Fragment>
                   )
                 })}
               </SimpleGrid>
             </RadioGroup>
           )}
+          <Button
+            w="full" mt={3}
+            colorScheme="teal"
+            onClick={() => imageRef.current?.click()}
+          >
+            <AddIcon/>
+          </Button>
         </FormControl>
       </ListItem>
       <ListItem>
@@ -423,7 +458,11 @@ export const NFTForm: React.FC<{
               <FormLabel _after={{ content: '":"' }}>
                 Attributes
               </FormLabel>
-              <Button ml={2} onClick={addRow} size="xs">
+              <Button
+                ml={2} size="xs"
+                onClick={addRow}
+                colorScheme="teal"
+              >
                 <AddIcon />
               </Button>
             </Flex>

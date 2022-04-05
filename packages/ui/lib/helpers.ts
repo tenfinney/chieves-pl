@@ -1,7 +1,9 @@
-import { CodedError, Maybe } from 'lib/types'
+import { CodedError, Fileish, FileListish, Maybe, NamedString } from 'lib/types'
 import { CID } from 'multiformats/cid'
 import { IPFS_LINK_PATTERN } from 'lib/constants';
 import { NETWORKS } from './networks';
+import CONFIG from 'config';
+import all from 'it-all';
 
 export const httpURL = (uri?: Maybe<string>) => {
     const [, origCID, path] = (
@@ -88,7 +90,7 @@ export const switchTo = async (chain: string) => {
   }
 }
 
-export const ipfsify = async (filesOrURL: Fileish) => {
+export const ipfsify = async (filesOrURL: FileListish) => {
   let value = filesOrURL
   if (Array.isArray(value) && typeof value[0] === 'string') {
     const count = value.length
@@ -103,7 +105,7 @@ export const ipfsify = async (filesOrURL: Fileish) => {
 
   if (typeof value === 'string') {
     if (value.startsWith('ipfs://')) {
-      return value
+      return [value]
     }
     throw new Error(`Unknown File String: ${value}`)
   }
@@ -125,8 +127,9 @@ export const ipfsify = async (filesOrURL: Fileish) => {
   ))
   const [{ cid }] = result.slice(-1)
   console.debug({ list, cid, result })
-  return (
+  const out = list.map((entry) => (
     `ipfs://${cid.toString()}/`
-    + encodeURIComponent((list[primaryImageIdx] as File).name)
-  )
+    + encodeURIComponent((entry as File).name)
+  ))
+  return out
 }
