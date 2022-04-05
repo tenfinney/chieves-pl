@@ -1,5 +1,5 @@
 import { NextPage } from 'next'
-import FormOptions from 'components/FormOptions'
+import { OptionsForm } from 'components'
 import { Button, Center, Flex, Heading, Spinner, Text, chakra, Stack, Container } from '@chakra-ui/react';
 import { useWeb3 } from 'lib/hooks'
 import { useCallback, useEffect, useState } from 'react'
@@ -148,7 +148,7 @@ const Content: React.FC = () => {
   }
 
   return (
-    <FormOptions {...{ tokenId }}/>
+    <OptionsForm {...{ tokenId }}/>
   )
 }
 

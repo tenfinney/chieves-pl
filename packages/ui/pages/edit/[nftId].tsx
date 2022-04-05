@@ -1,17 +1,16 @@
-import NFTForm from 'components/NFTForm'
 import { useWeb3 } from 'lib/hooks'
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { ReactNode, useEffect, useState } from 'react'
 import { ERC1155Metadata, Maybe } from 'lib/types';
 import { httpURL } from 'lib/helpers'
-import { FormOptions } from 'components'
+import { OptionsForm } from 'components'
 
 export const Edit: NextPage = () => {
-  const router = useRouter()
+  const { query: { nftId } } = useRouter()
   const [metadata, setMetadata] = useState<Maybe<ERC1155Metadata>>()
   const [error, setError] = useState<ReactNode>()
-  const tokenId = `0x${Number(router.query.nft_id).toString(16)}`
+  const tokenId = `0x${Number(nftId).toString(16)}`
   const { roContract } = useWeb3()
 
   useEffect(
@@ -37,7 +36,12 @@ export const Edit: NextPage = () => {
     [roContract, tokenId],
   )
 
-  return <FormOptions purpose="update" {...{ tokenId, metadata }}/>
+  return (
+    <OptionsForm
+      purpose="update"
+      {...{ tokenId, metadata }}
+    />
+  )
 }
 
 export default Edit

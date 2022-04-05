@@ -17,8 +17,7 @@ import abi from 'contracts/BulkDisbersableNFTs.abi'
 const Markdown = chakra(ReactMarkdown)
 
 const View: NextPage = () => {
-  const router = useRouter()
-  const tokenId = router.query.nft_id
+  const { query: { nftId } } = useRouter()
   const [metadata, setMetadata] = useState<ERC1155Metadata>()
   const [error, setError] = useState<string>()
 
@@ -52,12 +51,12 @@ const View: NextPage = () => {
   useEffect(
     () => {
       const getMetadata = async () => {
-        if(contract && tokenId) {
+        if(contract && nftId) {
           try {
-            const metadataURI = await contract.uri(ethers.BigNumber.from(Number(tokenId)))
+            const metadataURI = await contract.uri(ethers.BigNumber.from(Number(nftId)))
             const metadataURL = httpURL(metadataURI)
             if(!metadataURL) {
-              throw new Error(`Couldn't find metadata for token #${tokenId}.`)
+              throw new Error(`Couldn't find metadata for token #${nftId}.`)
             }
             const response = await fetch(metadataURL)
             setMetadata(await response.json())
@@ -69,7 +68,7 @@ const View: NextPage = () => {
 
       getMetadata()
     },
-    [contract, tokenId],
+    [contract, nftId],
   )
 
   if(error) {
@@ -86,7 +85,7 @@ const View: NextPage = () => {
     return (
       <Flex align="center" justify="center" h="100vh">
         <Spinner thickness="4px" speed="1s" mr={2}/>
-        <Text>Loading Metadata For Token #{tokenId}</Text>
+        <Text>Loading Metadata For Token #{nftId}</Text>
       </Flex>
     )
   }
@@ -99,7 +98,7 @@ const View: NextPage = () => {
   return (
     <Stack align="center">
       <Head>
-        <title>View NFT #{tokenId}</title>
+        <title>’𝖈𝖍𝖎𝖊𝖛𝖊: 𝓥ⲓⲉⲱ #{nftId}</title>
         <meta
           name="description"
           content="MetaGame’s ’Chievemint NFTs"

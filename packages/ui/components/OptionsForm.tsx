@@ -72,7 +72,7 @@ const Submit: React.FC<ButtonProps & {
   )
 }
 
-export const FormOptions: React.FC<{
+export const OptionsForm: React.FC<{
   purpose?: 'create' | 'update',
   tokenId: string,
 }> = ({
@@ -148,6 +148,7 @@ export const FormOptions: React.FC<{
   // }
 
   const submit = async (data: Record<string, unknown>) => {
+    console.info({ data })
     // const metadata: ERC1155Metadata = {
     //   name: name ?? 'Untitled', description, decimals: 0,
     // }
@@ -252,4 +253,4 @@ export const FormOptions: React.FC<{
   )
 }
 
-export default FormOptions
+export default OptionsForm

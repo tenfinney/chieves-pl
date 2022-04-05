@@ -47,7 +47,7 @@ const Address: React.FC<{ name: string }> = ({ name }) => {
 
 const Disberse: NextPage = () => {
   const router = useRouter()
-  const tokenId = router.query.nft_id
+  const tokenId = router.query.nftId
   const tokenNum = useMemo(
     () => (tokenId ? BigNumber.from(Number(tokenId)) : null),
     [tokenId],
