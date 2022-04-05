@@ -107,6 +107,7 @@ const View: NextPage = () => {
       {description && (
         <Markdown
           sx={{ a: { textDecoration: 'underline' } }}
+          linkTarget="_blank"
         >
           {description}
         </Markdown>

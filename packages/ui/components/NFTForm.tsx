@@ -1,25 +1,23 @@
 import { AddIcon, CloseIcon, ExternalLinkIcon } from '@chakra-ui/icons'
 import {
   Input, chakra, Select, Td, Tooltip, Button,
-  useToast, useDisclosure, Tr, Container,
+  useDisclosure, Tr,
   UnorderedList, ListItem, FormControl, Flex,
   FormLabel, Box, Text, Link, Image, Tabs,
   TabList, Tab, TabPanels, TabPanel, Textarea,
   Table, Thead, Th, Tbody, ModalFooter, Modal,
   ModalOverlay, ModalContent, ModalHeader,
-  ModalCloseButton, ModalBody, Spinner,
-  ButtonProps, Radio, RadioGroup, SimpleGrid,
+  ModalCloseButton, ModalBody,
+  Radio, RadioGroup, SimpleGrid, Stack,
 } from '@chakra-ui/react'
-import CONFIG from 'config'
 import { NFT_HOMEPAGE_BASE } from 'lib/constants'
 import { httpURL, isEmpty } from 'lib/helpers'
-import { Attribute, ERC1155Metadata, Maybe } from 'lib/types'
+import { Attribute, ERC1155Metadata, Maybe, OpenSeaAttribute } from 'lib/types'
 import React, {
   ChangeEvent, FormEvent, ReactNode, useCallback,
-  useEffect, useMemo, useRef, useState,
+  useEffect, useRef, useState,
 } from 'react'
 import Markdown from 'react-markdown'
-import all from 'it-all'
 import {
   FieldValues, UseFormRegister, UseFormSetValue,
   UseFormWatch,
@@ -135,159 +133,6 @@ const AttrRow: React.FC<{
   )
 }
 
-export const Anchor = ({ name }: { name: string }) => {
-  const anchor = name.toLowerCase().replace(/\s+/g, '-')
-
-  return (
-    <Link
-      id={anchor}
-      href={`#${anchor}`}
-      style={{ textDecoration: 'none' }}
-      tabIndex={-1}
-    >
-      <chakra.span role="img" aria-label="Link">🔗</chakra.span>
-    </Link>
-  )
-}
-
-const Label = ({ name }: { name: string }) => (
-  <Flex ml="-2.75em" mt={-1.5}>
-    <Anchor {...{ name }} />
-    <Text ml={3} mr={2}>■</Text>
-    <FormLabel whiteSpace="pre">{name}:</FormLabel>
-  </Flex>
-)
-
-export const ExpandShow: React.FC<{
-  name: string, button?: Maybe<ReactNode>
-}> = ({ name, button = null, children }) => {
-  const [hide, setHide] = useState<Record<string, boolean>>({})
-  const toggle = useCallback((prop) => {
-    setHide(h => ({ ...h, [prop]: !h[prop] }))
-  }, [])
-  const box = useRef<HTMLDivElement>(null)
-
-  return (
-    <Box ref={box}>
-      <Flex ml="-3em" mt={3} align="center">
-        <Anchor {...{ name, box }} />
-        <Text
-          ml={3}
-          cursor={hide[name] ? 'zoom-in' : 'zoom-out'}
-          onClick={() => toggle(name)}
-          _after={{ content: '":"'}}
-        >
-          <chakra.span mr={2}>
-            {hide[name] ? '▸' : '▾'}
-          </chakra.span>
-          {name}
-        </Text>
-        {!hide[name] && button}
-      </Flex>
-      {!hide[name] && children}
-    </Box>
-  )
-}
-
-export type NamedString = {
-  name: string
-  content: string
-}
-
-type ModelProps = {
-  isOpen: boolean
-  onClose: () => void
-  setWearables: (
-    React.Dispatch<React.SetStateAction<
-      Record<string, string>
-    >>
-  )
-}
-
-const ModelModal: React.FC<ModelProps> = ({
-  isOpen, onClose, setWearables,
-}) => {
-  const [type, setType] = useState('model/gltf-binary')
-  const [specifiedType, setSpecifiedType] = useState('')
-  const addModel = (type: string, file: string) => {
-    setWearables((ws) => {
-      if (!ws[type] || window.confirm(`¿Replace ${type}?`)) {
-        return { ...ws, [type]: file }
-      } else {
-        return ws
-      }
-    })
-  }
-
-  return (
-    <Modal {...{ isOpen, onClose }}>
-      <ModalOverlay />
-      <ModalContent
-        onSubmit={(evt: FormEvent) => {
-          evt.preventDefault()
-          evt.stopPropagation()
-          addModel(
-            type !== 'other' ? type : specifiedType,
-            (evt.target as HTMLFormElement)['file'].files[0],
-          )
-          onClose()
-        }}
-        as="form"
-      >
-        <ModalHeader>Add Model</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <FormControl id="mimetype">
-            <FormLabel>Model Type:</FormLabel>
-            <Select
-              ml={5} w="calc(100% - 2rem)"
-              value={type}
-              onChange={({ target: { value } }) => setType(value)}
-            >
-              <chakra.optgroup style={{ padding: 0 }}>
-                <chakra.option value="model/gltf-binary">Binary glTF</chakra.option>
-                <chakra.option value="model/gltf+json">glTF</chakra.option>
-                <chakra.option value="model/fbx">FBX</chakra.option>
-                <chakra.option value="application/x-blender">Blender</chakra.option>
-                <chakra.option value="model/vox">VOX</chakra.option>
-                <chakra.option value="model/vrm">VRM</chakra.option>
-              </chakra.optgroup>
-              <chakra.optgroup>
-                <chakra.option value="other" fontStyle="italic">
-                  Other
-                </chakra.option>
-              </chakra.optgroup>
-            </Select>
-            {type === 'other' && (
-              <Input
-                ml={5} mt={3} w="calc(100% - 2rem)" placeholder="Mime Type"
-                required={true} value={specifiedType}
-                onChange={({ target: { value } }) => (
-                  setSpecifiedType(value)
-                )}
-              />
-            )}
-          </FormControl>
-          <FormControl id="model" mt={5}>
-            <FormLabel>Model File:</FormLabel>
-            <Input
-              id="file" required={true} type="file"
-              ml={5} w="calc(100% - 2rem)" h="auto"
-            />
-          </FormControl>
-        </ModalBody>
-
-        <ModalFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button colorScheme="blue" ml={3} type="submit">
-            Add
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
-  )
-}
-
 export const NFTForm: React.FC<{
   purpose?: 'create' | 'update'
   register: UseFormRegister<FieldValues>
@@ -313,7 +158,6 @@ export const NFTForm: React.FC<{
     useState<Array<AttrProps>>([])
   )
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const toast = useToast()
 
   const setImage = useCallback((file) => setImages([file]), [])
 
@@ -333,7 +177,7 @@ export const NFTForm: React.FC<{
         setAttributes((attrs ?? []).map(({
           trait_type: name, value,
           display_type: type = 'string',
-        }: Attribute) => ({ name, value, type })))
+        }: OpenSeaAttribute) => ({ name, value, type })))
       }
 
       setWearables(metadata.properties?.wearables ?? {})
@@ -389,71 +233,28 @@ export const NFTForm: React.FC<{
     setAttributes(attrs => [...attrs, {}])
   }
 
-  type Fileish = File | string | Array<File | string> | NamedString
-
-  const ipfsify = async (filesOrURL: Fileish) => {
-    let value = filesOrURL
-    if (Array.isArray(value) && typeof value[0] === 'string') {
-      const count = value.length
-      if (count !== 1) {
-        throw new Error(
-          `Unexpected ${count} entries in string array`
-          + ' passed to ipfsify.'
-        )
-      }
-      value = value[0]
-    }
-
-    if (typeof value === 'string') {
-      if (value.startsWith('ipfs://')) {
-        return value
-      }
-      throw new Error(`Unknown File String: ${value}`)
-    }
-
-    const list: Array<File | NamedString> = (
-      Array.isArray(value) ? (
-        value as Array<File | NamedString>
-      ) : (
-        [value as File | NamedString]
-      )
-    )
-
-    const result = await all(CONFIG.ipfs.addAll(
-      list.map((entry) => ({
-        path: entry.name,
-        content: (entry as NamedString).content ?? entry 
-      })),
-      { pin: true, wrapWithDirectory: true }
-    ))
-    const [{ cid }] = result.slice(-1)
-    console.debug({ list, cid, result })
-    return (
-      `ipfs://${cid.toString()}/`
-      + encodeURIComponent((list[primaryImageIdx] as File).name)
-    )
-  }
-
   return (
     <UnorderedList listStyleType="none">
       <ListItem>
         <FormControl mt={3}>
-          <Flex align="center">
-            <FormLabel
-              _after={{ content: '":"' }}
-            >
+          <Flex direction={{ base: 'column', md: 'row' }}>
+            <FormLabel _after={{ content: '":"' }}>
               Name
             </FormLabel>
             <Input
               autoFocus
+              ml={{ base: 0, md: 4 }}
               {...register('name')}
             />
           </Flex>
         </FormControl>
       </ListItem>
       <ListItem>
-        <ExpandShow name="Image">
-          <Box m={3}>
+        <FormControl mt={3}>
+          <Flex direction={{ base: 'column', md: 'row' }}>
+            <FormLabel _after={{ content: '":"' }}>
+              Image
+            </FormLabel>
             <Input
               type="file" accept="image/*"
               ref={imageRef} onChange={configImage}
@@ -461,60 +262,62 @@ export const NFTForm: React.FC<{
               h="auto"
               multiple
             />
-            {images?.length && (
-              <RadioGroup
-                value={primaryImageIdx}
-                onChange={(value) => {
-                  setPrimaryImageIdx(Number(value))
-                }}
-              >
-                <SimpleGrid columns={2} templateColumns="6rem 1fr">
-                  {images.map((image, idx) => {
-                    const name = (
-                      image instanceof File ? (
-                        image.name
-                      ) : (
-                        image.replace(/^.*\//g, '')
-                      )
+          </Flex>
+          {images?.length && (
+            <RadioGroup
+              value={primaryImageIdx}
+              onChange={(value) => {
+                setPrimaryImageIdx(Number(value))
+              }}
+            >
+              <SimpleGrid columns={2} templateColumns="6rem 1fr">
+                {images.map((image, idx) => {
+                  const name = (
+                    image instanceof File ? (
+                      image.name
+                    ) : (
+                      image.replace(/^.*\//g, '')
                     )
+                  )
 
-                    return (
-                      <React.Fragment key={idx}>
-                        <Flex w={16}>
-                          <Radio value={idx}>Display Image</Radio>
-                        </Flex>
-                        <Flex
-                          justify="center"
-                          bg={idx === primaryImageIdx ? color : 'transparent'}
-                        >
-                          <Tooltip label={name} hasArrow>
-                            <Image
-                              alt={name}
-                              src={
-                                (image instanceof File) ? (
-                                  URL.createObjectURL(image)
-                                ) : (
-                                  httpURL(image)
-                                )
-                              }
-                              maxH={60} mt={0}
-                              onClick={() => imageRef.current?.click()}
-                            />
-                          </Tooltip>
-                        </Flex>
-                      </React.Fragment>
-                    )
-                  })}
-                </SimpleGrid>
-              </RadioGroup>
-            )}
-          </Box>
-        </ExpandShow>
+                  return (
+                    <React.Fragment key={idx}>
+                      <Flex w={16}>
+                        <Radio value={idx}>Display Image</Radio>
+                      </Flex>
+                      <Flex
+                        justify="center"
+                        bg={idx === primaryImageIdx ? color : 'transparent'}
+                      >
+                        <Tooltip label={name} hasArrow>
+                          <Image
+                            alt={name}
+                            src={
+                              (image instanceof File) ? (
+                                URL.createObjectURL(image)
+                              ) : (
+                                httpURL(image)
+                              )
+                            }
+                            maxH={60} mt={0}
+                            onClick={() => imageRef.current?.click()}
+                          />
+                        </Tooltip>
+                      </Flex>
+                    </React.Fragment>
+                  )
+                })}
+              </SimpleGrid>
+            </RadioGroup>
+          )}
+        </FormControl>
       </ListItem>
       <ListItem>
         <FormControl mt={3}>
-          <Flex align="center">
-            <Label name="Background Color" />
+          <Flex direction={{ base: 'column', md: 'row' }}>
+            <FormLabel _after={{ content: '":"' }}>
+              Background
+            </FormLabel>
             <Input
               type="color"
               {...register('color')}
@@ -524,46 +327,58 @@ export const NFTForm: React.FC<{
       </ListItem>
       <ListItem>
         <FormControl mt={3}>
-          <Flex align="center">
-            <Label name="Homepage" />
-            <Input
-              {...register('homepage')}
-            />
-            {homepage?.length > 0 && (
-              <chakra.a ml={2} href={homepage} target="_blank">
-                <ExternalLinkIcon />
-              </chakra.a>
-            )}
+          <Flex direction={{ base: 'column', md: 'row' }}>
+            <FormLabel _after={{ content: '":"' }}>
+              Homepage
+            </FormLabel>
+            <Flex grow={1}>
+              <Input
+                {...register('homepage')}
+              />
+              {homepage?.length > 0 && (
+                <Link ml={2} href={homepage} isExternal>
+                  <ExternalLinkIcon />
+                </Link>
+              )}
+            </Flex>
           </Flex>
         </FormControl>
       </ListItem>
       <ListItem>
-        <ExpandShow name="Description">
-          <Tabs ml={5} isFitted variant="enclosed">
-            <TabList mb="1em">
-              <Tab>Markdown</Tab>
-              <Tab>Preview</Tab>
-            </TabList>
-            <TabPanels>
-              <TabPanel>
-                <Textarea
-                  placeholder="Enter a markdown formatted description."
-                  minH={32}
-                  {...register('description')}
-                />
-              </TabPanel>
-              <TabPanel>
-                <Markdown>
-                  {description}
-                </Markdown>
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
-        </ExpandShow>
+        <FormControl mt={3}>
+          <Stack>
+            <FormLabel _after={{ content: '":"' }}>
+              Description
+            </FormLabel>
+            <Tabs ml={5} isFitted variant="enclosed">
+              <TabList mb="1em">
+                <Tab>Markdown</Tab>
+                <Tab>Preview</Tab>
+              </TabList>
+              <TabPanels>
+                <TabPanel>
+                  <Textarea
+                    placeholder="Enter a markdown formatted description."
+                    minH={32}
+                    {...register('description')}
+                  />
+                </TabPanel>
+                <TabPanel>
+                  <Markdown>
+                    {description}
+                  </Markdown>
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
+          </Stack>
+        </FormControl>
       </ListItem>
       <ListItem>
-        <ExpandShow name="Animation">
-          <Box m={3}>
+        <FormControl mt={3}>
+          <Flex direction={{ base: 'column', md: 'row' }}>
+            <FormLabel _after={{ content: '":"' }}>
+              Animation
+            </FormLabel>
             {typeof animation === 'string' && (
               <Flex>
                 <Text>
@@ -576,16 +391,21 @@ export const NFTForm: React.FC<{
                 </Link>
               </Flex>
             )}
-            {typeof File !== 'undefined' && animation instanceof File && (
-              <Flex>
-                <Text>{animation.name}</Text>
-                <chakra.a
-                  href={URL.createObjectURL(animation)}
-                  target="_blank" ml={3} mb={5}
-                >
-                  <ExternalLinkIcon />
-                </chakra.a>
-              </Flex>
+            {(
+              typeof File !== 'undefined'
+              && animation instanceof File
+              && (
+                <Flex>
+                  <Text>{animation.name}</Text>
+                  <Link
+                    ml={3} mb={5}
+                    isExternal
+                    href={URL.createObjectURL(animation)}
+                  >
+                    <ExternalLinkIcon />
+                  </Link>
+                </Flex>
+              )
             )}
             <Input
               type="file"
@@ -593,67 +413,45 @@ export const NFTForm: React.FC<{
               onChange={configAnimation}
               h="auto"
             />
-          </Box>
-        </ExpandShow>
+          </Flex>
+        </FormControl>
       </ListItem>
       <ListItem id="attributes">
-        <ExpandShow
-          name="Attributes"
-          button={<Button ml={2} onClick={addRow} size="xs">
-            <AddIcon />
-          </Button>}
-        >
-          {attributes.length > 0 && (
-            <Table
-              sx={{ 'th, td': { textAlign: 'center' } }}
-            >
-              <Thead>
-                <Tr>
-                  <Th>Name</Th>
-                  <Th>Value</Th>
-                  <Th>Type</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {attributes.map((_, index) => (
-                  <AttrRow
-                    key={index}
-                    {...{
-                      attributes, setAttributes, index,
-                    }}
-                  />
-                ))}
-              </Tbody>
-            </Table>
-          )}
-        </ExpandShow>
-      </ListItem>
-      <ListItem>
-        <ExpandShow
-          name="Models"
-          button={<Button ml={2} onClick={onOpen} size="xs">
-            <AddIcon />
-          </Button>}
-        >
-          {Object.keys(wearables).length === 0 ? (
-            <em>None</em>
-          ) : (
-            <UnorderedList>
-              {Object.entries(wearables).map(
-                ([mimetype, model], idx) => (
-                  <ListItem key={idx}>
-                    <a href={httpURL(model as string)}>{mimetype}</a>
-                  </ListItem>
-                )
-              )}
-            </UnorderedList>
-          )}
-          <ModelModal
-            {...{
-              isOpen, onClose, setWearables,
-            }}
-          />
-        </ExpandShow>
+        <FormControl mt={3}>
+          <Stack>
+            <Flex>
+              <FormLabel _after={{ content: '":"' }}>
+                Attributes
+              </FormLabel>
+              <Button ml={2} onClick={addRow} size="xs">
+                <AddIcon />
+              </Button>
+            </Flex>
+            {attributes.length > 0 && (
+              <Table
+                sx={{ 'th, td': { textAlign: 'center' } }}
+              >
+                <Thead>
+                  <Tr>
+                    <Th>Name</Th>
+                    <Th>Value</Th>
+                    <Th>Type</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {attributes.map((_, index) => (
+                    <AttrRow
+                      key={index}
+                      {...{
+                        attributes, setAttributes, index,
+                      }}
+                    />
+                  ))}
+                </Tbody>
+              </Table>
+            )}
+          </Stack>
+        </FormControl>
       </ListItem>
     </UnorderedList>
   )

@@ -1,6 +1,6 @@
 import { NextPage } from 'next'
 import { OptionsForm } from 'components'
-import { Button, Center, Flex, Heading, Spinner, Text, chakra, Stack, Container } from '@chakra-ui/react';
+import { Button, Center, Flex, Heading, Spinner, Text, chakra, Stack, Container, useToast } from '@chakra-ui/react';
 import { useWeb3 } from 'lib/hooks'
 import { useCallback, useEffect, useState } from 'react'
 import { NETWORKS } from '../../lib/networks';
@@ -9,6 +9,7 @@ import Head from 'next/head';
 import { Header } from 'components'
 import { useRouter } from 'next/router';
 import { Event, utils as ethUtils } from 'ethers';
+import { MetaMaskError } from '../../lib/types';
 
 export const New: NextPage = () => (
   <Container maxW="full">
@@ -36,6 +37,7 @@ const Content: React.FC = () => {
   )
   console.info({ id })
   const [working, setWorking] = useState(false)
+  const toast = useToast()
 
   useEffect(() => {
     if(typeof id === 'string') {
@@ -44,9 +46,9 @@ const Content: React.FC = () => {
   }, [id])
 
   const reserve = useCallback(async () => {
-    try {
-      setWorking(true)
+    setWorking(true)
 
+    try {
       if(!rwContract) {
         throw new Error(
           'Connect your wallet to reserve an id.'
@@ -64,6 +66,19 @@ const Content: React.FC = () => {
       }
       const [id, _controller] = event.args
       setTokenId(id.toHexString())
+    } catch(error) {
+      const msg = (
+        (error as MetaMaskError).data?.message
+        ?? (error as Error).message
+        ?? error
+      )
+      toast({
+        title: 'Creation Error',
+        description: msg,
+        status: 'error',
+        isClosable: true,
+        duration: 10000
+      })
     } finally {
       setWorking(false)
     }
@@ -74,7 +89,7 @@ const Content: React.FC = () => {
       <Center>
         <Stack>
           <Heading textAlign="center">
-            Mint A New
+            Create A New
             <chakra.span
               title="Non-Fungible Token"
               ml={2}
@@ -131,7 +146,7 @@ const Content: React.FC = () => {
             if(!tokenId) {
               return (
                 <Button
-                  colorScheme="blue"
+                  colorScheme="green"
                   onClick={reserve}
                 >
                   Reserve An ID

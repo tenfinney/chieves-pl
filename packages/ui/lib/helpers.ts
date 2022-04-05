@@ -45,18 +45,29 @@ export const capitalize = (str: string) => {
   )
 }
 
-export const isEmpty = (val: unknown) => {
-  if (Array.isArray(val)) {
-    return val.length === 0
+export const isEmpty = (
+  (val: unknown) => {
+    if(Array.isArray(val)) {
+      return val.length === 0
+    }
+    if(val instanceof Object) {
+      return Object.keys(val).length === 0
+    }
+    if(val === '') {
+      return true
+    }
+    return false
   }
-  if (val instanceof Object) {
-    return Object.keys(val).length === 0
-  }
-  if (val === '') {
+)
+
+export const isSet = (
+  (val: unknown): val is string | number | Array<string> => {
+    if(val === '' || val == null) {
+      return false
+    }
     return true
   }
-  return false
-}
+)
 
 export const switchTo = async (chain: string) => {
   try {
@@ -75,4 +86,47 @@ export const switchTo = async (chain: string) => {
       throw switchError
     }
   }
+}
+
+export const ipfsify = async (filesOrURL: Fileish) => {
+  let value = filesOrURL
+  if (Array.isArray(value) && typeof value[0] === 'string') {
+    const count = value.length
+    if (count !== 1) {
+      throw new Error(
+        `Unexpected ${count} entries in string array`
+        + ' passed to ipfsify.'
+      )
+    }
+    value = value[0]
+  }
+
+  if (typeof value === 'string') {
+    if (value.startsWith('ipfs://')) {
+      return value
+    }
+    throw new Error(`Unknown File String: ${value}`)
+  }
+
+  const list: Array<File | NamedString> = (
+    Array.isArray(value) ? (
+      value as Array<File | NamedString>
+    ) : (
+      [value as File | NamedString]
+    )
+  )
+
+  const result = await all(CONFIG.ipfs.addAll(
+    list.map((entry) => ({
+      path: entry.name,
+      content: (entry as NamedString).content ?? entry 
+    })),
+    { pin: true, wrapWithDirectory: true }
+  ))
+  const [{ cid }] = result.slice(-1)
+  console.debug({ list, cid, result })
+  return (
+    `ipfs://${cid.toString()}/`
+    + encodeURIComponent((list[primaryImageIdx] as File).name)
+  )
 }

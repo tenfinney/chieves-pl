@@ -68,9 +68,11 @@ const DescriptionTd:React.FC<Token> = ({ token }) => (
     flexGrow={1}
     sx={{ a: { textDecoration: 'underline' } }}
   >
-    <Markdown>{token.metadata?.description ?? (
-      '*No Description*'
-    )}</Markdown>
+    <Markdown linkTarget="_blank">
+      {token.metadata?.description ?? (
+        '*No Description*'
+      )}
+    </Markdown>
   </Td>
 )
 

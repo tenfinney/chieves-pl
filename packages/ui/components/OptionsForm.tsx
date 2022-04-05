@@ -1,15 +1,21 @@
 import { NextPage } from 'next'
-import { Button, ButtonProps, Container, Flex, FormControl, FormLabel, Input, Spinner, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from '@chakra-ui/react'
+import {
+  Box,
+  Button, ButtonProps, Container, Flex, FormControl,
+  FormLabel, Input, Spinner, Tab, TabList, TabPanel,
+  TabPanels, Tabs, Text, useToast,
+} from '@chakra-ui/react'
 import { URIForm, JSONForm, NFTForm } from 'components/forms'
-import { capitalize, switchTo } from 'lib/helpers'
+import { capitalize, ipfsify, isSet, switchTo } from 'lib/helpers'
 import { NETWORKS } from 'lib/networks'
-import { FormEvent, useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useWeb3 } from 'lib/hooks'
-import Head from 'next/head'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/router'
-import pluralize from 'pluralize'
-import { CodedError, ERC1155Metadata } from 'lib/types'
+import JSON5 from 'json5'
+import { CodedError, ERC1155Metadata, FormValues, Maybe, OpenSeaAttribute } from 'lib/types'
+import { isEmpty } from 'lib/helpers'
+import { Attribute, MetaMaskError } from '../lib/types';
 
 const Submit: React.FC<ButtonProps & {
   purpose: string
@@ -29,21 +35,25 @@ const Submit: React.FC<ButtonProps & {
     <Button
       type="submit"
       variant="solid"
-      colorScheme="green"
+      colorScheme={
+        (!userProvider || offChain) ? 'blue' : 'green'
+      }
       isDisabled={
         ((offChain && !isMetaMask) && !!userProvider)
         || processing || working
       }
       w="full"
-      onClick={async (...args) => {
+      onClick={async (evt) => {
         setWorking(true)
 
         if (!userProvider) {
+          evt.preventDefault()
           connect()
         } else if (offChain) {
+          evt.preventDefault()
           switchTo(NETWORKS.contract.chainId)
         } else {
-          onClick?.apply(this, args)
+          onClick?.apply(this, [evt])
         }
 
         setWorking(false)
@@ -54,7 +64,7 @@ const Submit: React.FC<ButtonProps & {
         if (processing || working) {
           return (
             <Flex>
-              <Spinner/>
+              <Spinner />
               <Text ml={2}>
                 {capitalize(purpose).slice(0, -1)}ing…
               </Text>
@@ -63,7 +73,7 @@ const Submit: React.FC<ButtonProps & {
         } else if (!userProvider) {
           return 'Connect To Continue'
         } else if (offChain) {
-          return `Connect to the ${desiredNetwork} network.`
+          return `Connect To The ${desiredNetwork} Network`
         } else {
           return `${capitalize(purpose)} NFT`
         }
@@ -75,187 +85,221 @@ const Submit: React.FC<ButtonProps & {
 export const OptionsForm: React.FC<{
   purpose?: 'create' | 'update'
   tokenId: string
-  metadata: ERC1155Metadata
+  metadata?: Maybe<ERC1155Metadata>
 }> = ({
   purpose = 'create', tokenId, metadata
 }) => {
-  const { roContract, rwContract, ensProvider } = useWeb3()
-  const router = useRouter()
-  const {
-    register, handleSubmit, watch, setValue,
-    formState: {
-      errors, isSubmitting: processing, isDirty: dirty,
-    },
-  } = useForm()
-  const FIELD_FORM = 0
-  const URI_FORM = 1
-  const [tab, setTab] = useState(FIELD_FORM)
-  const creating = purpose === 'create'
+    const { roContract, rwContract, ensProvider } = useWeb3()
+    const router = useRouter()
+    const {
+      register, handleSubmit, watch, setValue,
+      formState: {
+        errors, isSubmitting: processing, isDirty: dirty,
+      },
+    } = useForm()
+    const FIELD_FORM = 0
+    const URI_FORM = 1
+    const JSON5_FORM = 2
+    const [tab, setTab] = useState(FIELD_FORM)
+    const toast = useToast()
 
-  const mint = useCallback(async ({ metadata, max = 0 }) => {
-    // try {
-    //   if(!rwContract) {
-    //     throw new Error(`Cannot connect to contract to ${purpose} metadata.`)
-    //   }
+    const configure = useCallback(
+      async ({ metadata, max = null }) => {
+        if(!rwContract) {
+          throw new Error(
+            `Cannot connect to contract to ${purpose} metadata.`
+          )
+        }
 
-    //   if(!info) {
-    //     const tokenId = (creating ? (
+        let tx
+        if(max != null) {
+          tx = await rwContract.configure(
+            Number(tokenId), metadata, max
+          )
+        } else {
+          tx = await rwContract.setURI(Number(tokenId), metadata)
+        }
+        await tx.wait()
 
-    //     ) router.query.nftId as string
-    //     await rwContract.setURI(metadata, Number(tokenId))
-  
-    //   }
+        return router.push(`/view/${tokenId}`)
+      },
+      [],
+    )
 
-    //   if(creating) {
-    //     const { quantity, treasurer } = info
-    //     const enact = (
-    //       window.confirm(
-    //         `¿Mint ${quantity} ${pluralize('token', quantity)} to ${treasurer}?`
-    //       )
-    //     )
-    //     if(!enact) {
-    //       throw new Error('User denied mint operation.')
-    //     }
+    const buildMeta = async (data: FormValues) => {
+      const {
+        name, description, homepage, color,
+        images, animation, attributes,
+      } = data
 
-    //     const address = await ensProvider?.resolveName(treasurer)
-    //     if (!address) {
-    //       throw new Error(`Couldn't resolve ENS name: “${treasurer}”`)
-    //     }
+      const metadata: ERC1155Metadata = {
+        name: isSet(name) ? name : '𝙐𝙣𝙩𝙞𝙩𝙡𝙚𝙙',
+        decimals: 0,
+      }
 
-    //     const tokenId = (
-    //       await rwContract['mint(address,uint256,string,bytes)'](
-    //         address, quantity, metadata, []
-    //       )
-    //     )
-    //     return router.push(`/view/${tokenId}`)
-    //   }
+      if(isSet(description)) {
+        metadata.description = description
+      }
 
-    //   if(purpose !== 'update') {
-    //     throw new Error(`Unknown Purpose: “${purpose}”`)
-    //   }
-    // } catch (err) {
-    //   toast({
-    //     title: 'Contract Error',
-    //     description: (err as Error).message,
-    //     status: 'error',
-    //     isClosable: true,
-    //     duration: 10000
-    //   })
-    // }
-  }, [])
+      if(isSet(homepage)) {
+        metadata.external_url = homepage
+      }
 
-  // const buildMeta = (data) => {
-  //   if(data.)
-  // }
+      if(Array.isArray(images)) {
+        metadata.image = await ipfsify(images)
+      } else if (images != null) {
+        console.warn(`Unknown Image Type: ${typeof images}`)
+      }
 
-  const submit = async (data: Record<string, unknown>) => {
-    console.info({ data })
-    // const metadata: ERC1155Metadata = {
-    //   name: name ?? 'Untitled', description, decimals: 0,
-    // }
+      if(animation instanceof File || typeof animation === 'string') {
+        metadata.animation_url = await ipfsify(animation)
+      } else if (animation != null) {
+        console.warn(`Unknown Animation Type: ${typeof animation}`)
+      }
 
-    // if (!!homepage) {
-    //   metadata.external_url = homepage
-    // }
+      if(color?.startsWith('#')) {
+        metadata.background_color = (
+          color.substring(1).toUpperCase()
+        )
+      }
 
-    // if (Array.isArray(images)) {
-    //   metadata.image = await ipfsify(images)
-    // } else if (images != null) {
-    //   console.warn(`Unknown Image Type: ${typeof images}`)
-    // }
+      // metadata.properties = {}
 
-    // if (animation instanceof File || typeof animation === 'string') {
-    //   metadata.animation_url = await ipfsify(animation)
-    // } else if (animation !== undefined) {
-    //   console.warn(`Unknown Animation Type: ${typeof animation}`)
-    // }
+      // if (Object.keys(wearables).length > 0) {
+      //   metadata.properties.wearables = (
+      //     Object.fromEntries(
+      //       await Promise.all(
+      //         Object.entries(wearables).map(
+      //           async ([type, value]) => (
+      //             [type, await ipfsify(value as string | File)]
+      //           )
+      //         )
+      //       )
+      //     )
+      //   )
+      // }
 
-    // if (color.startsWith('#')) {
-    //   metadata.background_color = (
-    //     color.substring(1).toUpperCase()
-    //   )
-    // }
+      if(isSet(attributes) && !isEmpty(attributes)) {
+        metadata.attributes = (
+          attributes.map(({ name, value, type }: Attribute) => {
+            const attr: OpenSeaAttribute = {
+              trait_type: name,
+              value,
+            }
+            // including a string type causes nothing to render
+            if (type !== 'string') {
+              attr.display_type = type
+            }
+            return attr
+          })
+        )
+      }
 
-    // metadata.properties = {}
+      return metadata
+    }
 
-    // if (Object.keys(wearables).length > 0) {
-    //   metadata.properties.wearables = (
-    //     Object.fromEntries(
-    //       await Promise.all(
-    //         Object.entries(wearables).map(
-    //           async ([type, value]) => (
-    //             [type, await ipfsify(value as string | File)]
-    //           )
-    //         )
-    //       )
-    //     )
-    //   )
-    // }
+    const submit = async (data: FormValues) => {
+      console.info({ data, tab })
+      try {
+        const name = `metadata.${(new Date()).toISOString()}.json`
+        const metadata = await (async () => {
+          switch (tab) {
+            case FIELD_FORM: {
+              return {
+                name,
+                content: await buildMeta(data),
+              }
+            }
+            case URI_FORM: {
+              return data.uri
+            }
+            case JSON5_FORM: {
+              if(!isSet(data.json5)) {
+                throw new Error('JSON5 isn’t set.')
+              }
+              return {
+                name,
+                content: JSON.stringify(
+                  JSON5.parse(data.json5), null, 2
+                )
+              }
+            }
+            default: {
+              throw new Error(`Unknown Tab: ${tab}`)
+            }
+          }
+        })()
 
-    // if (attributes.length > 0) {
-    //   metadata.attributes = (
-    //     attributes.map(({ name, value, type }) => {
-    //       const attr: Attribute = {
-    //         trait_type: name,
-    //         value,
-    //       }
-    //       // including a string type causes nothing to render
-    //       if (type !== 'string') {
-    //         attr.display_type = type
-    //       }
-    //       return attr
-    //     })
-    //   )
-    // }
+        const max = (
+          isSet(data.maximum) ? data.maximum : null
+        )
 
-    // const dataURI = await ipfsify({
-    //   name: `metadata.${(new Date()).toISOString()}.json`,
-    //   content: JSON.stringify(metadata, null, 2),
-    // })
+        console.info({ metadata })
 
-    // await enact(dataURI)
+        await configure({
+          metadata: await ipfsify(metadata), max
+        })
+      } catch(error) {
+        const msg = (
+          (error as MetaMaskError).data?.message
+          ?? (error as Error).message
+          ?? error
+        )
+        toast({
+          title: 'Metadata Error',
+          description: msg,
+          status: 'error',
+          isClosable: true,
+          duration: 10000
+        })
+      }
+    }
+
+    return (
+      <Box
+        as="form" onSubmit={handleSubmit(submit)}
+        mt={10} mb="20rem" maxW={['100%', 'min(85vw, 50em)']}
+        sx={{ a: { textDecoration: 'underline' } }}
+      >
+        <Submit {...{ purpose, processing }} mb={3} />
+        <Tabs
+          mx={[0, 5]}
+          isFitted
+          variant="enclosed"
+          onChange={(idx) => setTab(idx)}
+        >
+          <TabList mb="1em">
+            <Tab>Fields</Tab>
+            <Tab>URI</Tab>
+            <Tab>JSON5</Tab>
+          </TabList>
+          <TabPanels>
+            {[NFTForm, URIForm, JSONForm].map((Form, idx) => (
+              <TabPanel key={idx} p={0}>
+                <Form {...{
+                  register,
+                  watch,
+                  setValue,
+                  tokenId,
+                  metadata,
+                }} />
+              </TabPanel>
+            ))}
+          </TabPanels>
+        </Tabs>
+        <FormControl>
+          <Flex align="center">
+            <FormLabel _after={{ content: '":"' }}>Max Mintable</FormLabel>
+            <Input
+              type="number"
+              placeholder="¿Maximum number of tokens allowed?"
+              {...register('maximum')}
+            />
+          </Flex>
+        </FormControl>
+        <Submit {...{ purpose, processing }} mb={3} />
+      </Box>
+    )
   }
-
-  return (
-    <Container
-      as="form" onSubmit={handleSubmit(submit)}
-      mt={10} mb="20rem" maxW={['100%', 'min(85vw, 50em)']}
-      sx={{ a: { textDecoration: 'underline' } }}
-    >
-      <Submit {...{ purpose, processing }} mb={3} />
-      <Tabs ml={5} isFitted variant="enclosed">
-        <TabList mb="1em">
-          <Tab>Fields</Tab>
-          <Tab>URI</Tab>
-          <Tab>JSON5</Tab>
-        </TabList>
-        <TabPanels>
-          {[NFTForm, URIForm, JSONForm].map((Form) => (
-            <TabPanel key={Form.displayName}>
-              <Form {...{
-                register,
-                watch,
-                setValue,
-                tokenId,
-                metadata,
-              }}/>
-            </TabPanel>
-          ))}
-        </TabPanels>
-      </Tabs>
-      <FormControl isRequired>
-        <Flex align="center">
-          <FormLabel>Maximum Mintable</FormLabel>
-          <Input
-            type="number"
-            placeholder="¿Maximum number of tokens allowed?"
-            {...register('maximum')}
-          />
-        </Flex>
-      </FormControl>
-      <Submit {...{ purpose, processing }} mb={3} />
-    </Container>
-  )
-}
 
 export default OptionsForm

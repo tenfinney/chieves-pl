@@ -2171,6 +2171,7 @@ __metadata:
     gh-pages: ^3.2.3
     ipfs-http-client: ^56.0.1
     it-all: ^1.0.6
+    json5: ^2.2.0
     mime: ^3.0.0
     multiformats: ^9.6.4
     next: 12.1.0
