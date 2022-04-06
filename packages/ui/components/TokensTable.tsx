@@ -7,7 +7,7 @@ import Markdown from 'react-markdown'
 type Token = { token: TokenState }
 
 const IdTd:React.FC<Token> = ({ token }) => (
-  <Td>{token.id}</Td>
+  <Td>{Number(token.id)}</Td>
 )
 
 const ErrorTd:React.FC<Token> = ({ token }) => (
@@ -139,9 +139,9 @@ const ActionsTd:React.FC<Token> = ({ token }) => (
           </Tooltip>
         </ChakraLink>
       </NextLink>
-      <NextLink href={`/disberse/${token.id}`} passHref>
+      <NextLink href={`/disburse/${token.id}`} passHref>
         <ChakraLink ml={2}>
-          <Tooltip label="Disberse This NFT" hasArrow>
+          <Tooltip label="Disburse This NFT" hasArrow>
             💸
           </Tooltip>
         </ChakraLink>

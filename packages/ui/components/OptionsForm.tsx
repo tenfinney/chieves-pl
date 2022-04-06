@@ -84,7 +84,7 @@ const Submit: React.FC<ButtonProps & {
 
 export const OptionsForm: React.FC<{
   purpose?: 'create' | 'update'
-  tokenId: string
+  tokenId?: string
   metadata?: Maybe<ERC1155Metadata>
 }> = ({
   purpose = 'create', tokenId, metadata

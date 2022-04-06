@@ -136,7 +136,7 @@ export const NFTForm: React.FC<{
   register: UseFormRegister<FieldValues>
   watch: UseFormWatch<FieldValues>
   setValue: UseFormSetValue<FieldValues>
-  tokenId: string
+  tokenId?: string
   metadata?: Maybe<ERC1155Metadata>
 }> = ({
   purpose = 'create',

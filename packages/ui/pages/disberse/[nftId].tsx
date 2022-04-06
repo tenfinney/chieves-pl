@@ -46,7 +46,7 @@ const Address: React.FC<{ name: string }> = ({ name }) => {
   )
 }
 
-const Disberse: NextPage = () => {
+const Disburse: NextPage = () => {
   const router = useRouter()
   const tokenId = router.query.nftId
   const tokenNum = useMemo(
@@ -133,7 +133,7 @@ const Disberse: NextPage = () => {
   return (
     <Container maxW="40rem">
       <Head>
-        <title>Disberse NFT #{tokenId}</title>
+        <title>Disburse NFT #{tokenId}</title>
         <meta name="description" content="Distribute A ’Chievemint NFT" />
       </Head>
 
@@ -201,4 +201,4 @@ const Disberse: NextPage = () => {
   )
 }
 
-export default Disberse
+export default Disburse
