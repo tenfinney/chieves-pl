@@ -60,19 +60,22 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
 
   // Gating tokens control access to contract
   // functionality.
-  uint256 public constant GATING_TYPE       = 1 << TYPE_BOUNDARY;
+  uint256 public constant GATING_TYPE        = 1 << TYPE_BOUNDARY;
   // Membership tokens represent being given
   // access to a team's information.
-  uint256 public constant MEMBERSHIP_TYPE   = 2 << TYPE_BOUNDARY;
+  uint256 public constant MEMBERSHIP_TYPE    = 2 << TYPE_BOUNDARY;
   // Address tokens have a lower 160 bits which
   // correspond to an Ethereum address.
-  uint256 public constant ADDRESS_TYPE      = 3 << TYPE_BOUNDARY; // ¿?
+  uint256 public constant ADDRESS_TYPE       = 3 << TYPE_BOUNDARY; // ¿?
   // Time tokens are divisible tokens to be
   // distributed in response to activities
   // that require time in proportion to that
   // time. I.e. 1 for 1 hour of pair programming.
-  uint256 public constant TIME_TYPE         = 4 << TYPE_BOUNDARY; // ¿?
-  
+  uint256 public constant RECORDED_TIME_TYPE = 4 << TYPE_BOUNDARY;
+  uint256 public constant VOUCHED_TIME_TYPE  = 5 << TYPE_BOUNDARY;
+  uint256 public constant RECORDING_TYPE     = 6 << TYPE_BOUNDARY;
+  uint256 public constant REVIEW_TYPE        = 7 << TYPE_BOUNDARY;
+
   // Experimental tokens are meant to demonstrate
   // properties of the system. The flag may be used
   // in conjunction with other types.
@@ -132,6 +135,13 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
   uint256 public constant LIMITER_ROLE = (
     uint(Role.Limiter) << ROLE_BOUNDARY
   );
+  // Oracles provide information about the world.
+  // Trusted information like the length of
+  // videos submitted for time tokens
+  uint256 public constant ORACLE_ROLE = (
+    uint(Role.Oracle) << ROLE_BOUNDARY
+  );
+  
 
   function binstr(
     bytes32 input
