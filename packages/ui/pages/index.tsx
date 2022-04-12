@@ -10,9 +10,8 @@ import {
 import Markdown from 'react-markdown'
 import { httpURL } from 'lib/helpers'
 import type { Maybe, ERC1155Metadata, TokenState } from 'lib/types'
-import abi from 'contracts/BulkDisbersableNFTs.abi'
-import address from 'contracts/BulkDisbersableNFTs.address'
 import { Header, TokensTable } from 'components'
+import { useWeb3 } from 'lib/hooks'
 
 const Home: NextPage = () => {
   const [tokens, setTokens] = useState<Array<TokenState>>([])
@@ -24,6 +23,7 @@ const Home: NextPage = () => {
     ),
     [],
   )
+  const { contract: { address, abi } } = useWeb3()
 
   const contract = useMemo(
     () => new ethers.Contract(address, abi, provider),

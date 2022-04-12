@@ -30,6 +30,10 @@ export type Web3ContextType = {
   connecting: boolean
   connected: boolean
   isMetaMask: Maybe<boolean>
+  contract: {
+    address: string
+    abi: Record<keyof typeof abi, any>
+  }
 }
 
 export const Web3Context = (
@@ -43,6 +47,10 @@ export const Web3Context = (
     connecting: false,
     connected: false,
     isMetaMask: null,
+    contract: {
+      address: contractAddress,
+      abi
+    }
   })
 )
 
@@ -191,6 +199,10 @@ export const Web3ContextProvider: React.FC = (
           address,
           chain,
           isMetaMask,
+          contract: {
+            address: contractAddress,
+            abi,
+          },
         }}
       >
         {children}

@@ -350,6 +350,45 @@ export default [
   },
   {
     "inputs": [],
+    "name": "ORACLE_ROLE",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "RECORDED_TIME_TYPE",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "RECORDING_TYPE",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "REQUIRE_ALL",
     "outputs": [
       {
@@ -377,6 +416,19 @@ export default [
   {
     "inputs": [],
     "name": "REQUIRE_ONE",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "REVIEW_TYPE",
     "outputs": [
       {
         "internalType": "uint256",
@@ -597,19 +649,6 @@ export default [
   },
   {
     "inputs": [],
-    "name": "TIME_TYPE",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "TRANSFERER_ROLE",
     "outputs": [
       {
@@ -663,6 +702,19 @@ export default [
   {
     "inputs": [],
     "name": "USE_UNLIMITED",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "VOUCHED_TIME_TYPE",
     "outputs": [
       {
         "internalType": "uint256",
@@ -904,9 +956,9 @@ export default [
     "name": "grantRole",
     "outputs": [
       {
-        "internalType": "uint8",
-        "name": "assignments",
-        "type": "uint8"
+        "internalType": "bool",
+        "name": "added",
+        "type": "bool"
       }
     ],
     "stateMutability": "nonpayable",
@@ -933,9 +985,9 @@ export default [
     "name": "grantRole",
     "outputs": [
       {
-        "internalType": "uint8",
-        "name": "assignments",
-        "type": "uint8"
+        "internalType": "bool",
+        "name": "added",
+        "type": "bool"
       }
     ],
     "stateMutability": "nonpayable",
@@ -1183,6 +1235,49 @@ export default [
     "name": "renounceOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum BulkDisbersableNFTs.Role",
+        "name": "role",
+        "type": "uint8"
+      }
+    ],
+    "name": "roleToken",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum BulkDisbersableNFTs.Role",
+        "name": "role",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "roleToken",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {

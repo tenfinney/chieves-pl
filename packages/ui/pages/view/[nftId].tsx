@@ -10,9 +10,8 @@ import type { NextPage } from 'next'
 import ReactMarkdown from 'react-markdown'
 import { httpURL } from 'lib/helpers'
 import type { ERC1155Metadata } from 'lib/types'
-import address from 'contracts/BulkDisbersableNFTs.address'
-import abi from 'contracts/BulkDisbersableNFTs.abi'
 import { HomeLink } from 'components'
+import { useWeb3 } from 'lib/hooks'
 
 const Markdown = chakra(ReactMarkdown)
 
@@ -20,6 +19,7 @@ const View: NextPage = () => {
   const { query: { nftId } } = useRouter()
   const [metadata, setMetadata] = useState<ERC1155Metadata>()
   const [error, setError] = useState<string>()
+  const { contract: { address, abi } } = useWeb3()
 
   const provider = useMemo(
     () => (

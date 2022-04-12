@@ -91,7 +91,8 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     Creator,
     Limiter,
     Burner,
-    Destroyer
+    Destroyer,
+    Oracle
   }
 
   // Superusers have access to the bulk of the
@@ -477,6 +478,31 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
       hasRole(Role.Maintainer) || isSuper(),
       "You must have a Maintainer token to upgrade the contract."
     );
+  }
+
+  function tokenOfOwnerByIndex(
+    address owner, 
+    uint256 index
+  ) 
+    public 
+    view 
+    virtual 
+    override 
+    returns (uint256) 
+  {
+    require(index < ERC721.balanceOf(owner), "ERC721Enumerable: owner index out of bounds");
+    return _ownedTokens[owner][index];
+  }
+
+  function tokenByIndex(uint256 index) 
+    public
+    view
+    virtual
+    override 
+    returns (uint256) 
+  {
+    require(index < ERC721Enumerable.totalSupply(), "ERC721Enumerable: global index out of bounds");
+    return _allTokens[index];
   }
 
   // The following functions are overrides required by Solidity.

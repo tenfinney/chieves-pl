@@ -64,6 +64,7 @@ const main = async () => {
 }
 
 const local = chain === 'localhost'
+console.log({chain})
 const fileTemplates = {
   address: `artifacts/${local ? 'local/' : ''}{contract}.address`,
   args: `artifacts/${local ? 'local/' : ''}{contract}.args`,

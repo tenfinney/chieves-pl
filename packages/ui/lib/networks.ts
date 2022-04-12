@@ -49,6 +49,9 @@ export const NETWORKS: NetworkInfo = {
     return this['0x1']
   },
   get contract() {
+    // return this['0x7a69']
+
     return this['0x89']
+
   },
 }

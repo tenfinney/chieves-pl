@@ -18,7 +18,7 @@
   "editor.cursorBlinking": "phase",
   "workbench.preferredDarkColorTheme": "Default High Contrast",
   "window.autoDetectColorScheme": true,
-  "workbench.colorTheme": "Solidity Visual Developer Dark",
+  "workbench.colorTheme": "Default Dark+",
   "window.closeWhenEmpty": true,
   "window.zoomLevel": 3
 }

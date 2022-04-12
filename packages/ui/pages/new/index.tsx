@@ -29,7 +29,7 @@ export const New: NextPage = () => (
 
 const Content: React.FC = () => {
   const {
-    rwContract, connecting, connect, chain,
+    rwContract, connecting, connect, chain, address,
   } = useWeb3()
   const { query: { tokenId: id } } = useRouter()
   const [tokenId, setTokenId] = (
@@ -89,7 +89,7 @@ const Content: React.FC = () => {
       <Center>
         <Stack>
           <Heading textAlign="center">
-            Create A New
+            Create A New {address}
             <chakra.span
               title="Non-Fungible Token"
               ml={2}
