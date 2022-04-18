@@ -1,4 +1,4 @@
-import { utils } from 'ethers'
+import { BigNumber, utils } from 'ethers'
 import fs from 'fs'
 import glob from 'glob'
 import chalk from 'chalk'
@@ -9,6 +9,8 @@ import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-etherscan'
 import '@openzeppelin/hardhat-upgrades'
 import 'dotenv/config'
+import { HardhatEthersHelpers } from '@nomiclabs/hardhat-ethers/types'
+import { HardhatUserConfig, HttpNetworkConfig } from 'hardhat/types'
 
 const { isAddress, getAddress, formatUnits, parseUnits } = utils
 
@@ -22,15 +24,18 @@ const mnemonic = (() => {
   try {
     return fs.readFileSync('./mnemonic.txt').toString().trim()
   } catch (e) {
-    if (defaultNetwork !== 'localhost') {
-      console.log(' ☢️ WARNING: No mnemonic.txt created for a deploy account. Try `yarn run generate` and then `yarn run account`.')
-    }
+    // if (defaultNetwork !== 'localhost') {
+    //   console.log(' ☢️ WARNING: No mnemonic.txt created for a deploy account. Try `yarn run generate` and then `yarn run account`.')
+    // }
   }
 })()
 
-const infuraId = process.env.INFURA_ID
+if (!mnemonic || mnemonic === '') {
+  throw new Error('Mnemonic Not Defined')
+}
 
-export default {
+const infuraId = process.env.INFURA_ID
+const config: HardhatUserConfig = {
   defaultNetwork,
 
   // don't forget to set your provider like:
@@ -101,8 +106,10 @@ export default {
 	},
 }
 
+export default config
+
 const DEBUG = false
-const debug = (...info) => {
+const debug = (...info: string[]) => {
   if (DEBUG) console.debug(...info)
 }
 
@@ -113,8 +120,8 @@ task('env', 'Display the execution environment', async () => {
 task('su', 'Add a superuser')
 .addParam('address', 'Address of the user to promote')
 .setAction(async (args, { ethers }) => {
-  const [, srcDir] = config.paths.sources.match(/^.*\/([^\/]+)\/?$/)
-  const contractsHome = `${config.paths.artifacts}/${srcDir}/`
+  const [, srcDir] = config?.paths?.sources?.match(/^.*\/([^\/]+)\/?$/) ?? []
+  const contractsHome = `${config?.paths?.artifacts}/${srcDir}/`
   const [contractFile] = (
     glob
     .sync(`${contractsHome}/*/*`)
@@ -131,7 +138,7 @@ task('su', 'Add a superuser')
   const address = (
     fs
     .readFileSync(
-      `${config.paths.artifacts}/${local ? 'local/' : ''}${contractName}.address`
+      `${config?.paths?.artifacts}/${local ? 'local/' : ''}${contractName}.address`
     )
     .toString()
     .trim()
@@ -149,8 +156,8 @@ task('grant', 'Grant a role')
 .addParam('address', 'Address of the user to promote')
 .addParam('role', 'Role to grant')
 .setAction(async (args, { ethers }) => {
-  const [, srcDir] = config.paths.sources.match(/^.*\/([^\/]+)\/?$/)
-  const contractsHome = `${config.paths.artifacts}/${srcDir}/`
+  const [, srcDir] = config?.paths?.sources?.match(/^.*\/([^\/]+)\/?$/) ?? []
+  const contractsHome = `${config?.paths?.artifacts}/${srcDir}/`
   const [contractFile] = (
     glob
     .sync(`${contractsHome}/*/*`)
@@ -167,7 +174,7 @@ task('grant', 'Grant a role')
   const address = (
     fs
     .readFileSync(
-      `${config.paths.artifacts}/${local ? 'local/' : ''}${contractName}.address`
+      `${config?.paths?.artifacts}/${local ? 'local/' : ''}${contractName}.address`
     )
     .toString()
     .trim()
@@ -189,47 +196,47 @@ task('wallet', 'Create a wallet (pk) link', async (_, { ethers }) => {
 })
 
 
-task('fundedwallet', 'Create a wallet (pk) link and fund it with deployer?')
-.addOptionalParam('amount', 'Amount of ETH to send to wallet after generating')
-.addOptionalParam('url', 'URL to add pk to')
-.setAction(async (taskArgs, { network, ethers }) => {
-  const randomWallet = ethers.Wallet.createRandom()
-  const privateKey = randomWallet._signingKey().privateKey
-  console.log(` 🔐 WALLET Generated As ${randomWallet.address}`)
-  let { url = 'http://localhost:3000' } = taskArgs
+// task('fundedwallet', 'Create a wallet (pk) link and fund it with deployer?')
+// .addOptionalParam('amount', 'Amount of ETH to send to wallet after generating')
+// .addOptionalParam('url', 'URL to add pk to')
+// .setAction(async (taskArgs, { network, ethers }) => {
+//   const randomWallet = ethers.Wallet.createRandom()
+//   const privateKey = randomWallet._signingKey().privateKey
+//   console.log(` 🔐 WALLET Generated As ${randomWallet.address}`)
+//   let { url = 'http://localhost:3000' } = taskArgs
 
-  let localDeployerMnemonic
-  try{
-    localDeployerMnemonic = (
-      fs.readFileSync('./mnemonic.txt')
-      .toString()
-      .trim()
-    )
-  } catch (e) {
-    /* do nothing - this file isn't always there */
-  }
+//   let localDeployerMnemonic
+//   try{
+//     localDeployerMnemonic = (
+//       fs.readFileSync('./mnemonic.txt')
+//       .toString()
+//       .trim()
+//     )
+//   } catch (e) {
+//     /* do nothing - this file isn't always there */
+//   }
 
-  let amount = taskArgs.amount ?? '0.01'
-  const tx = {
-    to: randomWallet.address,
-    value: ethers.utils.parseEther(amount)
-  }
+//   let amount = taskArgs.amount ?? '0.01'
+//   const tx = {
+//     to: randomWallet.address,
+//     value: ethers.utils.parseEther(amount)
+//   }
 
-  // SEND USING LOCAL DEPLOYER MNEMONIC IF THERE IS ONE
-  // IF NOT SEND USING LOCAL HARDHAT NODE:
-  if(localDeployerMnemonic){
-    let deployerWallet = ethers.Wallet.fromMnemonic(localDeployerMnemonic)
-    deployerWallet = deployerWallet.connect(ethers.provider)
-    console.log(` 💵 Sending ${amount} ETH to ${randomWallet.address} using deployer account`)
-    let sendresult = await deployerWallet.sendTransaction(tx)
-    console.log(`   ${url}/pk#${privateKey}`)
-    return
-  } else {
-    console.log(` 💵 Sending ${amount} ETH to ${randomWallet.address} using local node`)
-    console.log(`   ${url}/pk#${privateKey}`)
-    return send(ethers.provider.getSigner(), tx)
-  }
-})
+//   // SEND USING LOCAL DEPLOYER MNEMONIC IF THERE IS ONE
+//   // IF NOT SEND USING LOCAL HARDHAT NODE:
+//   if(localDeployerMnemonic){
+//     let deployerWallet = ethers.Wallet.fromMnemonic(localDeployerMnemonic)
+//     deployerWallet = deployerWallet.connect(ethers.provider)
+//     console.log(` 💵 Sending ${amount} ETH to ${randomWallet.address} using deployer account`)
+//     let sendresult = await deployerWallet.sendTransaction(tx)
+//     console.log(`   ${url}/pk#${privateKey}`)
+//     return
+//   } else {
+//     console.log(` 💵 Sending ${amount} ETH to ${randomWallet.address} using local node`)
+//     console.log(`   ${url}/pk#${privateKey}`)
+//     return send(ethers.provider.getSigner(), tx)
+//   }
+// })
 
 task('generate', 'Create a mnemonic for builder deploys', async (_, { ethers }) => {
   const bip39 = require('bip39')
@@ -335,7 +342,9 @@ task('account', 'Get balance information for the deployment account.', async (_,
   console.log(` ‍📬 Deployer Account is ${address}`)
   for (let n in config.networks) {
     try {
-      let provider = new ethers.providers.JsonRpcProvider(config.networks[n].url)
+      let provider = new ethers.providers.JsonRpcProvider(
+        (config.networks[n] as HttpNetworkConfig).url
+      )
       let balance = (await provider.getBalance(address))
       console.log(` -- ${n} --  -- -- 📡`)
       console.log(`   balance: ${ethers.utils.formatEther(balance)}`)
@@ -346,14 +355,14 @@ task('account', 'Get balance information for the deployment account.', async (_,
   }
 })
 
-const addr = async (ethers, addr) => {
+const addr = async (ethers: HardhatEthersHelpers, addr: string) => {
   if (isAddress(addr)) {
     return getAddress(addr)
   }
   const accounts = await ethers.provider.listAccounts()
-  if (accounts[addr] !== undefined) {
-    return accounts[addr]
-  }
+  // if (accounts[addr] !== undefined) {
+  //   return accounts[addr]
+  // }
   throw `Could not normalize address: ${addr}`
 }
 
@@ -376,65 +385,65 @@ task('balance', "Prints an account's balance")
   console.log(formatUnits(balance, 'ether'), 'ETH')
 })
 
-const send = (signer, txparams) => {
-  return signer.sendTransaction(txparams, (error, transactionHash) => {
-    if (error) {
-      debug(`Error: ${error}`)
-    }
-    debug(`transactionHash: ${transactionHash}`)
-    // checkForReceipt(2, params, transactionHash, resolve)
-  })
-}
+// const send = (signer: JsonRpcSigner, txparams: { to: string | undefined; value: string | BigNumber; from?: string; nonce?: number; gasPrice?: string; gasLimit?: any; chainId?: number | undefined }) => {
+//   return signer.sendTransaction(txparams, (error: any, transactionHash: any) => {
+//     if (error) {
+//       debug(`Error: ${error}`)
+//     }
+//     debug(`transactionHash: ${transactionHash}`)
+//     // checkForReceipt(2, params, transactionHash, resolve)
+//   })
+// }
 
-task('send', 'Send ETH')
-.addParam('from', 'From address or account index')
-.addOptionalParam('to', 'To address or account index')
-.addOptionalParam('amount', 'Amount to send in ether')
-.addOptionalParam('data', 'Data included in transaction')
-.addOptionalParam('gasPrice', 'Price you are willing to pay in gwei')
-.addOptionalParam('gasLimit', 'Limit of how much gas to spend')
-.setAction(async (taskArgs, { network, ethers }) => {
-  const from = await addr(ethers, taskArgs.from)
-  debug(`Normalized from address: ${from}`)
-  const fromSigner = await ethers.provider.getSigner(from)
+// task('send', 'Send ETH')
+// .addParam('from', 'From address or account index')
+// .addOptionalParam('to', 'To address or account index')
+// .addOptionalParam('amount', 'Amount to send in ether')
+// .addOptionalParam('data', 'Data included in transaction')
+// .addOptionalParam('gasPrice', 'Price you are willing to pay in gwei')
+// .addOptionalParam('gasLimit', 'Limit of how much gas to spend')
+// .setAction(async (taskArgs, { network, ethers }) => {
+//   const from = await addr(ethers, taskArgs.from)
+//   debug(`Normalized from address: ${from}`)
+//   const fromSigner = await ethers.provider.getSigner(from)
 
-  let to
-  if (taskArgs.to) {
-    to = await addr(ethers, taskArgs.to)
-    debug(`Normalized to address: ${to}`)
-  }
+//   let to
+//   if (taskArgs.to) {
+//     to = await addr(ethers, taskArgs.to)
+//     debug(`Normalized to address: ${to}`)
+//   }
 
-  const txRequest = {
-    from: await fromSigner.getAddress(),
-    to,
-    value: (
-      parseUnits(
-        taskArgs.amount ?? '0',
-        'ether'
-      )
-      .toHexString()
-    ),
-    nonce: await fromSigner.getTransactionCount(),
-    gasPrice: (
-      parseUnits(
-        taskArgs.gasPrice ?? '1.001',
-        'gwei'
-      )
-      .toHexString()
-    ),
-    gasLimit: taskArgs.gasLimit ?? 24000,
-    chainId: network.config.chainId,
-  }
+//   const txRequest = {
+//     from: await fromSigner.getAddress(),
+//     to,
+//     value: (
+//       parseUnits(
+//         taskArgs.amount ?? '0',
+//         'ether'
+//       )
+//       .toHexString()
+//     ),
+//     nonce: await fromSigner.getTransactionCount(),
+//     gasPrice: (
+//       parseUnits(
+//         taskArgs.gasPrice ?? '1.001',
+//         'gwei'
+//       )
+//       .toHexString()
+//     ),
+//     gasLimit: taskArgs.gasLimit ?? 24000,
+//     chainId: network.config.chainId,
+//   }
 
-  if(taskArgs.data !== undefined) {
-    txRequest.data = taskArgs.data
-    debug(`Adding data to payload: ${txRequest.data}`)
-  }
-  debug(`${Number(txRequest.gasPrice) / 1000000000} gwei`)
-  debug(JSON.stringify(txRequest, null, 2))
+//   if(taskArgs.data !== undefined) {
+//     txRequest.data = taskArgs.data
+//     debug(`Adding data to payload: ${txRequest.data}`)
+//   }
+//   debug(`${Number(txRequest.gasPrice) / 1000000000} gwei`)
+//   debug(JSON.stringify(txRequest, null, 2))
 
-  return send(fromSigner, txRequest)
-})
+//   return send(fromSigner, txRequest)
+// })
 
 task('sign', 'Sign the contents of a file')
 .addParam('toSign', 'File whose contents to sign')

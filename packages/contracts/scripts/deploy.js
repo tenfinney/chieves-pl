@@ -5,7 +5,7 @@ const { config, ethers, tenderly, run, upgrades } = require('hardhat')
 const { utils } = require('ethers')
 const R = require('ramda')
 
-const name = 'BulkDisbersableNFTs'
+const name = 'BulkDisbursableNFTs'
 
 const DEBUG = false
 const debug = (...info) => {

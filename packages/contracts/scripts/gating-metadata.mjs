@@ -27,7 +27,7 @@ const { abi, contractName } = JSON.parse(await (
   fs.promises.readFile(
     path.join(
       artifactsDir,
-      'src/BulkDisbersableNFTs.sol/BulkDisbersableNFTs.json'
+      'src/BulkDisbursableNFTs.sol/BulkDisbursableNFTs.json'
     )
   )
 ))
@@ -36,7 +36,7 @@ const contractAddress = (await (
   fs.promises.readFile(
     path.join(
       artifactsDir,
-      'BulkDisbersableNFTs.address'
+      'BulkDisbursableNFTs.address'
     )
   )
 ))

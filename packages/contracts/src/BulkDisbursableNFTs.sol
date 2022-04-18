@@ -11,7 +11,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /// @custom:security-contact dys@dhappy.org
-contract BulkDisbersableNFTs is
+contract BulkDisbursableNFTs is
  Initializable, ERC1155Upgradeable, OwnableUpgradeable,
  ERC1155BurnableUpgradeable, ERC1155SupplyUpgradeable, UUPSUpgradeable
 {
@@ -672,11 +672,13 @@ contract BulkDisbersableNFTs is
         }
       }
     }
-    for(uint256 i = 0; i < ids.length; ++i) {
-      if(balanceOf(from, ids[i]) <= amounts[i]) {
-        uint256 index = owned[from].indices[ids[i]];
-        delete owned[from].entries[index];
-        delete owned[from].indices[ids[i]];
+    if(from != address(0)) {
+      for(uint256 i = 0; i < ids.length; ++i) {
+        if(balanceOf(from, ids[i]) <= amounts[i]) {
+          uint256 index = owned[from].indices[ids[i]];
+          delete owned[from].entries[index];
+          delete owned[from].indices[ids[i]];
+        }
       }
     }
     super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
