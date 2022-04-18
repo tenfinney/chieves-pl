@@ -1,13 +1,14 @@
-const { utils } = require('ethers')
-const fs = require('fs')
-const glob = require('glob')
-const chalk = require('chalk')
-const { task } = require('hardhat/config')
-require('@nomiclabs/hardhat-waffle')
-require('@tenderly/hardhat-tenderly')
-require('@nomiclabs/hardhat-etherscan')
-require('@openzeppelin/hardhat-upgrades')
-require('dotenv').config()
+import { utils } from 'ethers'
+import fs from 'fs'
+import glob from 'glob'
+import chalk from 'chalk'
+import { task } from 'hardhat/config'
+import '@tenderly/hardhat-tenderly'
+import '@nomiclabs/hardhat-ethers'
+import '@nomiclabs/hardhat-waffle'
+import '@nomiclabs/hardhat-etherscan'
+import '@openzeppelin/hardhat-upgrades'
+import 'dotenv/config'
 
 const { isAddress, getAddress, formatUnits, parseUnits } = utils
 
@@ -29,7 +30,7 @@ const mnemonic = (() => {
 
 const infuraId = process.env.INFURA_ID
 
-module.exports = {
+export default {
   defaultNetwork,
 
   // don't forget to set your provider like:

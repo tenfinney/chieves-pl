@@ -1,4 +1,7 @@
-import { Box, Flex, Spinner, Stack, Table, Tbody, Td, Text, Th, Thead, Tr, Link as ChakraLink, Image, Tooltip, chakra } from '@chakra-ui/react';
+import {
+  Box, Flex, Spinner, Stack, Table, Tbody, Td, Text, Th, Thead, Tr,
+  Link as ChakraLink, Image, Tooltip, chakra,
+} from '@chakra-ui/react'
 import { httpURL } from 'lib/helpers'
 import { TokenState } from 'lib/types'
 import NextLink from 'next/link'

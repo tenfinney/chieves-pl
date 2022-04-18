@@ -16,14 +16,8 @@
     "jsx": "preserve",
     "incremental": true,
   },
-  "references": [
-    { "path": "packages/contracts/" },
-    { "path": "packages/ui" },
-  ],
-  "include": [],
-  "exclude": [
-    "packages/**/tests/**",
-    "packages/ui/out/**",
-    "packages/ui/.next/**"
-  ],
+  "references": [],
+  "include": ["scripts", "test/**/*"],
+  "files": ["hardhat.config.ts"],
+  "exclude": [],
 }

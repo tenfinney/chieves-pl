@@ -557,7 +557,7 @@ contract BulkDisbersableNFTs is
     if((id & UNIQUE) == UNIQUE && balanceOf(recipient, id) > 0) {
       return false;
     }
-    if((id & GATING_TYPE) == GATING_TYPE) { // token gate
+    if((id & GATING_TYPE) == GATING_TYPE) {
       require(
         hasRole(Role.Caster, id) || isSuper(),
         "You must have a Caster token to mint token gates."

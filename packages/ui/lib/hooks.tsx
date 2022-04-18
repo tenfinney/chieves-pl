@@ -14,8 +14,8 @@ import React, {
 import Web3Modal from 'web3modal'
 import providerOptions from 'lib/walletConnect'
 import { NETWORKS } from 'lib/networks'
-import contractAddress from 'contracts/BulkDisbersableNFTs.address'
-import abi from 'contracts/BulkDisbersableNFTs.abi'
+import contractAddress from 'contracts/BulkDisbursableNFTs.address'
+import abi from 'contracts/BulkDisbursableNFTs.abi'
 
 export type Web3ContextType = {
   userProvider?: Web3Provider
