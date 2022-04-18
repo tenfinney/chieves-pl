@@ -1,4 +1,4 @@
-import { Box, Flex, Spinner, Stack, Table, Tbody, Td, Text, Th, Thead, Tr, Link as ChakraLink, Image, Tooltip } from '@chakra-ui/react'
+import { Box, Flex, Spinner, Stack, Table, Tbody, Td, Text, Th, Thead, Tr, Link as ChakraLink, Image, Tooltip, chakra } from '@chakra-ui/react';
 import { httpURL } from 'lib/helpers'
 import { TokenState } from 'lib/types'
 import NextLink from 'next/link'
@@ -44,9 +44,9 @@ const ImageTd:React.FC<Token> = ({ token }) => (
             }
           >
             {token.metadata?.image && (
-              <Image
-                src={httpURL(token.metadata.image)}
-                alt={token.metadata?.name ?? 'Untitled'}
+              <chakra.object
+                data={httpURL(token.metadata.image)}
+                title={token.metadata?.name ?? 'Untitled'}
                 maxW={32}
                 maxH={32}
                 objectFit="contain"

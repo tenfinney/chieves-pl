@@ -98,9 +98,10 @@ const View: NextPage = () => {
       <HomeLink/>
       {name && <Heading>{name}</Heading>}
       {image && (
-        <Image
-          src={httpURL(image)}
-          alt={name}
+        <chakra.object
+          data={httpURL(image)}
+          title={name}
+          pointerEvents="none"
           maxW={72}
           maxH={72}
         />

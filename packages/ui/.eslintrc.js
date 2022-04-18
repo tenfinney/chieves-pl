@@ -24,7 +24,7 @@ module.exports = {
   rules: {
     'react/jsx-filename-extension': [
       1,
-      { extensions: ['.ts', '.tsx'] }
+      { extensions: ['.js', '.jsx', '.ts', '.tsx'] }
     ],
     indent: [
       'error',

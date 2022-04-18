@@ -1,29 +1,26 @@
 const sleep = (timeout) => (
   new Promise((r) => setTimeout(r, timeout))
 )
+
+const randColor = () => (
+  `hsl(
+    ${Math.random() * 255},
+    ${50 + Math.random() * 50}%,
+    ${50 + Math.random() * 20}%
+  )`
+)
+
 const randomLights = async (letters) => {
   for(const letter of letters) {
     const lights = letter.querySelectorAll('.light circle')
     for(const light of lights) {
-      light.style.fill = (
-        `hsl(
-          ${Math.random() * 255},
-          ${80 + Math.random() * 20}%,
-          ${60 + Math.random() * 20}%
-        )`
-      )
+      light.style.fill = randColor()
       await sleep(50)
     }
   }
 }
 const uniformLights = async (letters) => {
-  const fill = (
-    `hsl(
-      ${Math.random() * 255},
-      ${80 + Math.random() * 20}%,
-      ${60 + Math.random() * 20}%
-    )`
-  )
+  const fill = randColor()
   for(const letter of letters) {
     const lights = letter.querySelectorAll('.light circle')
     for(const light of lights) {
@@ -35,13 +32,7 @@ const uniformLights = async (letters) => {
 const randomLetters = async (letters) => {
   for(const letter of letters) {
     const lights = letter.querySelectorAll('.light circle')
-    const fill = (
-      `hsl(
-        ${Math.random() * 255},
-        ${80 + Math.random() * 20}%,
-        ${60 + Math.random() * 20}%
-      )`
-    )
+    const fill = randColor()
     for(const light of lights) {
       light.style.fill = fill
     }

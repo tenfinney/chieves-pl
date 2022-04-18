@@ -9,11 +9,16 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155Burn
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
 /// @custom:security-contact dys@dhappy.org
-contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgradeable, ERC1155BurnableUpgradeable, ERC1155SupplyUpgradeable, UUPSUpgradeable {
-  using CountersUpgradeable for CountersUpgradeable.Counter;
+contract BulkDisbersableNFTs is
+ Initializable, ERC1155Upgradeable, OwnableUpgradeable,
+ ERC1155BurnableUpgradeable, ERC1155SupplyUpgradeable, UUPSUpgradeable
+{
+  struct CheckableList {
+    uint256[] entries;
+    mapping (uint256 => uint256) indices;
+  }
 
   // Note that because the contract is proxied, the
   // storage members and order cannot change
@@ -21,12 +26,29 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
   string public symbol;
 
   mapping (uint256 => string) private uris;
-  CountersUpgradeable.Counter private numTokenTypes;
 
-  uint256 public constant TEAM_BOUNDARY = 243;
-  uint256 public constant MODE_BOUNDARY = 240;
-  uint256 public constant TYPE_BOUNDARY = 236;
-  uint256 public constant ROLE_BOUNDARY = 230;
+  // To allow enumeration of all the tokens a list is kept.
+  CheckableList private tokens;
+
+  // To allow listing the tokens held by a user, a map
+  // of owner to a list of tokens is maintained.
+  mapping (address => CheckableList) private owned;
+
+  // Each _WIDTH is the number of bits given to the
+  // particular field
+  uint8 public constant TEAM_WIDTH = 13;
+  uint8 public constant TEAM_BOUNDARY = 255 - TEAM_WIDTH;
+  uint8 public constant TYPE_WIDTH = 8;
+  uint8 public constant TYPE_BOUNDARY = TEAM_BOUNDARY - TYPE_WIDTH;
+  uint8 public constant REQUIREMENT_WIDTH = 3;
+  uint8 public constant REQUIREMENT_BOUNDARY = TEAM_BOUNDARY - REQUIREMENT_WIDTH;
+  uint8 public constant REPETITION_WIDTH = 3;
+  uint8 public constant REPETITION_BOUNDARY = REQUIREMENT_BOUNDARY - REPETITION_WIDTH;
+  uint8 public constant UNIQUENESS_WIDTH = 1;
+  uint8 public constant UNIQUENESS_BOUNDARY = REPETITION_BOUNDARY - UNIQUENESS_WIDTH;
+  uint8 public constant ROLE_WIDTH = 8;
+  uint8 public constant ROLE_BOUNDARY = TYPE_BOUNDARY - ROLE_WIDTH;
+  uint8 public constant COUNTER_WIDTH = 42;
   
   // 13 publicity bits defining groups to which
   // the the token information is accessible
@@ -50,12 +72,14 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
 
   // There are four modes for how the publicity
   // is interpreted.
-  uint256 public constant REQUIRE_ALL   = 1 << MODE_BOUNDARY;
-  uint256 public constant REQUIRE_NONE  = 2 << MODE_BOUNDARY;
-  uint256 public constant REQUIRE_ONE   = 3 << MODE_BOUNDARY;
-  uint256 public constant USE_ONCE      = 4 << MODE_BOUNDARY;
-  uint256 public constant USE_UNLIMITED = 5 << MODE_BOUNDARY;
-  uint256 public constant UNIQUE        = 6 << MODE_BOUNDARY;
+  uint256 public constant REQUIRE_ALL   = 1 << REQUIREMENT_BOUNDARY;
+  uint256 public constant REQUIRE_NONE  = 2 << REQUIREMENT_BOUNDARY;
+  uint256 public constant REQUIRE_ONE   = 3 << REQUIREMENT_BOUNDARY;
+  uint256 public constant USE_ONCE      = 1 << REPETITION_BOUNDARY;
+  uint256 public constant USE_UNLIMITED = 2 << REPETITION_BOUNDARY;
+  uint256 public constant USE_UNTIL     = 3 << REPETITION_BOUNDARY;
+  uint256 public constant USE_AFTER     = 4 << REPETITION_BOUNDARY;
+  uint256 public constant UNIQUE        = 1 << UNIQUENESS_BOUNDARY;
   
 
   // Gating tokens control access to contract
@@ -72,104 +96,126 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
   // that require time in proportion to that
   // time. I.e. 1 for 1 hour of pair programming.
   uint256 public constant RECORDED_TIME_TYPE = 4 << TYPE_BOUNDARY;
+  // Whereas recorded time is directly viewable,
+  // vouched time is represented by a summary of what
+  // was accomplished and how long it took. As with
+  // recorded time, the token is distributed proportionally
+  // to the time spent.
   uint256 public constant VOUCHED_TIME_TYPE  = 5 << TYPE_BOUNDARY;
+  // A recording is a reactable event.
   uint256 public constant RECORDING_TYPE     = 6 << TYPE_BOUNDARY;
+  // A review is a set of reactions to a recording.
   uint256 public constant REVIEW_TYPE        = 7 << TYPE_BOUNDARY;
+  // 20 bytes of a hash of a reaction, be it a word or
+  // image along with a signed byte representing the weight.
+  // This may be too much info for a token or even to have in
+  // the contract…
+  uint256 public constant REACTION_TYPE      = 8 << TYPE_BOUNDARY;
+
 
   // Experimental tokens are meant to demonstrate
   // properties of the system. The flag may be used
   // in conjunction with other types.
-  uint256 public constant EXPERIMENTAL_TYPE = 2**3 << TYPE_BOUNDARY;
+  uint256 public constant EXPERIMENTAL_TYPE = 2**TYPE_WIDTH << TYPE_BOUNDARY;
 
   enum Role {
+    // Superusers have access to the bulk of the
+    // functions of the contract.
     Superuser,
+
+    // Minters have the capacity to create instances
+    // of existing tokens subject to restrictions on
+    // quantity and whether an individual may hold
+    // duplicates.
     Minter,
+
+    // Casters may cast roles upon other users except
+    // for superusers who may only be created by
+    // other superusers (or the owner).
     Caster,
+
+    // Transferers have the ability to move tokens
+    // between accounts.
     Transferer,
+
+    // Configurers can update the URI associated
+    // with a token.
     Configurer,
+
+    // Maintainers may update the contract.
     Maintainer,
+
+    // Creators can create new tokens.
     Creator,
+
+    // Limiters can change the maximum number of
+    // tokens allowed to be minted.
     Limiter,
+
+    // Burners can destroy minted tokens.
     Burner,
+
+    // Destroyers can remove a created token.
     Destroyer,
-    Oracle
+
+    // Oracles provide information about the world.
+    // Trusted information like the length of
+    // videos submitted for time tokens.
+    Oracle,
+
+    // These spots are reserved because the storage
+    // layout has to remain the same.
+    Reserved00,
+    Reserved01,
+    Reserved02,
+    Reserved03,
+    Reserved04,
+    Reserved05,
+    Reserved06,
+    Reserved07,
+    Reserved08,
+    Reserved09,
+    Reserved10,
+    Reserved11,
+    Reserved12,
+    Reserved13,
+    Reserved14,
+    Reserved15,
+    Reserved16,
+    Reserved17,
+    Reserved18,
+    Reserved19,
+    Reserved20,
+    Reserved21,
+    Reserved22,
+    Reserved23,
+    Reserved24,
+    Reserved25,
+    Reserved26,
+    Reserved27,
+    Reserved28,
+    Reserved29,
+    Reserved30,
+    Reserved31,
+    Reserved32,
+    Reserved33,
+    Reserved34,
+    Reserved35,
+    Reserved36,
+    Reserved37,
+    Reserved38,
+    Reserved39,
+    Reserved40,
+    Reserved41,
+    Reserved42,
+    Reserved43,
+    Reserved44,
+    Reserved45,
+    Reserved46,
+    Reserved47,
+    Reserved48,
+    Reserved49
   }
-
-  // Superusers have access to the bulk of the
-  // functions of the contract.  
-  uint256 public constant SUPERUSER_ROLE = (
-    uint(Role.Minter) << ROLE_BOUNDARY
-  );
-  // Minters have the capacity to create instances
-  // of existing tokens subject to restrictions on
-  // quantity and whether an individual may hold
-  // duplicates.
-  uint256 public constant MINTER_ROLE = (
-    uint(Role.Minter) << ROLE_BOUNDARY
-  );
-  // Casters may cast roles upon other users except
-  // for superusers who may only be created by
-  // other superusers (or the owner).
-  uint256 public constant CASTER_ROLE = (
-    uint(Role.Caster) << ROLE_BOUNDARY
-  );
-  // Transferers have the ability to move tokens
-  // between accounts.
-  uint256 public constant TRANSFERER_ROLE = (
-    uint(Role.Transferer) << ROLE_BOUNDARY
-  );
-  // Configurers can update the URI associated
-  // with a token.
-  uint256 public constant CONFIGURER_ROLE = (
-    uint(Role.Configurer) << ROLE_BOUNDARY
-  );
-  // Maintainers may update the contract.
-  uint256 public constant MAINTAINER_ROLE = (
-    uint(Role.Maintainer) << ROLE_BOUNDARY
-  );
-  // Creators can create new tokens.
-  uint256 public constant CREATOR_ROLE = (
-    uint(Role.Creator) << ROLE_BOUNDARY
-  );
-  // Limiters can change the maximum number of
-  // tokens allowed to be minted.
-  uint256 public constant LIMITER_ROLE = (
-    uint(Role.Limiter) << ROLE_BOUNDARY
-  );
-  // Oracles provide information about the world.
-  // Trusted information like the length of
-  // videos submitted for time tokens
-  uint256 public constant ORACLE_ROLE = (
-    uint(Role.Oracle) << ROLE_BOUNDARY
-  );
-  
-
-  function binstr(
-    bytes32 input
-  )
-    public
-    pure
-    returns (uint256 value)
-  {
-    uint256 n = 0;
-    uint8 i = 0;
-
-    if(input[0] == "0" && input[1] == "b") {
-      i = 2;
-    }
-
-    for(i; i < 5; i++) {
-      n *= 2;
-      if(input[i] == "1") {
-        n += 1;
-      } else {
-        require(input[i] == "0");
-      }
-    }
-
-    return n;
-  }
-
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
@@ -202,6 +248,12 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     symbol = _symbol;
   }
 
+  /**
+   * @notice This function returns the gating token with the given
+   * role. It is possible for gating tokens to operate only on a
+   * single other token, but this method creates a token for id zero
+   * which allows it to operate on any token.
+   */
   function roleToken(Role role)
     public
     virtual
@@ -211,6 +263,10 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     return roleToken(role, 0);
   }
 
+  /**
+   * @notice Creates the gating token for oprtations on a single
+   * other token, given by id.
+   */
   function roleToken(
     Role role,
     uint256 id
@@ -220,9 +276,18 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     view
     returns (uint256 tokenId)
   {
-    return GATING_TYPE + (uint(role) << ROLE_BOUNDARY) + id;
+    return (
+      GATING_TYPE
+      + UNIQUE
+      + (uint(role) << ROLE_BOUNDARY)
+      + id
+    );
   }
 
+  /**
+   * @notice Checks if the message sender has the specified gating
+   * role.
+   */
   function hasRole(Role role)
     public
     virtual
@@ -232,6 +297,10 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     return hasRole(role, _msgSender());
   }
 
+  /**
+   * @notice Checks if the specified user has the given gating
+   * role.
+   */
   function hasRole(
     Role role,
     address user
@@ -244,6 +313,10 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     return hasRole(role, user, 0);
   }
 
+  /**
+   * @notice Checks if the message sender has the specified gating
+   * role for the listed token id.
+   */
   function hasRole(
     Role role,
     uint256 id
@@ -256,6 +329,10 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     return hasRole(role, _msgSender(), id);
   }
 
+  /**
+   * @notice Checks if the specified user has the given gating
+   * role for the listed token id.
+   */
   function hasRole(
     Role role,
     address user,
@@ -273,6 +350,10 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     );
   }
 
+  /**
+   * @notice Checks if the message sender holds a Superuser token
+   * or is the contract owner.
+   */
   function isSuper()
     public
     virtual
@@ -282,6 +363,10 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     return isSuper(_msgSender());
   }
 
+  /**
+   * @notice Checks if the specified user holds a Superuser token
+   * or is the contract owner.
+   */
   function isSuper(address user)
     public
     virtual
@@ -291,6 +376,10 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     return hasRole(Role.Superuser, user) || user == owner();
   }
 
+  /**
+   * @notice Create an all-token gating token for the listed
+   * role given to the specified user.
+   */
   function grantRole(
     Role role,
     address user
@@ -302,6 +391,10 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     return grantRole(role, user, 0);
   }
 
+  /**
+   * @notice Create an gating token for the given listed
+   * role given to the specified user.
+   */
   function grantRole(
     Role role,
     address user,
@@ -323,28 +416,32 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
       );
     }
 
-    if(!hasRole(role, user, id)) {
-      uint256 token = roleToken(role, id);
-      mint(user, token, 1, "");
-      return true;
-    }
-    return false;
+    return mint(user, roleToken(role, id), 1, "");
   }
 
+  /**
+   * @return metadata The metadata URI associated with the given token.
+   */
   function uri(uint256 id)
     public
     view
     virtual
     override
-    returns (string memory)
+    returns (string memory metadata)
   {
     string memory response = uris[id];
     if(bytes(response).length == 0) {
-      // To Do: Send generic role tokens
+      if((id & (2**TYPE_WIDTH - 1) << TYPE_BOUNDARY) == GATING_TYPE) {
+        uint256 gate = id & ((2**256 - 1) << COUNTER_WIDTH);
+        response = uris[gate];
+      }
     }
     return response;
   }
 
+  /**
+   * @notice Set the metadata URI for the given token.
+   */
   function setURI(
     uint256 id,
     string calldata newURI
@@ -360,6 +457,10 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     emit URI(newURI, id);
   }
 
+  /**
+    * @notice ¡Unimplmemented! Set the maximum number of tokens
+    * allowed to be minted. Trumps the Minter role.
+   */
   function setMax(
     uint256 id,
     uint256 max
@@ -374,40 +475,57 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     max;
   }
 
+  /**
+   * @notice Event fired when a new token type is created.
+   */
   event Created(uint256 id, address controller);
 
+  /**
+   * @notice Call `create` with the message sender as the
+   * maintainer.
+   * @return id The reserved token id.
+   */
   function create()
     public
     virtual
-    returns (uint256 tokenId)
+    returns (uint256 id)
   {
     return create(_msgSender());
   }
 
+  /**
+   * @notice Reserve a new token id & mint gating tokens
+   * with the Minter, Configurer, & Limiter for the
+   * listed maintainer.
+   * @return id The reserved token id.
+   */
   function create(
     address maintainer
   )
     public
     virtual
-    returns (uint256 tokenId)
+    returns (uint256 id)
   {
-    numTokenTypes.increment();
-    uint256 id = numTokenTypes.current();
+    uint256 tokenId = tokens.entries.length + 1;
 
     require(
-      hasRole(Role.Creator, id) || isSuper(),
+      hasRole(Role.Creator, tokenId) || isSuper(),
       "You must have a Creator token to create new tokens."
     );
 
-    grantRole(Role.Minter, maintainer, id);
-    grantRole(Role.Configurer, maintainer, id);
-    grantRole(Role.Limiter, maintainer, id);
+    tokens.entries.push(tokenId);
+    grantRole(Role.Minter, maintainer, tokenId);
+    grantRole(Role.Configurer, maintainer, tokenId);
+    grantRole(Role.Limiter, maintainer, tokenId);
 
-    emit Created(id, maintainer);
+    emit Created(tokenId, maintainer);
 
-    return id;
+    return tokenId;
   }
 
+  /**
+   * @notice Set the properties of a previously created token.
+   */
   function configure(
     uint256 id,
     string calldata newURI,
@@ -420,6 +538,12 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     setMax(id, max);
   }
 
+  /**
+   * @notice Create new tokens instances.
+   * @return minted If a token instance was actually created.
+   * If the token to be minted is unique & the user already
+   * has one, the function will succeed and return `false`.
+   */
   function mint(
     address recipient,
     uint256 id,
@@ -428,7 +552,11 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
   )
     public
     virtual
+    returns (bool minted)
   {
+    if((id & UNIQUE) == UNIQUE && balanceOf(recipient, id) > 0) {
+      return false;
+    }
     if((id & GATING_TYPE) == GATING_TYPE) { // token gate
       require(
         hasRole(Role.Caster, id) || isSuper(),
@@ -443,8 +571,11 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     _mint(recipient, id, amount, data);
   }
 
-  function distributeSingles(
-    address from,
+  /**
+   * @notice Mint a given token to a group of
+   * addresses.
+   */
+  function mint(
     address[] memory to,
     uint256 id,
     bytes memory data
@@ -452,21 +583,21 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
     public
     virtual
   {
-    require(
-      from == _msgSender() || isApprovedForAll(from, _msgSender()),
-      "ERC1155: caller is not owner nor approved"
-    );
     for(uint256 i = 0; i < to.length; ++i) {
-      _safeTransferFrom(from, to[i], id, 1, data);
+      mint(to[i], id, 1, data);
     }
   }
 
-  function tokenTypeCount()
+  /**
+   * @return count The number of types of tokens.
+   */
+  function totalSupply()
     public
     view
-    returns (uint256 numTypes)
+    virtual
+    returns (uint256 count)
   {
-    return numTokenTypes.current();
+    return tokens.entries.length;
   }
 
   function _authorizeUpgrade(address)
@@ -483,26 +614,30 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
   function tokenOfOwnerByIndex(
     address owner, 
     uint256 index
-  ) 
-    public 
-    view 
-    virtual 
-    override 
-    returns (uint256) 
+  )
+    public
+    view
+    virtual
+    returns (uint256)
   {
-    require(index < ERC721.balanceOf(owner), "ERC721Enumerable: owner index out of bounds");
-    return _ownedTokens[owner][index];
+    require(
+      index < owned[owner].entries.length,
+      "ERC-1155 Enumerable: token index out of bounds"
+    );
+    return owned[owner].entries[index];
   }
 
   function tokenByIndex(uint256 index) 
     public
     view
     virtual
-    override 
-    returns (uint256) 
+    returns (uint256)
   {
-    require(index < ERC721Enumerable.totalSupply(), "ERC721Enumerable: global index out of bounds");
-    return _allTokens[index];
+    require(
+      index < tokens.entries.length,
+      "ERC-1155 Enumerable: token index out of bounds"
+    );
+    return tokens.entries[index];
   }
 
   // The following functions are overrides required by Solidity.
@@ -523,6 +658,25 @@ contract BulkDisbersableNFTs is Initializable, ERC1155Upgradeable, OwnableUpgrad
           hasRole(Role.Transferer, from, ids[i]),
           "You must have a Transferer token to transfer tokens."
         );
+      }
+    }
+    if(to != address(0)) {
+      for(uint256 i = 0; i < ids.length; ++i) {
+        if(tokens.indices[ids[i]] == 0) {
+          tokens.entries.push(ids[i]);
+          tokens.indices[ids[i]] = tokens.entries.length;
+        }
+        if(owned[to].indices[ids[i]] == 0) {
+          owned[to].entries.push(ids[i]);
+          owned[to].indices[ids[i]] = tokens.entries.length;
+        }
+      }
+    }
+    for(uint256 i = 0; i < ids.length; ++i) {
+      if(balanceOf(from, ids[i]) <= amounts[i]) {
+        uint256 index = owned[from].indices[ids[i]];
+        delete owned[from].entries[index];
+        delete owned[from].indices[ids[i]];
       }
     }
     super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
