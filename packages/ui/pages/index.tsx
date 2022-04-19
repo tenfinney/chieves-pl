@@ -42,11 +42,14 @@ const Home: NextPage = () => {
     () => {
       const load = async () => {
         if(contract) {
-          const typeCount = Number(await contract.tokenTypeCount())
+          console.log({contract})
+          console.log(await contract.owner())
+          const typeCount = Number(await contract['totalSupply()']())
 
           await Promise.allSettled(
             Array.from({ length: typeCount }).map(async (_, index) => {
-              const id = `0x${(index + 1).toString(16)}`
+              const id = (await contract.tokenByIndex(index)).toHexString()
+              console.log({id})
               let metadata = null
               try {
                 setToken(index, { id })
@@ -74,8 +77,9 @@ const Home: NextPage = () => {
                 setToken(index, { metadata })
               }
 
-              const total = await contract.totalSupply(id)
+              const total = await contract['totalSupply(uint256)']()
               setToken(index, { total })
+
 
               // const max = await contract.getMax(id)
               // setToken(index, { max })

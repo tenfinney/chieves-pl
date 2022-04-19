@@ -7,10 +7,20 @@ import { TokenState } from 'lib/types'
 import NextLink from 'next/link'
 import Markdown from 'react-markdown'
 
-type Token = { token: TokenState }
+type Token = { token: TokenState, index?: number }
 
-const IdTd:React.FC<Token> = ({ token }) => (
-  <Td>{Number(token.id)}</Td>
+const IdTd:React.FC<Token> = ({ token, index }) => (
+  <Td>
+    <Tooltip
+      title={token.id != null ? (
+        BigInt(token.id).toString(16)
+      ) : (
+        'null'
+      )}
+    >
+      {index != null ? index + 1 : 'null'}
+    </Tooltip>
+  </Td>
 )
 
 const ErrorTd:React.FC<Token> = ({ token }) => (
@@ -179,9 +189,9 @@ export const TokensTable: React.FC<{
         </Tr>
       </Thead>
       <Tbody>
-        {tokens.map((token: TokenState) => (
+        {tokens.map((token: TokenState, index) => (
           <Tr key={token.id}>
-            <IdTd {...{ token }}/>
+            <IdTd {...{ token, index }}/>
             {(() => {
               if(!token.uri && token.error) {
                 return <ErrorTd {...{ token }}/>

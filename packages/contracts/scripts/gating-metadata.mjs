@@ -18,6 +18,15 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const artifactsDir = path.join(__dirname, '../artifacts/')
 
+const capitalize = (str) => (
+  str.replace(
+    /\w\S*/g,
+    (w) => (
+      w.replace(/^\w/, (c) => c.toUpperCase())
+    )
+  )
+)
+
 if(!process.env.NFT_STORAGE_API_KEY) {
   throw new Error('Missing `NFT_STORAGE_API_KEY`.')
 }
@@ -115,14 +124,15 @@ console.info(
 )
 
 for(const file of files) {
-  const type = file.name.replace(/\.json$/, '').toUpperCase()
-  const tokenIdFunction = contract[`${type}_TOKEN`]
-  if(!tokenIdFunction) {
+  const type = file.name.replace(/\.json$/, '')
+  const typeId = await contract.roleValueForName(capitalize(type))  
+  const tokenId = await contract['roleToken(uint8)'](typeId)
+  console.log({type,typeId,tokenId})
+  if(!tokenId) {
     console.debug(
-      `Couldn't find \`${type}_TOKEN\` on ${contractName}.`
+      `Couldn't find \`${type}\` on ${contractName}.`
     )
   } else {
-    const tokenId = await tokenIdFunction.call()
     const uri = `ipfs://${metadataCID}/${file.name}`
     const hex = (
       tokenId.toHexString()
@@ -143,7 +153,7 @@ for(const file of files) {
         + ` ${chalk.hex('#6E9AFF')(`0x${hex}`)}`
         + ` URI to ${chalk.hex('#FF069C')(uri)}.`
       )
-      const tx = await contract.setURI(uri, tokenId)
+      const tx = await contract.setURI(tokenId, uri)
       await tx.wait()
     }
   }

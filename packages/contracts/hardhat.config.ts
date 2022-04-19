@@ -44,6 +44,7 @@ const config: HardhatUserConfig = {
 
   paths: {
     sources: 'src',
+    artifacts: 'artifacts',
   },
 
   networks: {
@@ -120,13 +121,16 @@ task('env', 'Display the execution environment', async () => {
 task('su', 'Add a superuser')
 .addParam('address', 'Address of the user to promote')
 .setAction(async (args, { ethers }) => {
-  const [, srcDir] = config?.paths?.sources?.match(/^.*\/([^\/]+)\/?$/) ?? []
+  const [, srcDir] = config?.paths?.sources?.match(/^.*?\/?([^\/]+)\/?$/) ?? []
+console.log({srcDir})
+  if (!srcDir) throw new Error('ERROR - could not find source directory')
   const contractsHome = `${config?.paths?.artifacts}/${srcDir}/`
   const [contractFile] = (
     glob
     .sync(`${contractsHome}/*/*`)
     .filter((name) => !/\.dbg\.json$/.test(name))
   )
+  console.log({contractFile})
   const { abi, contractName } = JSON.parse(
     fs.readFileSync(contractFile).toString()
   )
@@ -148,7 +152,8 @@ task('su', 'Add a superuser')
   )
   const { address: user } = args
   console.log(` 🍏 Setting ${user} as superuser on ${contractName} (${address})`)
-  const tx = await contract['grantRole(uint8,address)'](0, user)
+  const suRole = await contract.roleValueForName('Superuser')
+  const tx = await contract['grantRole(uint8,address)'](suRole, user)
   console.info(` 🕋 Tx: ${tx.hash}`)
 })
 

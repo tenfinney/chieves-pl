@@ -121,7 +121,7 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
 
   let implementation = null
   let loops = 0
-  const timeout = 0.5 * 60 * 1000
+  const timeout =  2 * 1000
   const maxLoops = 40
 
   while(!implementation && ++loops <= maxLoops) {

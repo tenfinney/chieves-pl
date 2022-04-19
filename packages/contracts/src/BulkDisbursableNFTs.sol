@@ -262,7 +262,7 @@ contract BulkDisbursableNFTs is
     if(hash == keccak256(abi.encodePacked('Oracle'))) {
       return Role.Oracle;
     }
-    return Role.Reserved00;
+    revert('Unknown role type.');
   }
 
   /// @custom:oz-upgrades-unsafe-allow constructor
