@@ -2149,10 +2149,13 @@ __metadata:
     "@openzeppelin/hardhat-upgrades": ^1.16.0
     "@tenderly/hardhat-tenderly": ^1.0.13
     "@types/chai": ^4.3.1
+    "@types/chai-as-promised": ^7
     "@types/glob": ^7.2.0
     "@types/mocha": ^9.1.0
     "@types/node": 17.0.21
     chai: ^4.3.6
+    chai-as-promised: ^7.1.1
+    chai-match: ^1.1.1
     dotenv: ^16.0.0
     ethereum-waffle: ^3.2.0
     ethers: ^5.6.0
@@ -3079,6 +3082,15 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: 7f66f2c7b7b9303b3205a57184261974b114495736b77853af5b18d857c0b33e82ce7146911e86e87a87837de8acae28986716fd381ac7c301fd6e8d8b6c811f
+  languageName: node
+  linkType: hard
+
+"@types/chai-as-promised@npm:^7":
+  version: 7.1.5
+  resolution: "@types/chai-as-promised@npm:7.1.5"
+  dependencies:
+    "@types/chai": "*"
+  checksum: 7c1345c6e32513d52d8e562ec173c23161648d6b792046525f18803a9932d7b3ad3dca8f0181e3c529ec42b106099f174e34edeb184d61dc93e32c98b5132fd4
   languageName: node
   linkType: hard
 
@@ -6067,6 +6079,24 @@ __metadata:
   bin:
     cborg: cli.js
   checksum: 5932e77b6ed8e3d02690a5fac6644e9d27169356db4ea9b349df6983447e710e0f769344cf79ba02bf01b9c25dbeaeb763b9dd41ad0f4c638427ec27dc645a6a
+  languageName: node
+  linkType: hard
+
+"chai-as-promised@npm:^7.1.1":
+  version: 7.1.1
+  resolution: "chai-as-promised@npm:7.1.1"
+  dependencies:
+    check-error: ^1.0.2
+  peerDependencies:
+    chai: ">= 2.1.2 < 5"
+  checksum: 7262868a5b51a12af4e432838ddf97a893109266a505808e1868ba63a12de7ee1166e9d43b5c501a190c377c1b11ecb9ff8e093c89f097ad96c397e8ec0f8d6a
+  languageName: node
+  linkType: hard
+
+"chai-match@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "chai-match@npm:1.1.1"
+  checksum: b94ce8af10965af3f0a7fac6b139c8c30e897be4a802ec7ac036b466d97aac487bc292581ff4b2b31a531ddeb347a3410f66486a850723852d651cf4c362d2cf
   languageName: node
   linkType: hard
 

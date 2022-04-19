@@ -452,18 +452,33 @@ contract BulkDisbursableNFTs is
     virtual
     returns (bool added)
   {
-    if(role == Role.Superuser) {
-      require(
-        isSuper(),
-        "You must be a superuser to create new ones."
-      );
-    } else {
-      require(
-        hasRole(Role.Caster, id) || isSuper(),
-        "You must have the Caster role to assign new roles."
-      );
-    }
+    return _grantRole(role, user, id, true);
+  }
 
+  function _grantRole(
+    Role role,
+    address user,
+    uint256 id,
+    bool check
+  )
+    internal
+    virtual
+    returns (bool added)
+  {
+
+    if(check) {
+      if(role == Role.Superuser) {
+        require(
+          isSuper(),
+          "You must be a superuser to create new ones."
+        );
+      } else {
+        require(
+          hasRole(Role.Caster, id) || isSuper(),
+          "You must have the Caster role to assign new roles."
+        );
+      }
+    }
     return mint(user, roleToken(role, id), 1, "");
   }
 
@@ -562,9 +577,9 @@ contract BulkDisbursableNFTs is
     );
 
     tokens.entries.push(tokenId);
-    grantRole(Role.Minter, maintainer, tokenId);
-    grantRole(Role.Configurer, maintainer, tokenId);
-    grantRole(Role.Limiter, maintainer, tokenId);
+    _grantRole(Role.Minter, maintainer, tokenId, false);
+    _grantRole(Role.Configurer, maintainer, tokenId, false);
+    _grantRole(Role.Limiter, maintainer, tokenId, false);
 
     emit Created(tokenId, maintainer);
 

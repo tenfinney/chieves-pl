@@ -1,8 +1,15 @@
-import { expect } from 'chai'
+import chai, { expect } from 'chai'
+import chaiAsPromised from 'chai-as-promised'
+// @ts-ignore
+import chaiMatch from 'chai-match'
 import { ethers as Ethers } from 'ethers'
 import { ethers, upgrades } from 'hardhat'
 
+chai.use(chaiAsPromised)
+chai.use(chaiMatch)
+
 describe('The Token Contract', () => {
+
   it(
     'should create four tokens when reserving.',
     async () => {
@@ -75,6 +82,50 @@ describe('The Token Contract', () => {
       expect(roles).to.have.members(
         [MINTER_ROLE, CONFIGURER_ROLE, LIMITER_ROLE]
       )
+    }
+  )
+
+  it(
+    'it allows for a Superuser to create tokens.',
+    async () => {
+      const [owner, creator] = await ethers.getSigners()
+      const Token = await ethers.getContractFactory(
+        'BulkDisbursableNFTs'
+      )
+      const token = await upgrades.deployProxy(
+        Token,
+        ['MetaGame ’Chievemints', 'MG’s 🏆s'],
+        { kind: 'uups', timeout: 10 * 60 * 1000 },
+      )
+      const transact = async (
+        { sender = owner, method, args = [] }:
+        { sender?: any, method: string, args?: Array<unknown> }
+      ) => {
+        const tx = await token.connect(sender)[method](...args)
+        return await tx.wait()
+      }
+
+      const creatorRole = await token.roleValueForName('Creator')
+
+      await expect(transact({sender: creator.address, method: 'create()'}))
+      .to.eventually.be.rejected
+      .then((error) => {
+        expect(error.error).to.match(/must have a Creator token/)
+      })
+
+      await transact({
+        method: 'grantRole(uint8,address)',
+        args: [creatorRole, creator.address],
+      }) 
+    
+      expect(await token['hasRole(uint8,address)'](creatorRole, creator.address))
+      .to.be.true
+
+      expect(await token.connect(creator)['hasRole(uint8,uint256)'](creatorRole, 1))
+      .to.be.true
+      
+      await expect(transact({sender: creator, method: 'create()'}))
+      .to.eventually.be.rejected
     }
   )
 })
