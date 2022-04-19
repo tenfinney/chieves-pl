@@ -1,15 +1,18 @@
 import { NextPage } from 'next'
 import { OptionsForm } from 'components'
-import { Button, Center, Flex, Heading, Spinner, Text, chakra, Stack, Container, useToast } from '@chakra-ui/react';
+import {
+  Button, Center, Flex, Heading, Spinner, Text, chakra,
+  Stack, Container, useToast,
+} from '@chakra-ui/react'
 import { useWeb3 } from 'lib/hooks'
 import { useCallback, useEffect, useState } from 'react'
-import { NETWORKS } from '../../lib/networks';
-import { switchTo } from 'lib/helpers';
-import Head from 'next/head';
+import { NETWORKS } from '../../lib/networks'
+import { switchTo } from 'lib/helpers'
+import Head from 'next/head'
 import { Header } from 'components'
-import { useRouter } from 'next/router';
-import { Event, utils as ethUtils } from 'ethers';
-import { MetaMaskError } from '../../lib/types';
+import { useRouter } from 'next/router'
+import { Event, utils as ethUtils } from 'ethers'
+import { MetaMaskError } from '../../lib/types'
 
 export const New: NextPage = () => (
   <Container maxW="full">
@@ -56,11 +59,11 @@ const Content: React.FC = () => {
       }
       const tx = await rwContract['create()']()
       const receipt = await tx.wait()
-      let event = receipt.events.find(
+      const event = receipt.events.find(
         (evt: Event) => evt.event === 'Created'
       )
       if(!event) {
-        throw new Event(
+        throw new Error(
           'Couldn’t find a creation event.'
         )
       }

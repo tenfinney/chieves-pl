@@ -111,6 +111,9 @@ contract BulkDisbursableNFTs is
   // This may be too much info for a token or even to have in
   // the contract…
   uint256 public constant REACTION_TYPE      = 8 << TYPE_BOUNDARY;
+  // Vanilla NFTs are created by using `create` to reserve
+  // an id.
+  uint256 public constant VANILLA_TYPE       = 9 << TYPE_BOUNDARY;
 
 
   // Experimental tokens are meant to demonstrate
@@ -119,6 +122,10 @@ contract BulkDisbursableNFTs is
   uint256 public constant EXPERIMENTAL_TYPE = 2**TYPE_WIDTH << TYPE_BOUNDARY;
 
   enum Role {
+    // The first value is zero and all tokens should
+    // have a positive value.
+    Reserved00,
+
     // Superusers have access to the bulk of the
     // functions of the contract.
     Superuser,
@@ -165,7 +172,6 @@ contract BulkDisbursableNFTs is
 
     // These spots are reserved because the storage
     // layout has to remain the same.
-    Reserved00,
     Reserved01,
     Reserved02,
     Reserved03,
@@ -215,6 +221,48 @@ contract BulkDisbursableNFTs is
     Reserved47,
     Reserved48,
     Reserved49
+  }
+
+  function roleValueForName(string memory roleName)
+    public
+    pure
+    returns (Role role)
+  {
+    bytes32 hash = keccak256(abi.encodePacked(roleName));
+    if(hash == keccak256(abi.encodePacked('Superuser'))) {
+      return Role.Superuser;
+    }
+    if(hash == keccak256(abi.encodePacked('Minter'))) {
+      return Role.Minter;
+    }
+    if(hash == keccak256(abi.encodePacked('Caster'))) {
+      return Role.Caster;
+    }
+    if(hash == keccak256(abi.encodePacked('Transferer'))) {
+      return Role.Transferer;
+    }
+    if(hash == keccak256(abi.encodePacked('Configurer'))) {
+      return Role.Configurer;
+    }
+    if(hash == keccak256(abi.encodePacked('Maintainer'))) {
+      return Role.Maintainer;
+    }
+    if(hash == keccak256(abi.encodePacked('Creator'))) {
+      return Role.Creator;
+    }
+    if(hash == keccak256(abi.encodePacked('Limiter'))) {
+      return Role.Limiter;
+    }
+    if(hash == keccak256(abi.encodePacked('Burner'))) {
+      return Role.Burner;
+    }
+    if(hash == keccak256(abi.encodePacked('Destroyer'))) {
+      return Role.Destroyer;
+    }
+    if(hash == keccak256(abi.encodePacked('Oracle'))) {
+      return Role.Oracle;
+    }
+    return Role.Reserved00;
   }
 
   /// @custom:oz-upgrades-unsafe-allow constructor
@@ -506,7 +554,7 @@ contract BulkDisbursableNFTs is
     virtual
     returns (uint256 id)
   {
-    uint256 tokenId = tokens.entries.length + 1;
+    uint256 tokenId = VANILLA_TYPE + tokens.entries.length + 1;
 
     require(
       hasRole(Role.Creator, tokenId) || isSuper(),
