@@ -79,7 +79,7 @@ const Home: NextPage = () => {
                 setToken(index, { metadata })
               }
 
-              const total = await contract['totalSupply(uint256)']()
+              const total = await contract['totalSupply(uint256)']( id )
               setToken(index, { total })
 
 

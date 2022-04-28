@@ -48,9 +48,15 @@ const Address: React.FC<{ name: string }> = ({ name }) => {
 
 const Disburse: NextPage = () => {
   const router = useRouter()
-  const tokenId = router.query.nftId
+  let tokenId = router.query.nftId
+  if (Array.isArray(tokenId)) {
+    [tokenId] = tokenId
+  }
+  if (tokenId == null || tokenId === '') {
+    return null
+  }  
   const tokenNum = useMemo(
-    () => (tokenId ? BigNumber.from(Number(tokenId)) : null),
+    () => (tokenId ? BigNumber.from(BigInt(tokenId as string)) : null),
     [tokenId],
   )
   const [balance, setBalance] = useState<number>()
@@ -93,16 +99,17 @@ const Disburse: NextPage = () => {
         }
       }
     }
-
+    
     getBalance()
   }, [address, roContract, tokenId])
-
+  
   useEffect(
     () => {
       const getMetadata = async () => {
         if(roContract && tokenId) {
           try {
             const meta = await roContract.uri(tokenId)
+            console.log('LOOK HERE', {meta, tokenId})
             if(!meta) {
               setMetadata(null)
             } else {
@@ -139,7 +146,22 @@ const Disburse: NextPage = () => {
 
       <HomeLink/>
 
-      <Stack>
+{/* const Submit: React.FC<ButtonProps & {
+purpose: string
+processing?: boolean
+}> = ({ purpose, processing = false, onClick, ...props }) => {
+const { chain, isMetaMask, userProvider, connect } = useWeb3()
+const offChain = useMemo(
+() => chain !== NETWORKS.contract.chainId,
+[chain],
+)
+const [working, setWorking] = useState(processing)
+const desiredNetwork = (
+offChain ? NETWORKS.contract.name : null
+) */}
+
+
+      <Stack as="form">
         {(() => {
           if(metadata === null) {
             return <Text my={8}>Token {name} does not exist.</Text>
@@ -194,7 +216,7 @@ const Disburse: NextPage = () => {
           <Checkbox>Don’t distribute to existing holders</Checkbox>
         </FormControl>
         <FormControl textAlign="center">
-          <Button colorScheme="green">Distribute</Button>
+          <Button type="submit" colorScheme="green">Distribute</Button>
         </FormControl>
       </Stack>
     </Container>
