@@ -31,6 +31,8 @@ const Home: NextPage = () => {
   )
 
   const setToken = (index: number, info: Record<string, unknown>) => {
+    console.log({ t: {...tokens[index], ...info}})
+
     setTokens((tkns: Array<TokenState>) => ([
       ...tkns.slice(0, index),
       { ...tkns[index], ...info },

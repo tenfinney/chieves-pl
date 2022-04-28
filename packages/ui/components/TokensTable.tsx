@@ -10,16 +10,16 @@ import Markdown from 'react-markdown'
 type Token = { token: TokenState, index?: number }
 
 const IdTd:React.FC<Token> = ({ token, index }) => (
-  <Td>
-    <Tooltip
-      title={token.id != null ? (
+  <Td title={token?.id ? BigInt(token.id).toString(16) : ''}>
+    {/* <Tooltip
+      label={token.id != null ? (
         BigInt(token.id).toString(16)
       ) : (
         'null'
       )}
-    >
+    > */}
       {index != null ? index + 1 : 'null'}
-    </Tooltip>
+    {/* </Tooltip> */}
   </Td>
 )
 

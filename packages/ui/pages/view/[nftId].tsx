@@ -43,7 +43,7 @@ const View: NextPage = () => {
       const getMetadata = async () => {
         if(contract && nftId) {
           try {
-            const metadataURI = await contract.uri(ethers.BigNumber.from(Number(nftId)))
+            const metadataURI = await contract.uri(ethers.BigNumber.from(BigInt(nftId)))
             const metadataURL = httpURL(metadataURI)
             if(!metadataURL) {
               throw new Error(`Couldn't find metadata for token #${nftId}.`)

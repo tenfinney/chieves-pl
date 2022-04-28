@@ -108,22 +108,26 @@ export const OptionsForm: React.FC<{
         if(!rwContract) {
           throw new Error(
             `Cannot connect to contract to ${purpose} metadata.`
-          )
-        }
-
-        let tx
-        if(max != null) {
-          tx = await rwContract.configure(
-            Number(tokenId), metadata, max
-          )
-        } else {
-          tx = await rwContract.setURI(Number(tokenId), metadata)
-        }
-        await tx.wait()
-
+            )
+          }
+          
+          let tx
+          if(max != null) {
+            console.log({rwContract})
+            tx = await rwContract.configure(
+              Number(tokenId), metadata, max
+              )
+              
+            } else if(tokenId != null) {
+              console.log({r: rwContract})
+              tx = await rwContract.setURI(BigInt(tokenId), metadata)
+            }
+            console.log({q: rwContract})
+            await tx.wait()
+            
         return router.push(`/view/${tokenId}`)
       },
-      [],
+      [rwContract],
     )
 
     const buildMeta = async (data: FormValues) => {
@@ -183,7 +187,6 @@ export const OptionsForm: React.FC<{
     }
 
     const submit = async (data: FormValues) => {
-      console.info({ data, tab })
       try {
         const name = `metadata.${(new Date()).toISOString()}.json`
         let metadata = await (async () => {
@@ -215,15 +218,16 @@ export const OptionsForm: React.FC<{
             }
           }
         })()
-
+          
         const max = (
           isSet(data.maximum) ? data.maximum : null
         )
-
-       if(!metadata) {
-         throw new Error('Metadata is undefined')
-       }
+          
+        if(!metadata) {
+          throw new Error('Metadata is undefined')
+        }
         ;[metadata] = await ipfsify(metadata)
+
         await configure({ metadata, max })
       } catch(error) {
         const msg = (
@@ -240,7 +244,7 @@ export const OptionsForm: React.FC<{
         })
       }
     }
-
+      
     return (
       <Box
         as="form" onSubmit={handleSubmit(submit)}
