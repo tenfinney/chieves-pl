@@ -41,7 +41,7 @@
     "test": "hardhat test --network hardhat",
     "compile": "hardhat compile",
     "gating-metadata": "hardhat run scripts/gating-metadata.mjs",
-    "deploy": "hardhat run scripts/deploy.js",
+    "deploy": "hardhat run scripts/deploy.js && yarn publish",
     "postdeploy": "hardhat run scripts/publish.js",
     "publish": "hardhat run scripts/publish.js",
     "watch": "node scripts/watch.js",

@@ -18,8 +18,8 @@ const { isAddress, getAddress, formatUnits } = utils
 // Select the network you want to deploy to here:
 //
 // const defaultNetwork = 'localhost'
-// const defaultNetwork = 'matic'
-const defaultNetwork = 'rinkeby'
+const defaultNetwork = 'matic'
+// const defaultNetwork = 'rinkeby'
 
 const mnemonic = (() => {
   try {

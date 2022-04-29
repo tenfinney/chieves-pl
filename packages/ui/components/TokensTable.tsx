@@ -56,6 +56,7 @@ const ImageTd:React.FC<Token> = ({ token }) => (
               )
             }
           >
+            {console.log({i: token.metadata.image})}
             {token.metadata?.image && (
               <chakra.object
                 data={httpURL(token.metadata.image)}

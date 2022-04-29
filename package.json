@@ -26,7 +26,6 @@
     "send": "yarn workspace @metagame-chievemints/contracts send",
     "ship": "yarn workspace @metagame-chievemints/ui ship",
     "hh:gen": "yarn workspace @metagame-chievemints/contracts generate",
-    "hh:account": "yarn workspace @metagame-chievemints/contracts account",
     "hh:mine": "yarn workspace @metagame-chievemints/contracts hardhat mineContractAddress",
     "hh:wallet": "yarn workspace @metagame-chievemints/contracts hardhat wallet",
     "hh:funded": "yarn workspace @metagame-chievemints/contracts hardhat fundedwallet",

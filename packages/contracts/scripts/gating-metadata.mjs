@@ -16,7 +16,7 @@ import hardhat from 'hardhat'
 const { config, ethers } = hardhat
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const artifactsDir = path.join(__dirname, '../artifacts/')
+const artifactsDir = config.paths.artifacts
 
 const capitalize = (str) => (
   str.replace(
@@ -104,7 +104,7 @@ const files = await Promise.all(
     )
     ;['image', 'animation_url'].forEach((prop) => {
       if(template[prop]) {
-        template[prop] = encodeURI(
+        template[prop] = (
           template[prop].replace(/\{assets-cid\}/g, assetsCID)
         )
       }
@@ -116,6 +116,8 @@ const files = await Promise.all(
     )
   })
 )
+
+console.log('Uploading to NFT Storage.')
 
 const metadataCID = await storage.storeDirectory(files)
 console.info(

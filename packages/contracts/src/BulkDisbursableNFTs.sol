@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155Burn
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155SupplyUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-
+import "hardhat/console.sol";
 /// @custom:security-contact dys@dhappy.org
 contract BulkDisbursableNFTs is
  Initializable, ERC1155Upgradeable, OwnableUpgradeable,
@@ -37,17 +37,17 @@ contract BulkDisbursableNFTs is
   // Each _WIDTH is the number of bits given to the
   // particular field
   uint8 public constant TEAM_WIDTH = 13;
-  uint8 public constant TEAM_BOUNDARY = 255 - TEAM_WIDTH;
+  uint8 public constant TEAM_BOUNDARY = uint8(256 - uint16(TEAM_WIDTH));
   uint8 public constant TYPE_WIDTH = 8;
   uint8 public constant TYPE_BOUNDARY = TEAM_BOUNDARY - TYPE_WIDTH;
   uint8 public constant REQUIREMENT_WIDTH = 3;
-  uint8 public constant REQUIREMENT_BOUNDARY = TEAM_BOUNDARY - REQUIREMENT_WIDTH;
+  uint8 public constant REQUIREMENT_BOUNDARY = TYPE_BOUNDARY - REQUIREMENT_WIDTH;
   uint8 public constant REPETITION_WIDTH = 3;
   uint8 public constant REPETITION_BOUNDARY = REQUIREMENT_BOUNDARY - REPETITION_WIDTH;
   uint8 public constant UNIQUENESS_WIDTH = 1;
   uint8 public constant UNIQUENESS_BOUNDARY = REPETITION_BOUNDARY - UNIQUENESS_WIDTH;
   uint8 public constant ROLE_WIDTH = 8;
-  uint8 public constant ROLE_BOUNDARY = TYPE_BOUNDARY - ROLE_WIDTH;
+  uint8 public constant ROLE_BOUNDARY = UNIQUENESS_BOUNDARY - ROLE_WIDTH;
   uint8 public constant COUNTER_WIDTH = 42;
   
   // 13 publicity bits defining groups to which
@@ -229,7 +229,7 @@ contract BulkDisbursableNFTs is
     returns (Role role)
   {
     bytes32 hash = keccak256(abi.encodePacked(roleName));
-    if(hash == ) {
+    if(hash == keccak256(abi.encodePacked('Superuser'))) {
       return Role.Superuser;
     }
     if(hash == keccak256(abi.encodePacked('Minter'))) {
@@ -325,13 +325,20 @@ contract BulkDisbursableNFTs is
     returns (uint256 tokenId)
   {
     require(
-      tokenId < 2**42,
+      tokenId < 2**COUNTER_WIDTH,
       'Indices can be at most 42 bits.'
     );
+    console.log(id);
+    console.log(uint(role));
+    console.log(uint(role) << ROLE_BOUNDARY);
+    console.log(role == Role.Superuser ? 1 << UNIQUENESS_BOUNDARY : 0);
+    console.log(GATING_TYPE);
+    console.log('-------');
+
     return (
       GATING_TYPE
-      | UNIQUE
       | (uint(role) << ROLE_BOUNDARY)
+      | (role == Role.Superuser ? 1 << UNIQUENESS_BOUNDARY : 0)
       | id
     );
   }
@@ -398,8 +405,9 @@ contract BulkDisbursableNFTs is
     uint256 gate = roleToken(role);    
     return (
       balanceOf(user, gate) > 0
-      || balanceOf(user, gate + id) > 0
-    );
+      || balanceOf(user, gate | id) > 0
+      || balanceOf(user, gate | USE_ONCE) > 0
+      || balanceOf(user, gate | USE_ONCE | id) > 0);
   }
 
   /**
@@ -497,8 +505,11 @@ contract BulkDisbursableNFTs is
     returns (string memory metadata)
   {
     string memory response = uris[id];
+    console.log(id);
+    console.log((2**TYPE_WIDTH - 1) << TYPE_BOUNDARY);
+    console.log(GATING_TYPE);
     if(bytes(response).length == 0) {
-      if((id & (2**TYPE_WIDTH - 1) << TYPE_BOUNDARY) == GATING_TYPE) {
+      if(id & ((2**TYPE_WIDTH - 1) << TYPE_BOUNDARY) == GATING_TYPE) {
         uint256 gate = id & ((2**256 - 1) << COUNTER_WIDTH);
         response = uris[gate];
       }

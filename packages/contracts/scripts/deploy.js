@@ -166,7 +166,7 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
       deployed.deployTransaction.gasLimit.mul(gasPrice)
     )
     gasInfo = (
-      `${utils.formatEther(gasUsed)} ETH`
+      `${utils.formatEther(gasUsed)} ${hre.network.name === 'matic' ? 'MATIC' : 'ETH'}`
     )
   }
 

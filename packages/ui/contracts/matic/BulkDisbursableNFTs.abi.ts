@@ -1515,7 +1515,26 @@ export default [
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "tokenIndex",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
         "type": "uint256"
       }
     ],
