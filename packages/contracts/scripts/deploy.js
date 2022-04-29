@@ -1,9 +1,12 @@
 const fs = require('fs')
 const path = require('path')
 const chalk = require('chalk')
-const { config, ethers, tenderly, run, upgrades } = require('hardhat')
+const {
+  config, ethers, tenderly, run, upgrades,
+} = require('hardhat')
 const { utils } = require('ethers')
 const R = require('ramda')
+const { glob } = require('glob')
 
 const name = 'BulkDisbursableNFTs'
 
@@ -53,7 +56,7 @@ const main = async () => {
     console.error(err.message)
   }
 
-  let saveDir = path.join(__dirname, '../artifacts/')
+  let saveDir = hre.config.paths.artifacts
   if(saveDir.startsWith(process.env.PWD)) {
     saveDir = saveDir.substring(process.env.PWD.length + 1)
   }
@@ -63,11 +66,9 @@ const main = async () => {
   )
 }
 
-const local = chain === 'localhost'
-console.log({chain})
 const fileTemplates = {
-  address: `artifacts/${local ? 'local/' : ''}{contract}.address`,
-  args: `artifacts/${local ? 'local/' : ''}{contract}.args`,
+  address: `artifacts/${hre.network.name}/{contract}.address`,
+  args: `artifacts/${hre.network.name}/{contract}.args`,
 }
 
 const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
@@ -119,10 +120,15 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
     deployTransaction: { gasPrice, hash: tx, chainId: chain },
   } = deployed
 
+  console.debug(
+    ` 🍅 ${chalk.hex('#00AA7F')('Deployed in TX:')} `
+    + chalk.hex('#6572AA')(tx)
+  )
+
   let implementation = null
   let loops = 0
-  const timeout =  2 * 1000
-  const maxLoops = 40
+  const timeout =  4 * 1000
+  const maxLoops = 125
 
   while(!implementation && ++loops <= maxLoops) {
     try {
@@ -138,6 +144,10 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
       )
       await sleep(timeout)
     }
+  }
+
+  if(!implementation) {
+    throw new Error('Proxy never loaded')
   }
 
   console.log(
@@ -156,7 +166,7 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
       deployed.deployTransaction.gasLimit.mul(gasPrice)
     )
     gasInfo = (
-      `${utils.formatEther(gasUsed)} ETH, TX Hash: ${tx}`
+      `${utils.formatEther(gasUsed)} ETH`
     )
   }
 

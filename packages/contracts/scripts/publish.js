@@ -11,12 +11,12 @@ const shortDir = (path) => {
   return path
 }
 
-let publishDir = path.join(process.cwd(), '../ui/contracts')
+let publishDir = path.join(
+  process.cwd(),
+  '../ui/contracts/',
+  hre.network.name,
+)
 let artifactsDir = hre.config.paths.artifacts
-if(hre.network.name === 'localhost') {
-  publishDir += '/local'
-  artifactsDir += '/local'
-}
 
 const graphDir = path.join(process.cwd(), '../subgraph')
 
@@ -29,9 +29,9 @@ const publishContract = (contractName) => {
     const [, sourceDir = 'contracts'] = (
       hre.config.paths.sources.match(/^.*\/([^\/]+)\/?$/) ?? []
     )
-    const contractJSON = (
-      `${hre.config.paths.artifacts}/${sourceDir}/`
-      + `${contractName}.sol/${contractName}.json`
+    const contractJSON = path.join(
+      artifactsDir, sourceDir,
+      `${contractName}.sol/${contractName}.json`,
     )
     console.log(
       `\n 📖 Reading: ${chalk.magentaBright(shortDir(contractJSON))}`
@@ -73,9 +73,10 @@ const publishContract = (contractName) => {
       [`${publishDir}/${contractName}.abi.ts`]: (
         `export default ${JSON.stringify(contract.abi, null, 2)}`
       ),
-      [`${publishDir}/${contractName}.bytecode.ts`]: (
-        `export default '${contract.bytecode}'`
-      ),
+      // [`${publishDir}/${contractName}.bytecode.ts`]: (
+      //   `export default '${contract.bytecode}'`
+      // ),
+      
       // [graphConfigPath]: JSON.stringify(graphConfig, null, 2),
       // [`${graphDir}/abis/${contractName}.json`]: (
       //   JSON.stringify(contract.abi, null, 2)
@@ -84,7 +85,7 @@ const publishContract = (contractName) => {
     Object.entries(outs).forEach(([file, content]) => {
       const dir = path.dirname(file)
       if (!fs.existsSync(dir)){
-        fs.mkdirSync(dir)
+        fs.mkdirSync(dir, { recursive: true })
       }
   
       console.info(
@@ -99,6 +100,7 @@ const publishContract = (contractName) => {
 
     return true
   } catch (e) {
+    console.error(e)
     if(/no such file or directory/i.test(e.message)) {
       console.log(chalk.yellowBright(
         ` ⚠️  Can't find ${contractName}.json. (Is it deployed?)`

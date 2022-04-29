@@ -1,16 +1,15 @@
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Alert, AlertDescription, AlertIcon, AlertTitle, Box,
   Button, Container, Tabs, TabList, Tab,
   TabPanels, TabPanel, FormControl, FormLabel, Textarea,
-  OrderedList, ListItem, Stack, Text, Flex, Spinner, Checkbox,
+  OrderedList, ListItem, Stack, Text, Flex, Spinner, Checkbox, RadioGroup, Radio, useToast,
 } from '@chakra-ui/react'
-import {  BigNumber } from 'ethers'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import type { NextPage } from 'next'
-import { httpURL } from 'lib/helpers'
-import { Maybe, ERC1155Metadata } from 'lib/types'
+import { capitalize, httpURL } from 'lib/helpers'
+import { Maybe, ERC1155Metadata, Optional } from 'lib/types'
 import { useWeb3 } from 'lib/hooks'
 import { HomeLink } from 'components'
 
@@ -20,8 +19,8 @@ const Address: React.FC<{ name: string }> = ({ name }) => {
     () => /^0x[a-z0-9]{40}$/i.test(name),
     [name],
   )
-  const [address, setAddress] = useState<string | ReactNode>(
-    isAddress ? undefined : <Spinner size="xs"/>
+  const [address, setAddress] = useState<Optional<Maybe<string>>>(
+    isAddress ? undefined : null
   )
   useMemo(
     () => {
@@ -37,14 +36,22 @@ const Address: React.FC<{ name: string }> = ({ name }) => {
   )
 
   return (
-    <Text>
-      {name}
-      {address !== undefined && (
-        <>{' '}<Text as="em">({address})</Text></>
-      )}
-    </Text>
+    <>
+      <Text>
+        {name}
+        {address != null && (
+          <Text ml={2} as="em">({address})</Text>
+        )}
+      </Text>
+      {address === null && <Spinner size="xs"/>}
+    </>
   )
 }
+
+const split = (raw: string) => (
+  raw.split(/\s*[\s,;:/\\|]+\s*/)
+  .filter((str: string) => str && str !== '')
+)
 
 const Disburse: NextPage = () => {
   const router = useRouter()
@@ -52,30 +59,26 @@ const Disburse: NextPage = () => {
   if (Array.isArray(tokenId)) {
     [tokenId] = tokenId
   }
-  if (tokenId == null || tokenId === '') {
-    return null
-  }  
-  const tokenNum = useMemo(
-    () => (tokenId ? BigNumber.from(BigInt(tokenId as string)) : null),
-    [tokenId],
-  )
   const [balance, setBalance] = useState<number>()
   const [metadata, setMetadata] = (
     useState<Maybe<ERC1155Metadata>>()
   )
   const [error, setError] = useState<string>()
   const [raw, setRaw] = useState('')
+  const [action, setAction] = useState('whitelist')
   const {
     ensProvider, address, roContract, connected, connect
   } = useWeb3()
   const [addresses, setAddresses] = useState<Array<string | ReactNode>>([])
-  
+  const toast = useToast()
+
   useEffect(() => {
     const parse = async () => {
       setAddresses(
-        raw.split(/\s*[\s,;:/\|]+\s*/)
-        .filter((str) => str && str !== '')
-        .map((name, idx) => <Address key={idx} {...{ name }}/>)
+        split(raw)
+        .map((name: string, idx: number) => (
+          <Address key={idx} {...{ name }}/>
+        ))
       )
     }
 
@@ -127,6 +130,42 @@ const Disburse: NextPage = () => {
     [roContract, tokenId],
   )
 
+  const submit = useCallback(async (evt) => {
+    evt.preventDefault()
+
+    try {
+      const skip = evt.target.skip.checked
+      const addrs = await Promise.all(
+        split(raw)
+        .map(async (name: string) => {
+          const response = await ensProvider?.resolveName(name)
+          if(!response) {
+            throw new Error(`Couldn't Resolve Name: “${name}”`)
+          }
+          return response
+        })
+      )
+      switch(action) {
+        case 'mint': {
+          console.debug('minting', { addrs })
+          break
+        }
+        case 'whitelist': {
+          console.debug('whitelist', { addrs })
+          break
+        }
+      }
+    } catch(err) {
+      toast({
+        title: `${capitalize(action)}ing Error`,
+        description: (err as Error).message,
+        status: 'error',
+        isClosable: true,
+        duration: 10000
+      })
+    }
+  }, [action, addresses, ensProvider])
+
   if(error) {
     return (
       <Alert status="error">
@@ -146,22 +185,7 @@ const Disburse: NextPage = () => {
 
       <HomeLink/>
 
-{/* const Submit: React.FC<ButtonProps & {
-purpose: string
-processing?: boolean
-}> = ({ purpose, processing = false, onClick, ...props }) => {
-const { chain, isMetaMask, userProvider, connect } = useWeb3()
-const offChain = useMemo(
-() => chain !== NETWORKS.contract.chainId,
-[chain],
-)
-const [working, setWorking] = useState(processing)
-const desiredNetwork = (
-offChain ? NETWORKS.contract.name : null
-) */}
-
-
-      <Stack as="form">
+      <Stack as="form" onSubmit={submit}>
         {(() => {
           if(metadata === null) {
             return <Text my={8}>Token {name} does not exist.</Text>
@@ -171,9 +195,7 @@ offChain ? NETWORKS.contract.name : null
                 Connect your wallet to distribute “{name}” tokens…
               </Text>
             )
-          } else if(balance === 0) {
-            return <Text my={8}>You have no “{name}” tokens to distribute…</Text>
-           } else if(balance == null) {
+          } else if(balance == null) {
             return (
               <Flex my={8}>
                 <Spinner/>
@@ -213,7 +235,15 @@ offChain ? NETWORKS.contract.name : null
           </TabPanels>
         </Tabs>
         <FormControl>
-          <Checkbox>Don’t distribute to existing holders</Checkbox>
+          <RadioGroup onChange={setAction} value={action}>
+            <Radio value="mint">Mint</Radio>
+            <Radio value="whitelist" ml={5}>Whitelist</Radio>
+          </RadioGroup>
+        </FormControl>
+        <FormControl>
+          <Checkbox name="skip" value="true">
+            Skip existing holders
+          </Checkbox>
         </FormControl>
         <FormControl textAlign="center">
           <Button type="submit" colorScheme="green">Distribute</Button>

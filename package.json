@@ -18,6 +18,7 @@
     "hh:deploy": "yarn workspace @metagame-chievemints/contracts deploy",
     "hh:publish": "yarn workspace @metagame-chievemints/contracts publish",
     "hh:watch": "yarn workspace @metagame-chievemints/contracts watch",
+    "hh:account": "yarn workspace @metagame-chievemints/contracts account",
     "hh:accounts": "yarn workspace @metagame-chievemints/contracts accounts",
     "hh:balance": "yarn workspace @metagame-chievemints/contracts balance",
     "hh:console": "yarn workspace @metagame-chievemints/contracts hardhat console",

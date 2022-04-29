@@ -229,7 +229,7 @@ contract BulkDisbursableNFTs is
     returns (Role role)
   {
     bytes32 hash = keccak256(abi.encodePacked(roleName));
-    if(hash == keccak256(abi.encodePacked('Superuser'))) {
+    if(hash == ) {
       return Role.Superuser;
     }
     if(hash == keccak256(abi.encodePacked('Minter'))) {
@@ -324,11 +324,15 @@ contract BulkDisbursableNFTs is
     view
     returns (uint256 tokenId)
   {
+    require(
+      tokenId < 2**42,
+      'Indices can be at most 42 bits.'
+    );
     return (
       GATING_TYPE
-      + UNIQUE
-      + (uint(role) << ROLE_BOUNDARY)
-      + id
+      | UNIQUE
+      | (uint(role) << ROLE_BOUNDARY)
+      | id
     );
   }
 
@@ -694,13 +698,27 @@ contract BulkDisbursableNFTs is
     public
     view
     virtual
-    returns (uint256)
+    returns (uint256 id)
   {
     require(
       index < tokens.entries.length,
       "ERC-1155 Enumerable: token index out of bounds"
     );
     return tokens.entries[index];
+  }
+
+  function tokenIndex(uint256 id) 
+    public
+    view
+    virtual
+    returns (uint256 index)
+  {
+    uint256 idx = tokens.indices[id];
+    require(
+      idx != 0,
+      "The requested token does not exist."
+    );
+    return idx;
   }
 
   // The following functions are overrides required by Solidity.

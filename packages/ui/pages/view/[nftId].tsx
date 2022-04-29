@@ -19,31 +19,18 @@ const View: NextPage = () => {
   const { query: { nftId } } = useRouter()
   const [metadata, setMetadata] = useState<ERC1155Metadata>()
   const [error, setError] = useState<string>()
-  const { contract: { address, abi } } = useWeb3()
-
-  const provider = useMemo(
-    () => (
-      new ethers.providers.JsonRpcProvider(
-        process.env.NEXT_PUBLIC_TOKEN_RPC
-      )
-    ),
-    [],
-  )
-  const contract = useMemo(
-    () => (provider ? (
-      new ethers.Contract(address, abi, provider)
-    ) : (
-      null
-    )),
-    [provider],
-  )
+  const {
+    contractProvider: provider,
+    contract: { address, abi },
+    roContract,
+  } = useWeb3()
 
   useEffect(
     () => {
       const getMetadata = async () => {
-        if(contract && nftId) {
+        if(roContract && nftId) {
           try {
-            const metadataURI = await contract.uri(ethers.BigNumber.from(BigInt(nftId)))
+            const metadataURI = await roContract.uri(ethers.BigNumber.from(BigInt(nftId)))
             const metadataURL = httpURL(metadataURI)
             if(!metadataURL) {
               throw new Error(`Couldn't find metadata for token #${nftId}.`)
@@ -59,7 +46,7 @@ const View: NextPage = () => {
 
       getMetadata()
     },
-    [contract, nftId],
+    [roContract, nftId],
   )
 
   if(error) {

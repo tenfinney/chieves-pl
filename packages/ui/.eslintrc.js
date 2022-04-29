@@ -27,7 +27,7 @@ module.exports = {
       { extensions: ['.js', '.jsx', '.ts', '.tsx'] }
     ],
     indent: [
-      'error',
+      'warn',
       2,
     ],
     'linebreak-style': [

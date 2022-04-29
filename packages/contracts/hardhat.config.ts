@@ -12,13 +12,14 @@ import 'dotenv/config'
 import { HardhatEthersHelpers } from '@nomiclabs/hardhat-ethers/types'
 import { HardhatUserConfig, HttpNetworkConfig } from 'hardhat/types'
 
-const { isAddress, getAddress, formatUnits, parseUnits } = utils
+const { isAddress, getAddress, formatUnits } = utils
 
 //
 // Select the network you want to deploy to here:
 //
 // const defaultNetwork = 'localhost'
-const defaultNetwork = 'matic'
+// const defaultNetwork = 'matic'
+const defaultNetwork = 'rinkeby'
 
 const mnemonic = (() => {
   try {
@@ -44,7 +45,7 @@ const config: HardhatUserConfig = {
 
   paths: {
     sources: 'src',
-    artifacts: 'artifacts',
+    artifacts: `artifacts/${defaultNetwork}`,
   },
 
   networks: {
@@ -78,6 +79,10 @@ const config: HardhatUserConfig = {
     },
     matic: {
       url: 'https://polygon-rpc.com',
+      accounts: { mnemonic },
+    },
+    mumbai: {
+      url: 'https://rpc-mumbai.maticvigil.com',
       accounts: { mnemonic },
     },
   },
@@ -122,7 +127,6 @@ task('su', 'Add a superuser')
 .addParam('address', 'Address of the user to promote')
 .setAction(async (args, { ethers }) => {
   const [, srcDir] = config?.paths?.sources?.match(/^.*?\/?([^\/]+)\/?$/) ?? []
-console.log({srcDir})
   if (!srcDir) throw new Error('ERROR - could not find source directory')
   const contractsHome = `${config?.paths?.artifacts}/${srcDir}/`
   const [contractFile] = (
@@ -130,7 +134,6 @@ console.log({srcDir})
     .sync(`${contractsHome}/*/*`)
     .filter((name) => !/\.dbg\.json$/.test(name))
   )
-  console.log({contractFile})
   const { abi, contractName } = JSON.parse(
     fs.readFileSync(contractFile).toString()
   )

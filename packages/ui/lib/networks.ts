@@ -21,6 +21,14 @@ export const NETWORKS: NetworkInfo = {
     explorer: 'https://etherscan.io',
     rpc: `https://mainnet.infura.io/v3/${CONFIG.infuraId}`,
   },
+  '0x4': {
+    chainId: '0x4',
+    name: 'Rinkeby',
+    label: 'Rinkeby',
+    symbol: 'ETH',
+    explorer: 'https://rinkeby.etherscan.io',
+    rpc: `https://rinkeby.infura.io/v3/${CONFIG.infuraId}`,
+  },
   '0x64': {
     chainId: '0x64',
     name: 'Gnosis Chain',
@@ -50,8 +58,7 @@ export const NETWORKS: NetworkInfo = {
   },
   get contract() {
     // return this['0x7a69']
-
-    return this['0x89']
-
+    return this['0x4']
+    // return this['0x89']
   },
 }

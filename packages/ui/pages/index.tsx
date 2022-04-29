@@ -15,24 +15,13 @@ import { useWeb3 } from 'lib/hooks'
 
 const Home: NextPage = () => {
   const [tokens, setTokens] = useState<Array<TokenState>>([])
-  const provider = useMemo(
-    () => (
-      new ethers.providers.JsonRpcProvider(
-        process.env.NEXT_PUBLIC_TOKEN_RPC
-      )
-    ),
-    [],
-  )
-  const { contract: { address, abi } } = useWeb3()
-
-  const contract = useMemo(
-    () => new ethers.Contract(address, abi, provider),
-    [provider],
-  )
+  const {
+    contractProvider: provider,
+    contract: { address, abi },
+    roContract,
+  } = useWeb3()
 
   const setToken = (index: number, info: Record<string, unknown>) => {
-    console.log({ t: {...tokens[index], ...info}})
-
     setTokens((tkns: Array<TokenState>) => ([
       ...tkns.slice(0, index),
       { ...tkns[index], ...info },
@@ -43,19 +32,16 @@ const Home: NextPage = () => {
   useEffect(
     () => {
       const load = async () => {
-        if(contract) {
-          console.log({contract})
-          console.log(await contract.owner())
-          const typeCount = Number(await contract['totalSupply()']())
+        if(roContract) {
+          const typeCount = Number(await roContract['totalSupply()']())
 
           await Promise.allSettled(
             Array.from({ length: typeCount }).map(async (_, index) => {
-              const id = (await contract.tokenByIndex(index)).toHexString()
-              console.log({id})
+              const id = (await roContract.tokenByIndex(index)).toHexString()
               let metadata = null
               try {
                 setToken(index, { id })
-                let uri = await contract.uri(id)
+                let uri = await roContract.uri(id)
                 if(uri === '') uri = null
                 setToken(index, { uri })
 
@@ -79,9 +65,8 @@ const Home: NextPage = () => {
                 setToken(index, { metadata })
               }
 
-              const total = await contract['totalSupply(uint256)']( id )
+              const total = await roContract['totalSupply(uint256)'](id)
               setToken(index, { total })
-
 
               // const max = await contract.getMax(id)
               // setToken(index, { max })
@@ -92,7 +77,7 @@ const Home: NextPage = () => {
 
       load()
     },
-    [contract],
+    [roContract],
   )
 
   return (

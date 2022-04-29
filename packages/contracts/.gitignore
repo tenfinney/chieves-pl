@@ -3,6 +3,6 @@ mnemonic.txt
 cache/
 *.dbg.json
 metadata/assets.car
-artifacts/build-info/
+build-info/
 .openzeppelin/
-artifacts/local/
+artifacts/localhost/

@@ -38,7 +38,6 @@ const Content: React.FC = () => {
   const [tokenId, setTokenId] = (
     useState(Array.isArray(id) ? id[0] : id)
   )
-  console.info({ id })
   const [working, setWorking] = useState(false)
   const toast = useToast()
 
@@ -70,8 +69,10 @@ const Content: React.FC = () => {
       const [id, _controller] = event.args
       setTokenId(id.toHexString())
     } catch(error) {
+      console.error({ error })
       const msg = (
-        (error as MetaMaskError).data?.message
+        error.error?.message
+        ?? (error as MetaMaskError).data?.message
         ?? (error as Error).message
         ?? error
       )
@@ -92,7 +93,7 @@ const Content: React.FC = () => {
       <Center>
         <Stack>
           <Heading textAlign="center">
-            Create A New {address}
+            Create A New
             <chakra.span
               title="Non-Fungible Token"
               ml={2}
