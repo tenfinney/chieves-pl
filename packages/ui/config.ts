@@ -9,13 +9,14 @@ export const CONFIG = {
     process.env.NEXT_PUBLIC_CERAMIC_URL
     ?? 'https://ceramic.metagame.wtf'       // mainnet
     ?? 'https://ceramic-clay.3boxlabs.com'  // testnet
-    ?? 'https://d12-a-ceramic.3boxlabs.com' // mainnet by 3Box
   ),
   ceramicNetwork: (
     process.env.NEXT_PUBLIC_CERAMIC_NETWORK
     ?? 'mainnet' ?? 'testnet-clay'
   ),
-  contractNetwork: 'Polygon',
+  contractNetwork: (
+    process.env.NEXT_PUBLIC_CHAIN_NAME || 'polygon'
+  ),
   ipfs: ipfsHTTPClient({
     host: 'ipfs.infura.io', port: 5001, protocol: 'https'
   }),  

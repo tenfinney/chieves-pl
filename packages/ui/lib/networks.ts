@@ -2,7 +2,7 @@ import CONFIG from 'config'
 import { Maybe } from './types'
 
 export type NetworkInfo = {
-  [chainId: string]: {
+  [chainName: string]: {
     chainId: string
     name: string
     label: string
@@ -13,7 +13,7 @@ export type NetworkInfo = {
 }
 
 export const NETWORKS: NetworkInfo = {
-  '0x1': {
+  mainnet: {
     chainId: '0x1',
     name: 'Ethereum Mainnet',
     label: 'Ethereum',
@@ -21,7 +21,7 @@ export const NETWORKS: NetworkInfo = {
     explorer: 'https://etherscan.io',
     rpc: `https://mainnet.infura.io/v3/${CONFIG.infuraId}`,
   },
-  '0x4': {
+  rinkeby: {
     chainId: '0x4',
     name: 'Rinkeby',
     label: 'Rinkeby',
@@ -29,7 +29,7 @@ export const NETWORKS: NetworkInfo = {
     explorer: 'https://rinkeby.etherscan.io',
     rpc: `https://rinkeby.infura.io/v3/${CONFIG.infuraId}`,
   },
-  '0x64': {
+  gnosis: {
     chainId: '0x64',
     name: 'Gnosis Chain',
     label: 'Gnosis',
@@ -37,7 +37,7 @@ export const NETWORKS: NetworkInfo = {
     explorer: 'https://blockscout.com/xdai/mainnet',
     rpc: 'https://rpc.gnosischain.com/',
   },
-  '0x89': {
+  polygon: {
     chainId: '0x89',
     name: 'Polygon',
     label: 'Polygon',
@@ -45,7 +45,7 @@ export const NETWORKS: NetworkInfo = {
     explorer: 'https://polygonscan.com',
     rpc: 'https://polygon-rpc.com',
   },
-  '0x7a69': {
+  localhost: {
     chainId: '0x7a69',
     name: 'Ganache',
     label: 'Ganache',
@@ -53,12 +53,7 @@ export const NETWORKS: NetworkInfo = {
     explorer: null,
     rpc: 'http://127.0.0.1:8545',
   },
-  get mainnet() {
-    return this['0x1']
-  },
   get contract() {
-    // return this['0x7a69']
-    // return this['0x4']
-    return this['0x89']
+    return this[CONFIG.contractNetwork]
   },
 }

@@ -33,7 +33,7 @@ const Home: NextPage = () => {
     () => {
       const load = async () => {
         if(roContract) {
-          const typeCount = Number(await roContract['totalSupply()']())
+          const typeCount = Number(await roContract.typeSupply())
 
           await Promise.allSettled(
             Array.from({ length: typeCount }).map(async (_, index) => {

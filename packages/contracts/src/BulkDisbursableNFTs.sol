@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: CC0-1.0
 pragma solidity ^0.8.4;
 
-// From: https://wizard.openzeppelin.com/#erc1155
-
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
@@ -10,7 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155Supp
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "hardhat/console.sol";
-/// @custom:security-contact dys@dhappy.org
+
 contract BulkDisbursableNFTs is
  Initializable, ERC1155Upgradeable, OwnableUpgradeable,
  ERC1155BurnableUpgradeable, ERC1155SupplyUpgradeable, UUPSUpgradeable
@@ -27,7 +25,7 @@ contract BulkDisbursableNFTs is
 
   mapping (uint256 => string) private uris;
 
-  // To allow enumeration of all the tokens a list is kept.
+  // To allow enumeration of all the tokens, a list is kept.
   CheckableList private tokens;
 
   // To allow listing the tokens held by a user, a map
@@ -35,9 +33,10 @@ contract BulkDisbursableNFTs is
   mapping (address => CheckableList) private owned;
 
   // Each _WIDTH is the number of bits given to the
-  // particular field
+  // particular field. The _BOUNDARY is the bit before
+  // the first bit of the field.
   uint8 public constant TEAM_WIDTH = 13;
-  uint8 public constant TEAM_BOUNDARY = uint8(256 - uint16(TEAM_WIDTH));
+  uint8 public constant TEAM_BOUNDARY = uint8(256 - TEAM_WIDTH);
   uint8 public constant TYPE_WIDTH = 8;
   uint8 public constant TYPE_BOUNDARY = TEAM_BOUNDARY - TYPE_WIDTH;
   uint8 public constant REQUIREMENT_WIDTH = 3;
@@ -48,7 +47,17 @@ contract BulkDisbursableNFTs is
   uint8 public constant UNIQUENESS_BOUNDARY = REPETITION_BOUNDARY - UNIQUENESS_WIDTH;
   uint8 public constant ROLE_WIDTH = 8;
   uint8 public constant ROLE_BOUNDARY = UNIQUENESS_BOUNDARY - ROLE_WIDTH;
+  uint8 public constant INTERNAL_WIDTH = 1;
+  uint8 public constant INTERNAL_BOUNDARY = ROLE_BOUNDARY - INTERNAL_WIDTH;
   uint8 public constant COUNTER_WIDTH = 42;
+  uint256 public constant TEAM_MASK = (2**TEAM_WIDTH - 1) << TEAM_BOUNDARY;
+  uint256 public constant TYPE_MASK = (2**TYPE_WIDTH - 1) << TYPE_BOUNDARY;
+  uint256 public constant REQUIREMENT_MASK = (2**REQUIREMENT_WIDTH - 1) << REQUIREMENT_BOUNDARY;
+  uint256 public constant REPETITION_MASK = (2**REPETITION_WIDTH - 1) << REPETITION_BOUNDARY;
+  uint256 public constant UNIQUENESS_MASK = (2**UNIQUENESS_WIDTH - 1) << UNIQUENESS_BOUNDARY;
+  uint256 public constant ROLE_MASK = (2**ROLE_WIDTH - 1) << ROLE_BOUNDARY;
+  uint256 public constant INTERNAL_MASK = (2**INTERNAL_WIDTH - 1) << INTERNAL_BOUNDARY;
+  uint256 public constant COUNTER_MASK = (2**COUNTER_WIDTH - 1);
   
   // 13 publicity bits defining groups to which
   // the the token information is accessible
@@ -338,7 +347,7 @@ contract BulkDisbursableNFTs is
     return (
       GATING_TYPE
       | (uint(role) << ROLE_BOUNDARY)
-      | (role == Role.Superuser ? 1 << UNIQUENESS_BOUNDARY : 0)
+      | (role == Role.Superuser ? UNIQUENESS_MASK : 0)
       | id
     );
   }
@@ -402,12 +411,21 @@ contract BulkDisbursableNFTs is
     view
     returns (bool has)
   {
-    uint256 gate = roleToken(role);    
+    uint256 gate = roleToken(role);
+    console.log(user);
+    console.log(uint8(role));
+    console.log(uint8(Role.Transferer));
+    console.log('--==--==--==--==--==--');    
     return (
       balanceOf(user, gate) > 0
       || balanceOf(user, gate | id) > 0
       || balanceOf(user, gate | USE_ONCE) > 0
-      || balanceOf(user, gate | USE_ONCE | id) > 0);
+      || balanceOf(user, gate | USE_ONCE | id) > 0
+      || balanceOf(user, gate | INTERNAL_MASK) > 0
+      || balanceOf(user, gate | INTERNAL_MASK | id) > 0
+      || balanceOf(user, gate | USE_ONCE | INTERNAL_MASK) > 0
+      || balanceOf(user, gate | USE_ONCE | INTERNAL_MASK | id) > 0
+    );
   }
 
   /**
@@ -446,9 +464,8 @@ contract BulkDisbursableNFTs is
   )
     public
     virtual
-    returns (bool added)
   {
-    return grantRole(role, user, 0);
+     grantRole(role, user, 0);
   }
 
   /**
@@ -462,23 +479,20 @@ contract BulkDisbursableNFTs is
   )
     public
     virtual
-    returns (bool added)
   {
-    return _grantRole(role, user, id, true);
+    _grantRole(role, user, id, false);
   }
 
   function _grantRole(
     Role role,
     address user,
     uint256 id,
-    bool check
+    bool local
   )
     internal
     virtual
-    returns (bool added)
   {
-
-    if(check) {
+    if(!local) {
       if(role == Role.Superuser) {
         require(
           isSuper(),
@@ -491,7 +505,12 @@ contract BulkDisbursableNFTs is
         );
       }
     }
-    return mint(user, roleToken(role, id), 1, "");
+    _mint(
+      user,
+      roleToken(role, id) | (local ? INTERNAL_MASK : 0),
+      1,
+      ""
+    );
   }
 
   /**
@@ -505,13 +524,13 @@ contract BulkDisbursableNFTs is
     returns (string memory metadata)
   {
     string memory response = uris[id];
-    console.log(id);
-    console.log((2**TYPE_WIDTH - 1) << TYPE_BOUNDARY);
-    console.log(GATING_TYPE);
     if(bytes(response).length == 0) {
-      if(id & ((2**TYPE_WIDTH - 1) << TYPE_BOUNDARY) == GATING_TYPE) {
-        uint256 gate = id & ((2**256 - 1) << COUNTER_WIDTH);
-        response = uris[gate];
+      console.log(id);
+      console.log(id & TYPE_MASK);
+      console.log(GATING_TYPE);
+      if(id & TYPE_MASK == GATING_TYPE) {
+        uint256 generic = id & ~COUNTER_MASK;
+        response = uris[generic];
       }
     }
     return response;
@@ -584,7 +603,7 @@ contract BulkDisbursableNFTs is
     virtual
     returns (uint256 id)
   {
-    uint256 tokenId = VANILLA_TYPE + tokens.entries.length + 1;
+    uint256 tokenId = VANILLA_TYPE | (tokens.entries.length + 1);
 
     require(
       hasRole(Role.Creator, tokenId) || isSuper(),
@@ -592,9 +611,9 @@ contract BulkDisbursableNFTs is
     );
 
     tokens.entries.push(tokenId);
-    _grantRole(Role.Minter, maintainer, tokenId, false);
-    _grantRole(Role.Configurer, maintainer, tokenId, false);
-    _grantRole(Role.Limiter, maintainer, tokenId, false);
+    _grantRole(Role.Minter, maintainer, tokenId, true);
+    _grantRole(Role.Configurer, maintainer, tokenId, true);
+    _grantRole(Role.Limiter, maintainer, tokenId, true);
 
     emit Created(tokenId, maintainer);
 
@@ -632,21 +651,15 @@ contract BulkDisbursableNFTs is
     virtual
     returns (bool minted)
   {
+    require(
+      id & INTERNAL_MASK != INTERNAL_MASK,
+      "Cannot mint internal tokens from outside."
+    );
     if((id & UNIQUE) == UNIQUE && balanceOf(recipient, id) > 0) {
       return false;
     }
-    if((id & GATING_TYPE) == GATING_TYPE) {
-      require(
-        hasRole(Role.Caster, id) || isSuper(),
-        "You must have a Caster token to mint token gates."
-      );
-    } else {
-      require(
-        hasRole(Role.Minter, id) || isSuper(),
-        "You must have a Minter token to mint tokens."
-      );
-    }
     _mint(recipient, id, amount, data);
+    return true; // Also a transfer event is conditionally emitted
   }
 
   /**
@@ -669,24 +682,13 @@ contract BulkDisbursableNFTs is
   /**
    * @return count The number of types of tokens.
    */
-  function totalSupply()
+  function typeSupply()
     public
     view
     virtual
     returns (uint256 count)
   {
     return tokens.entries.length;
-  }
-
-  function _authorizeUpgrade(address)
-    internal
-    view
-    override
-  {
-    require(
-      hasRole(Role.Maintainer) || isSuper(),
-      "You must have a Maintainer token to upgrade the contract."
-    );
   }
 
   function tokenOfOwnerByIndex(
@@ -746,10 +748,40 @@ contract BulkDisbursableNFTs is
   {
     if(!isSuper()) {
       for(uint256 i = 0; i < ids.length; ++i) {
-        require(
-          hasRole(Role.Transferer, from, ids[i]),
-          "You must have a Transferer token to transfer tokens."
-        );
+        if(ids[i] & INTERNAL_MASK != INTERNAL_MASK) {
+          Role needed = (
+            from == address(0) ? (
+              Role.Minter
+            ) : (
+              Role.Transferer
+            )
+          );
+          if(needed == Role.Minter) {
+            if(ids[i] & TYPE_MASK == GATING_TYPE) {
+              require(
+                hasRole(Role.Caster, ids[i]) || isSuper(),
+                "You must have a Caster token to mint token gates."
+              );
+            } else {
+              require(
+                hasRole(needed, ids[i]),
+                "You must have a Minter token to generate tokens."
+              );
+            }
+          } else { // Transferer (or Burner)
+            if(to == address(0)) {
+              require(
+                hasRole(Role.Burner, ids[i]),
+                "You must have a Burner token to destroy tokens."
+              );
+            } else {
+              require(
+                hasRole(needed, ids[i]),
+                "You must have a Transferer token to transfer tokens."
+              );
+            }
+          }
+        }
       }
     }
     if(to != address(0)) {
@@ -773,6 +805,19 @@ contract BulkDisbursableNFTs is
         }
       }
     }
-    super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+    super._beforeTokenTransfer(
+      operator, from, to, ids, amounts, data
+    );
+  }
+
+  function _authorizeUpgrade(address)
+    internal
+    view
+    override
+  {
+    require(
+      hasRole(Role.Maintainer) || isSuper(),
+      "You must have a Maintainer token to upgrade the contract."
+    );
   }
 }

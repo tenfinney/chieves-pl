@@ -17,9 +17,7 @@ const { isAddress, getAddress, formatUnits } = utils
 //
 // Select the network you want to deploy to here:
 //
-// const defaultNetwork = 'localhost'
-const defaultNetwork = 'matic'
-// const defaultNetwork = 'rinkeby'
+const defaultNetwork = process.env.CHAIN_NAME ?? 'polygon'
 
 const mnemonic = (() => {
   try {
@@ -77,7 +75,7 @@ const config: HardhatUserConfig = {
       gasPrice: 1000000000,
       accounts: { mnemonic },
     },
-    matic: {
+    polygon: {
       url: 'https://polygon-rpc.com',
       accounts: { mnemonic },
     },
@@ -141,11 +139,9 @@ task('su', 'Add a superuser')
     ` 🦐 Loaded ${chalk.hex('#88C677')(contractName)} From:`
     + ` ${chalk.hex('#E59AF9')(contractFile)}`
   )
-  const local = false
   const address = (
-    fs
-    .readFileSync(
-      `${config?.paths?.artifacts}/${local ? 'local/' : ''}${contractName}.address`
+    fs.readFileSync(
+      `${config?.paths?.artifacts}/${contractName}.address`
     )
     .toString()
     .trim()

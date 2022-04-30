@@ -46,7 +46,7 @@ const main = async () => {
   try {
     console.log(chalk.hex('#FFD25E')(
       `\n 🔍 Verifying ${chalk.hex('#8454FF')(implementationAddress)}`
-      + ` on ${chain === 'matic' ? 'Polygon' : 'Ether'}scan…\n`
+      + ` on ${['polygon', 'mumbai'].includes(chain) ? 'Polygon' : 'Ether'}scan…\n`
     ))
     await run('verify:verify', {
       address: implementationAddress,
@@ -95,6 +95,8 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
   )
 
   let deployed
+  let impl = {}
+
   if(!fs.existsSync(files.address)) {
     console.log(
       `\n 🥂 ${chalk.hex('#FF7D31')(files.address)} doesn't exist;`
@@ -107,6 +109,10 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
     )
   } else {
     const existing = await fs.readFileSync(files.address).toString().trim()
+    impl.old = (
+      await upgrades.erc1967.getImplementationAddress(existing)
+    )
+
     console.log(
       `\n ⚇ Existing deployment at ${chalk.hex('#AD4EFF')(existing)};`
       + ' upgrading'
@@ -115,7 +121,7 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
   }
 
   const {
-    address,
+    address: proxy,
     signer: { address: signer },
     deployTransaction: { gasPrice, hash: tx, chainId: chain },
   } = deployed
@@ -124,19 +130,20 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
     ` 🍅 ${chalk.hex('#00AA7F')('Deployed in TX:')} `
     + chalk.hex('#6572AA')(tx)
   )
-
-  let implementation = null
   let loops = 0
   const timeout =  4 * 1000
   const maxLoops = 125
 
-  while(!implementation && ++loops <= maxLoops) {
+  while(
+    (!impl.new || impl.old == impl.new)
+    && ++loops <= maxLoops
+  ) {
     try {
-      implementation = (
-        await upgrades.erc1967.getImplementationAddress(address)
+      impl.new = (
+        await upgrades.erc1967.getImplementationAddress(proxy)
       )
     } catch(err) {} // fails if the proxy isn't yet connected
-    if(!implementation) {
+    if(!impl.new) {
       console.info(
         ` ${chalk.hex('#FF0606')(loops)}: No contract found`
         + ` at ${chalk.hex('#FFF013')(address)};`
@@ -146,19 +153,19 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
     }
   }
 
-  if(!implementation) {
-    throw new Error('Proxy never loaded')
+  if(!impl.new) {
+    throw new Error('Proxy implementation never loaded.')
   }
 
   console.log(
     `\n 📄 ${chalk.cyan(contract)},`
-    + ` deployed as a proxy at ${chalk.magenta(address)}`
-    + ` to the implementation at ${chalk.hex('#DE307E')(implementation)}`
+    + ` deployed as a proxy at ${chalk.magenta(proxy)}`
+    + ` to the implementation at ${chalk.hex('#DE307E')(impl.new)}`
     + ` by ${chalk.hex('#5A5FA5')(signer)}`
     + ` on chain ${chalk.bold.yellowBright(`#${chain}`)}`
     + ` ${chalk.green(`(saved to ${files.address})`)}.`
   )
-  fs.writeFileSync(files.address, address)
+  fs.writeFileSync(files.address, proxy)
 
   let gasInfo = '𐌵ⲛⲕⲛⲟⲱⲛ'
   if(deployed?.deployTransaction) {
@@ -166,7 +173,8 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
       deployed.deployTransaction.gasLimit.mul(gasPrice)
     )
     gasInfo = (
-      `${utils.formatEther(gasUsed)} ${hre.network.name === 'matic' ? 'MATIC' : 'ETH'}`
+      `${utils.formatEther(gasUsed)} `
+      + (hre.network.name === 'polygon' ? 'MATIC' : 'ETH')
     )
   }
 

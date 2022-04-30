@@ -14,8 +14,7 @@ import React, {
 import Web3Modal from 'web3modal'
 import providerOptions from 'lib/walletConnect'
 import { NETWORKS } from 'lib/networks'
-import contractAddress from 'contracts/matic/BulkDisbursableNFTs.address'
-import abi from 'contracts/matic/BulkDisbursableNFTs.abi'
+import CONFIG from 'config'
 
 export type Web3ContextType = {
   userProvider?: Web3Provider
@@ -31,8 +30,8 @@ export type Web3ContextType = {
   connected: boolean
   isMetaMask: Maybe<boolean>
   contract: {
-    address: string
-    abi: Record<keyof typeof abi, any>
+    address: Maybe<string>
+    abi: Maybe<Record<string, unknown>>
   }
 }
 
@@ -48,9 +47,9 @@ export const Web3Context = (
     connected: false,
     isMetaMask: null,
     contract: {
-      address: contractAddress,
-      abi
-    }
+      address: null,
+      abi: null,
+    },
   })
 )
 
@@ -67,13 +66,15 @@ export const Web3ContextProvider: React.FC = (
     const [chain, setChain] = useState<string>()
     const [address, setAddress] = useState<string>()
     const [connected, setConnected] = useState(false)
+    const [contractAddress, setContractAddress] = useState(null)
+    const [abi, setABI] = useState(null)
 
     const web3Modal = useMemo(
       () => {
         if(typeof window !== 'undefined') {
           return (
             new Web3Modal({
-              network: 'polygon',
+              network: CONFIG.contractNetwork,
               cacheProvider: true,
               providerOptions,
             })
@@ -100,21 +101,30 @@ export const Web3ContextProvider: React.FC = (
     )
 
     const roContract = useMemo(
-      () => (
-        new Contract(contractAddress, abi, contractProvider)
-      ),
-      [contractProvider],
+      () => {
+        if(contractAddress && abi) {
+          return (
+            new Contract(contractAddress, abi, contractProvider)
+          )
+        }
+      },
+      [contractProvider, abi, contractAddress],
     )
 
     const rwContract = useMemo(
       () => {
-        if(userProvider && chain === NETWORKS.contract.chainId) {
+        if(
+          contractAddress
+          && abi
+          && userProvider
+          && chain === NETWORKS.contract.chainId
+        ) {
           return new Contract(contractAddress, abi, userProvider.getSigner())
         } else {
           return undefined
         }
       },
-      [userProvider, chain],
+      [userProvider, chain, abi, contractAddress],
     )
 
     const disconnect = useCallback(() => {
@@ -126,6 +136,8 @@ export const Web3ContextProvider: React.FC = (
       setUserProvider(undefined)
       setConnecting(false)
       setConnected(false)
+      setContractAddress(null)
+      setABI(null)
     }, [web3Modal])
 
     const update = useCallback(
@@ -174,6 +186,24 @@ export const Web3ContextProvider: React.FC = (
         connect()
       }
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+    useEffect(() => {
+      const libs = async () => {
+        const { contractNetwork: chain } = CONFIG
+        import(
+          `../contracts/${chain}/BulkDisbursableNFTs.address`
+        )
+        .then(({ default: addr }) => setContractAddress(addr))
+
+        import (
+          `../contracts/${chain}/BulkDisbursableNFTs.abi`
+        )
+        .then(({ default: abi }) => setABI(abi))
+      }
+
+      libs()
+    }, [])
+        
 
     const isMetaMask = useMemo(
       () => (

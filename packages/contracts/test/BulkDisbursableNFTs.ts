@@ -148,36 +148,66 @@ describe('The Token Contract', () => {
         const tx = await token.connect(sender)[method](...args)
         return await tx.wait()
       }
-      
+
       const minterRole = await token['roleValueForName(string)']('Minter')
       const minterGate = await token['roleToken(uint8)'](minterRole)
-      
+
       await transact({
         method: 'setURI(uint256,string)',
         args: [minterGate, 'test'],
       }) 
 
-      expect(await token.uri(minterGate))
-      .to.equal('test')
+      expect(
+        await token.uri(minterGate),
+        'the generic gating token to have the specified URI',
+      ).to.equal('test')
     
       const specificGate = await token['roleToken(uint8,uint256)'](minterRole, 2)
       
-      console.log({specificGate})
+      expect(
+        specificGate.toBigInt() - minterGate.toBigInt(),
+        'there to be a difference in the generic & specific token ids'
+      ).to.equal(2n)
 
-      expect(specificGate - minterGate)
-      .to.equal(2)
-
-      expect(await token.uri(specificGate))
-      .to.equal('test')
+      expect(
+        await token.uri(specificGate),
+        'the single affect token to have the same URI',
+      ).to.equal('test')
     
-      // expect(await token['hasRole(uint8,address)'](creatorRole, creator.address))
-      // .to.be.true
+      expect(
+        await token.typeSupply(),
+        'the number of token types to be zero',
+      ).to.equal(0)
+    
+      expect(
+        await token['hasRole(uint8,address)'](minterRole, owner.address),
+        'a user not granted a role not to have it',
+      ).to.be.false
 
-      // expect(await token.connect(creator)['hasRole(uint8,uint256)'](creatorRole, 1))
-      // .to.be.true
-      
-      // await expect(transact({sender: creator, method: 'create()'}))
-      // .to.eventually.be.rejected
+      const creatorRole = await token['roleValueForName(string)']('Creator')
+      const creatorGate = await token['roleToken(uint8)'](creatorRole)
+
+      await transact({
+        method: 'grantRole(uint8,address)',
+        args: [creatorRole, creator.address],
+      })
+
+      expect(
+        await token.balanceOf(creator.address, creatorGate),
+        'a user to have a gating token when granted a role'
+      ).to.equal(1)
+
+      expect(
+        await token['hasRole(uint8,address)'](creatorRole, creator.address),
+        'a user granted a role to have it',
+      ).to.be.true
+
+      await transact({ sender: creator, method: 'create()' })
+
+      await expect(
+        transact({ sender: creator, method: 'create()' }),
+        'a user with a Creator role to be able to create new types',
+      ).to.eventually.be.fulfilled
     }
   )
 })
