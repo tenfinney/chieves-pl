@@ -1,17 +1,17 @@
-const fs = require('fs')
-const path = require('path')
-const chalk = require('chalk')
-const {
-  config, ethers, tenderly, run, upgrades,
-} = require('hardhat')
-const { utils } = require('ethers')
-const R = require('ramda')
-const { glob } = require('glob')
+import fs from 'fs'
+import path from 'path'
+import chalk from 'chalk'
+import {
+  config, ethers, tenderly, run, upgrades, network,
+} from 'hardhat'
+import { utils, Contract } from 'ethers'
+import R from 'ramda'
+import { Maybe } from '../../ui/lib/types'
 
 const name = 'BulkDisbursableNFTs'
 
 const DEBUG = false
-const debug = (...info) => {
+const debug = (...info: Array<unknown>) => {
   if (DEBUG) console.debug(...info)
 }
 
@@ -41,8 +41,6 @@ const main = async () => {
     await tenderlyVerify({ contract: name, address: implementationAddress })
   )
 
-  console.debug({ verification })
-
   try {
     console.log(chalk.hex('#FFD25E')(
       `\n 🔍 Verifying ${chalk.hex('#8454FF')(implementationAddress)}`
@@ -53,11 +51,11 @@ const main = async () => {
       constructorArguments: [],
     })
   } catch(err) {
-    console.error(err.message)
+    console.error((err as Error).message)
   }
 
-  let saveDir = hre.config.paths.artifacts
-  if(saveDir.startsWith(process.env.PWD)) {
+  let saveDir = config.paths.artifacts
+  if(process.env.PWD && saveDir.startsWith(process.env.PWD)) {
     saveDir = saveDir.substring(process.env.PWD.length + 1)
   }
   console.log(
@@ -67,11 +65,11 @@ const main = async () => {
 }
 
 const fileTemplates = {
-  address: `artifacts/${hre.network.name}/{contract}.address`,
-  args: `artifacts/${hre.network.name}/{contract}.args`,
+  address: `artifacts/${network.name}/{contract}.address`,
+  args: `artifacts/${network.name}/{contract}.args`,
 }
 
-const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
+const deploy = async (contract: string, _args = [], overrides = {}, libraries = {}) => {
   const files = Object.fromEntries(
     Object.entries(fileTemplates).map(
       ([name, template]) => {
@@ -95,7 +93,7 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
   )
 
   let deployed
-  let impl = {}
+  let impl: { new?: string, old?: string } = {}
 
   if(!fs.existsSync(files.address)) {
     console.log(
@@ -108,23 +106,34 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
       { kind: 'uups', timeout: 10 * 60 * 1000 },
     )
   } else {
-    const existing = await fs.readFileSync(files.address).toString().trim()
+    const existing = (
+      fs.readFileSync(files.address).toString().trim()
+    )
     impl.old = (
       await upgrades.erc1967.getImplementationAddress(existing)
     )
 
     console.log(
-      `\n ⚇ Existing deployment at ${chalk.hex('#AD4EFF')(existing)};`
+      `\n ⚇ Existing deployment proxied at ${chalk.hex('#AD4EFF')(existing)}`
+      + ` for implementation ${chalk.hex('#87BED5')(impl.old)};`
       + ' upgrading'
     )
-    deployed = await upgrades.upgradeProxy(existing, artifacts)
+    deployed = await upgrades.upgradeProxy(
+      existing,
+      artifacts,
+      { kind: 'uups', timeout: 10 * 60 * 1000 },
+    )
   }
 
   const {
     address: proxy,
-    signer: { address: signer },
-    deployTransaction: { gasPrice, hash: tx, chainId: chain },
+    signer: signator,
+    deployTransaction: {
+      gasPrice: gas, hash: tx, chainId: chain,
+    },
   } = deployed
+  const signer = await signator.getAddress()
+  const gasPrice = gas ?? 'Undefined'
 
   console.debug(
     ` 🍅 ${chalk.hex('#00AA7F')('Deployed in TX:')} `
@@ -132,22 +141,22 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
   )
   let loops = 0
   const timeout =  4 * 1000
-  const maxLoops = 125
+  const maxLoops = 25
+  let done = false
 
-  while(
-    (!impl.new || impl.old == impl.new)
-    && ++loops <= maxLoops
-  ) {
+  while(!done && ++loops <= maxLoops) {
     try {
       impl.new = (
         await upgrades.erc1967.getImplementationAddress(proxy)
       )
     } catch(err) {} // fails if the proxy isn't yet connected
-    if(!impl.new) {
+    done = impl.new != null && impl.old !== impl.new
+    if(!done) {
       console.info(
-        ` ${chalk.hex('#FF0606')(loops)}: No new contract found`
-        + ` at ${chalk.hex('#FFF013')(proxy)};`
-        + ` sleeping ${timeout}ms`
+        ` ${chalk.hex('#FF0606')(loops.toString())}:`
+        + ' No new implmentation found at'
+        + ` ${chalk.hex('#FFF013')(proxy)};`
+        + ` sleeping ${timeout / 1000}s`
       )
       await sleep(timeout)
     }
@@ -168,13 +177,13 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
   fs.writeFileSync(files.address, proxy)
 
   let gasInfo = '𐌵ⲛⲕⲛⲟⲱⲛ'
-  if(deployed?.deployTransaction) {
+  if(typeof(gasPrice) === 'number') {
     const gasUsed = (
       deployed.deployTransaction.gasLimit.mul(gasPrice)
     )
     gasInfo = (
       `${utils.formatEther(gasUsed)} `
-      + (hre.network.name === 'polygon' ? 'MATIC' : 'ETH')
+      + (network.name === 'polygon' ? 'MATIC' : 'ETH')
     )
   }
 
@@ -182,7 +191,7 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
 
   const encoded = abiEncodeArgs(deployed, args)
 
-  if (encoded.length > 2) {
+  if(encoded && encoded.length > 2) {
     console.log(
       `\n 📚 Serializing ${encoded.length}`
       + ` arguments to ${chalk.hex('#6FBCFF')(files.args)}.`
@@ -198,7 +207,7 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
 // abi encodes contract arguments
 // useful when you want to manually verify the contracts
 // for example, on Etherscan
-const abiEncodeArgs = (deployed, args) => {
+const abiEncodeArgs = (deployed: Contract, args: Array<unknown>) => {
   if (
     args
     && deployed
@@ -213,17 +222,19 @@ const abiEncodeArgs = (deployed, args) => {
 }
 
 // checks if it is a Solidity file
-const isSolidity = (filename) => (
+const isSolidity = (filename: string) => (
   /\.(sol|swp|swap)$/i.test(filename)
 )
 
-const sleep = (ms) => (
+const sleep = (ms: number) => (
   new Promise(resolve => setTimeout(resolve, ms))
 )
 
 // If you want to verify on https://tenderly.co/
 const tenderlyVerify = async ({
   contract: name, address, network = null,
+}: {
+  contract: string, address: string, network?: Maybe<string>,
 }) => {
   let tenderlyNetworks = [
     'kovan', 'goerli', 'mainnet', 'rinkeby', 'ropsten',

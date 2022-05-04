@@ -601,6 +601,8 @@ contract BulkDisbursableNFTs is
     );
 
     tokens.entries.push(id);
+    tokens.indices[id] = tokens.entries.length;
+
     _grantRole(Role.Minter, maintainer, tokenNum, true);
     _grantRole(Role.Configurer, maintainer, tokenNum, true);
     _grantRole(Role.Limiter, maintainer, tokenNum, true);
@@ -719,6 +721,7 @@ contract BulkDisbursableNFTs is
       index != 0,
       "The requested token does not exist."
     );
+    index -= 1;
   }
 
   // The following functions are overrides required by Solidity.

@@ -53,6 +53,7 @@ const config: HardhatUserConfig = {
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${infuraId}`,
       accounts: { mnemonic },
+      gasMultiplier: 2.25,
     },
     kovan: {
       url: `https://kovan.infura.io/v3/${infuraId}`,
@@ -250,94 +251,92 @@ task('wallet', 'Create a wallet (pk) link', async (_, { ethers }) => {
 //   }
 // })
 
-task('generate', 'Create a mnemonic for builder deploys', async (_, { ethers }) => {
-  const bip39 = require('bip39')
-  const hdkey = require('ethereumjs-wallet/hdkey')
-  const monic = mnemonic ?? bip39.generateMnemonic()
-  debug('mnemonic', monic)
-  const seed = await bip39.mnemonicToSeed(monic)
-  debug('seed', seed)
-  const hdwallet = hdkey.fromMasterSeed(seed)
-  const walletHDPath = "m/44'/60'/0'/0/"
-  const accountIndex = 0
-  let fullPath = walletHDPath + accountIndex
-  debug('fullPath', fullPath)
-  const wallet = hdwallet.derivePath(fullPath).getWallet()
-  const privateKey = `0x${wallet._privKey.toString('hex')}`
-  debug('privateKey', privateKey)
-  var EthUtil = require('ethereumjs-util')
-  const address = `0x${EthUtil.privateToAddress(wallet._privKey).toString('hex')}`
-  console.log(` 🔐 Account Generated as ${address} and set as mnemonic in packages/hardhat`)
-  console.log(' 💬 Use `yarn run account` to get more information about the deployment account.')
+// task('generate', 'Create a mnemonic for builder deploys', async (_, { ethers }) => {
+//   const bip39 = require('bip39')
+//   const hdkey = require('ethereumjs-wallet/hdkey')
+//   const monic = mnemonic ?? bip39.generateMnemonic()
+//   debug('mnemonic', monic)
+//   const seed = await bip39.mnemonicToSeed(monic)
+//   debug('seed', seed)
+//   const hdwallet = hdkey.fromMasterSeed(seed)
+//   const walletHDPath = "m/44'/60'/0'/0/"
+//   const accountIndex = 0
+//   let fullPath = walletHDPath + accountIndex
+//   debug('fullPath', fullPath)
+//   const wallet = hdwallet.derivePath(fullPath).getWallet()
+//   const privateKey = `0x${wallet._privKey.toString('hex')}`
+//   debug('privateKey', privateKey)
+//   var EthUtil = require('ethereumjs-util')
+//   const address = `0x${EthUtil.privateToAddress(wallet._privKey).toString('hex')}`
+//   console.log(` 🔐 Account Generated as ${address} and set as mnemonic in packages/hardhat`)
+//   console.log(' 💬 Use `yarn run account` to get more information about the deployment account.')
 
-  fs.writeFileSync(`${address}.txt`, monic.toString())
-  if(fs.existsSync('mnemonic.txt')) {
-    console.warn('mnemonic.txt exists; skipping.')
-  } else {
-    fs.writeFileSync('./mnemonic.txt', monic.toString())
-  }
-})
+//   fs.writeFileSync(`${address}.txt`, monic.toString())
+//   if(fs.existsSync('mnemonic.txt')) {
+//     console.warn('mnemonic.txt exists; skipping.')
+//   } else {
+//     fs.writeFileSync('./mnemonic.txt', monic.toString())
+//   }
+// })
 
-task('mineContractAddress', 'Looks for a deployer account that will give leading zeros')
-.addParam('searchFor', 'String to search for')
-.setAction(async (taskArgs, { network, ethers }) => {
-  let contract_address = ''
-  let address
+// task('mineContractAddress', 'Looks for a deployer account that will give leading zeros')
+// .addParam('searchFor', 'String to search for')
+// .setAction(async (taskArgs, { network, ethers }) => {
+//   let contract_address = ''
+//   let address
 
-  const bip39 = require('bip39')
-  const hdkey = require('ethereumjs-wallet/hdkey')
+//   const bip39 = require('bip39')
+//   const hdkey = require('ethereumjs-wallet/hdkey')
 
-  let mnemonic = ''
-  while(contract_address.indexOf(taskArgs.searchFor) != 0) {
-    mnemonic = bip39.generateMnemonic()
-    debug('mnemonic', mnemonic)
-    const seed = await bip39.mnemonicToSeed(mnemonic)
-    debug('seed', seed)
-    const hdwallet = hdkey.fromMasterSeed(seed)
-    const wallet_hdpath = "m/44'/60'/0'/0/"
-    const account_index = 0
-    let fullPath = wallet_hdpath + account_index
-    debug('fullPath', fullPath)
-    const wallet = hdwallet.derivePath(fullPath).getWallet()
-    const privateKey = '0x' + wallet._privKey.toString('hex')
-    debug('privateKey', privateKey)
-    var EthUtil = require('ethereumjs-util')
-    address = `0x${EthUtil.privateToAddress(wallet._privKey).toString('hex')}`
+//   let mnemonic = ''
+//   while(contract_address.indexOf(taskArgs.searchFor) != 0) {
+//     mnemonic = bip39.generateMnemonic()
+//     debug('mnemonic', mnemonic)
+//     const seed = await bip39.mnemonicToSeed(mnemonic)
+//     debug('seed', seed)
+//     const hdwallet = hdkey.fromMasterSeed(seed)
+//     const wallet_hdpath = "m/44'/60'/0'/0/"
+//     const account_index = 0
+//     let fullPath = wallet_hdpath + account_index
+//     debug('fullPath', fullPath)
+//     const wallet = hdwallet.derivePath(fullPath).getWallet()
+//     const privateKey = '0x' + wallet._privKey.toString('hex')
+//     debug('privateKey', privateKey)
+//     var EthUtil = require('ethereumjs-util')
+//     address = `0x${EthUtil.privateToAddress(wallet._privKey).toString('hex')}`
 
 
-    const rlp = require('rlp')
-    const keccak = require('keccak')
+//     const rlp = require('rlp')
+//     const keccak = require('keccak')
 
-    let nonce = 0x00 //The nonce must be a hex literal!
-    let sender = address
+//     let nonce = 0x00 //The nonce must be a hex literal!
+//     let sender = address
 
-    let input_arr = [sender, nonce]
-    let rlp_encoded = rlp.encode(input_arr)
+//     let input_arr = [sender, nonce]
+//     let rlp_encoded = rlp.encode(input_arr)
 
-    let contract_address_long = keccak('keccak256').update(rlp_encoded).digest('hex')
+//     let contract_address_long = keccak('keccak256').update(rlp_encoded).digest('hex')
 
-    contract_address = contract_address_long.substring(24)
-  }
+//     contract_address = contract_address_long.substring(24)
+//   }
 
-  console.log(` ⛏  Account Mined as ${address} and set as mnemonic in packages/hardhat`)
-  console.log(` 📜 This will create the first contract: ${chalk.magenta(`0x${contract_address}`)}`)
-  console.log(' 💬 Use `yarn run account` to get more information about the deployment account.')
+//   console.log(` ⛏  Account Mined as ${address} and set as mnemonic in packages/hardhat`)
+//   console.log(` 📜 This will create the first contract: ${chalk.magenta(`0x${contract_address}`)}`)
+//   console.log(' 💬 Use `yarn run account` to get more information about the deployment account.')
 
-  fs.writeFileSync(`${address}_produces-${contract_address}.txt`, mnemonic.toString())
-  if(fs.existsSync('mnemonic.txt')) {
-    console.warn('mnemonic.txt exists; skipping.')
-  } else {
-    fs.writeFileSync('mnemonic.txt', mnemonic.toString())
-  }
-})
+//   fs.writeFileSync(`${address}_produces-${contract_address}.txt`, mnemonic.toString())
+//   if(fs.existsSync('mnemonic.txt')) {
+//     console.warn('mnemonic.txt exists; skipping.')
+//   } else {
+//     fs.writeFileSync('mnemonic.txt', mnemonic.toString())
+//   }
+// })
 
 task('account', 'Get balance information for the deployment account.', async (_, { ethers }) => {
-  const hdkey = require('ethereumjs-wallet/hdkey')
-  const bip39 = require('bip39')
+  const hdkey = await import('ethereumjs-wallet/hdkey')
+  const bip39 = await import('bip39')
   let mnemonic = fs.readFileSync('./mnemonic.txt').toString().trim()
-  debug('mnemonic', mnemonic)
   const seed = await bip39.mnemonicToSeed(mnemonic)
-  debug('seed', seed)
   const hdwallet = hdkey.fromMasterSeed(seed)
   const wallet_hdpath = "m/44'/60'/0'/0/"
   const account_index = 0
@@ -345,11 +344,10 @@ task('account', 'Get balance information for the deployment account.', async (_,
   debug('fullPath', fullPath)
   const wallet = hdwallet.derivePath(fullPath).getWallet()
   const privateKey = '0x' + wallet._privKey.toString('hex')
-  debug('privateKey', privateKey)
-  var EthUtil = require('ethereumjs-util')
+  var EthUtil = await import('ethereumjs-util')
   const address = '0x' + EthUtil.privateToAddress(wallet._privKey).toString('hex')
 
-  var qrcode = require('qrcode-terminal')
+  var qrcode = await import('qrcode-terminal')
   qrcode.generate(address)
   console.log(` ‍📬 Deployer Account is ${address}`)
   for (let n in config.networks) {

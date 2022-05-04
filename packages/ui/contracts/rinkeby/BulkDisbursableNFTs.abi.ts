@@ -1120,7 +1120,7 @@ export default [
       },
       {
         "internalType": "uint256",
-        "name": "id",
+        "name": "index",
         "type": "uint256"
       }
     ],
@@ -1414,7 +1414,7 @@ export default [
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "tokenId",
+        "name": "id",
         "type": "uint256"
       }
     ],
@@ -1430,7 +1430,7 @@ export default [
       },
       {
         "internalType": "uint256",
-        "name": "num",
+        "name": "index",
         "type": "uint256"
       }
     ],
@@ -1689,7 +1689,7 @@ export default [
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "id",
         "type": "uint256"
       }
     ],

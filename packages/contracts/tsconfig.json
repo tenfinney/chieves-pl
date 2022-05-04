@@ -19,7 +19,12 @@
     "outDir": "dist",
   },
   "references": [],
-  "include": ["scripts", "test/**/*"],
+  "include": ["scripts", "test/**/*", "**/*.d.ts"],
   "files": ["hardhat.config.ts"],
   "exclude": [],
+  "ts-node": {
+    "compilerOptions": {
+       // "module": "esnext",
+    },
+  },
 }

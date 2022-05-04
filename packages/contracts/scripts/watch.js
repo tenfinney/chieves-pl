@@ -3,7 +3,7 @@ const { exec } = require("child_process");
 
 const run = () => {
   console.log("🛠  Compiling & Deploying...");
-  exec("yarn deploy", function (error, stdout, stderr) {
+  exec("yarn deploy", (error, stdout, stderr) => {
     console.log(stdout);
     if (error) console.log(error);
     if (stderr) console.log(stderr);
@@ -11,8 +11,9 @@ const run = () => {
 };
 
 console.log("🔬 Watching Contracts...");
-watch("./contracts", { recursive: true }, function (evt, name) {
+watch("./contracts", { recursive: true }, (_evt, name) => {
   console.log("%s changed.", name);
   run();
 });
+
 run();

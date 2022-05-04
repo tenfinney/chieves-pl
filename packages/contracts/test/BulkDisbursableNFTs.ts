@@ -1,27 +1,45 @@
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 // @ts-ignore
 import chaiMatch from 'chai-match'
-import { ethers as Ethers } from 'ethers'
+import { ethers as Ethers, Signer } from 'ethers'
 import { ethers, upgrades } from 'hardhat'
 
 chai.use(chaiAsPromised)
 chai.use(chaiMatch)
 
+let owner: SignerWithAddress
+let creator: SignerWithAddress
+let token: Ethers.Contract
+
+const transact = async (
+  { sender = owner, method, args = [] }:
+  { sender?: any, method: string, args?: Array<unknown> }
+) => {
+  const tx = await token.connect(sender)[method](...args)
+  return await tx?.wait()
+}
+
+beforeEach(async () => {
+  [owner, creator] = await ethers.getSigners()
+
+  const Token = await ethers.getContractFactory(
+    'BulkDisbursableNFTs'
+  )
+
+  token = await upgrades.deployProxy(
+    Token,
+    ['MetaGame ’Chievemints', 'MG’s 🏆s'],
+    { kind: 'uups', timeout: 10 * 60 * 1000 },
+  )
+})
+
+
 describe('The Token Contract', () => {
   it(
     'should create four tokens when reserving.',
     async () => {
-      const [owner] = await ethers.getSigners()
-      const Token = await ethers.getContractFactory(
-        'BulkDisbursableNFTs'
-      )
-      const token = await upgrades.deployProxy(
-        Token,
-        ['MetaGame ’Chievemints', 'MG’s 🏆s'],
-        { kind: 'uups', timeout: 10 * 60 * 1000 },
-      )
-
       expect(await token.owner()).to.equal(owner.address)
 
       const tx = await token['create()']()
@@ -87,23 +105,6 @@ describe('The Token Contract', () => {
   it(
     'it allows for a Superuser to create tokens.',
     async () => {
-      const [owner, creator] = await ethers.getSigners()
-      const Token = await ethers.getContractFactory(
-        'BulkDisbursableNFTs'
-      )
-      const token = await upgrades.deployProxy(
-        Token,
-        ['MetaGame ’Chievemints', 'MG’s 🏆s'],
-        { kind: 'uups', timeout: 10 * 60 * 1000 },
-      )
-      const transact = async (
-        { sender = owner, method, args = [] }:
-        { sender?: any, method: string, args?: Array<unknown> }
-      ) => {
-        const tx = await token.connect(sender)[method](...args)
-        return await tx.wait()
-      }
-
       const creatorRole = await token.roleValueForName('Creator')
 
       await expect(
@@ -176,23 +177,6 @@ describe('The Token Contract', () => {
   it(
     'retrieves generic metadata.',
     async () => {
-      const [owner, creator] = await ethers.getSigners()
-      const Token = await ethers.getContractFactory(
-        'BulkDisbursableNFTs'
-      )
-      const token = await upgrades.deployProxy(
-        Token,
-        ['MetaGame ’Chievemints', 'MG’s 🏆s'],
-        { kind: 'uups', timeout: 10 * 60 * 1000 },
-      )
-      const transact = async (
-        { sender = owner, method, args = [] }:
-        { sender?: any, method: string, args?: Array<unknown> }
-      ) => {
-        const tx = await token.connect(sender)[method](...args)
-        return await tx.wait()
-      }
-
       const minterRole = await token['roleValueForName(string)']('Minter')
       const minterGate = await token['roleToken(uint8)'](minterRole)
 

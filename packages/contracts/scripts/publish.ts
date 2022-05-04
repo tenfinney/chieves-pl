@@ -1,10 +1,10 @@
-const fs = require('fs')
-const path = require('path')
-const chalk = require('chalk')
-const hre = require('hardhat')
+import fs from 'fs'
+import path from 'path'
+import chalk from 'chalk'
+import hre from 'hardhat'
 
-const shortDir = (path) => {
-  const [, start] = process.env.PWD.match(/^(.*\/packages\/).*$/)
+const shortDir = (path: string) => {
+  const [, start] = process.env.PWD?.match(/^(.*\/packages\/).*$/) ?? []
   if(path.startsWith(start)) {
     path = path.substring(start.length)
   }
@@ -20,7 +20,7 @@ let artifactsDir = hre.config.paths.artifacts
 
 const graphDir = path.join(process.cwd(), '../subgraph')
 
-const publishContract = (contractName) => {
+const publishContract = (contractName: string) => {
   console.log(
     `\n 💽 Publishing ${chalk.cyan(contractName)}`
     + ` to ${chalk.gray(shortDir(publishDir))}`
@@ -101,7 +101,7 @@ const publishContract = (contractName) => {
     return true
   } catch (e) {
     console.error(e)
-    if(/no such file or directory/i.test(e.message)) {
+    if(/no such file or directory/i.test((e as Error).message)) {
       console.log(chalk.yellowBright(
         ` ⚠️  Can't find ${contractName}.json. (Is it deployed?)`
       ))
@@ -116,7 +116,7 @@ async function main() {
   if(!fs.existsSync(publishDir)) {
     fs.mkdirSync(publishDir)
   }
-  const finalContractList = []
+  const finalContractList: Array<string> = []
   fs.readdirSync(hre.config.paths.sources).forEach(
     (file) => {
       if(file.endsWith('.sol')) {
