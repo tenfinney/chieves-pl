@@ -109,26 +109,23 @@ export const OptionsForm: React.FC<{
       if(!rwContract) {
         throw new Error(
           `Cannot connect to contract to ${purpose} metadata.`
-          )
-        }
+        )
+      }
         
-        let tx
-        if(max != null) {
-          console.log({rwContract})
-          tx = await rwContract.configure(
-            Number(tokenId), metadata, max
-            )
-            
-          } else if(tokenId != null) {
-            console.log({r: rwContract})
-            tx = await rwContract.setURI(BigInt(tokenId), metadata)
-          }
-          console.log({q: rwContract})
-          await tx.wait()
+      let tx
+      if(max != null) {
+        tx = await rwContract.configure(
+          Number(tokenId), metadata, max
+        )
+      } else if(tokenId != null) {
+        console.log({r: rwContract})
+        tx = await rwContract.setURI(BigInt(tokenId), metadata)
+      }
+      await tx.wait()
           
       return router.push(`/view/${tokenId}`)
     },
-    [rwContract],
+    [purpose, router, rwContract, tokenId],
   )
 
   const buildMeta = async (data: FormValues) => {

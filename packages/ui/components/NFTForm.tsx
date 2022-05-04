@@ -150,7 +150,9 @@ export const NFTForm: React.FC<{
     useState<number | undefined>(0)
   )
   const imageRef = useRef<HTMLInputElement>(null)
-  const { homepage, description, color, images, attributes, animation } = watch()
+  const {
+    homepage, description, color, images, attributes, animation,
+  } = watch()
   const [wearables, setWearables] = useState({})
   const { isOpen, onOpen, onClose } = useDisclosure()
 
@@ -196,7 +198,7 @@ export const NFTForm: React.FC<{
   }, [metadata, setImage, setValue])
 
   useEffect(() => {
-    if(!homepage || isEmpty(homepage)) {
+    if(!homepage || isEmpty(homepage) || homepage.endsWith('𝘜𝘯𝘬𝘯𝘰𝘸𝘯')) {
       setValue(
         'homepage',
         `${NFT_HOMEPAGE_BASE}/${tokenId}`
@@ -219,7 +221,6 @@ export const NFTForm: React.FC<{
   const addImage = ({ target: { files } }: (
     { target: { files: Maybe<FileList> } }
   )) => {
-    console.info({ files, images })
     if(files?.length && files?.length >= 1) {
       setValue('images', [...(images ?? []), ...Array.from(files)])
     }
