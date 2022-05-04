@@ -1,38 +1,38 @@
 import { CodedError, Fileish, FileListish, Maybe, NamedString } from 'lib/types'
 import { CID } from 'multiformats/cid'
-import { IPFS_LINK_PATTERN } from 'lib/constants';
-import { NETWORKS } from './networks';
-import CONFIG from 'config';
-import all from 'it-all';
+import { IPFS_LINK_PATTERN } from 'lib/constants'
+import { NETWORKS } from './networks'
+import CONFIG from 'config'
+import all from 'it-all'
 
 export const httpURL = (uri?: Maybe<string>) => {
-    const [, origCID, path] = (
-      uri?.match(/^(?:ipfs|dweb):(?:\/\/)?([^/]+)(?:\/(.*))?$/) ?? []
-    )
-  
-    if (origCID) {
-      const cid = CID.parse(origCID)
-      const v0CID = cid.toV0().toString()
-      const v1CID = cid.toV1().toString()
-      const pattern = IPFS_LINK_PATTERN
-      return (
-        encodeURI(
-          pattern
-          .replace(/{cid}/g, origCID)
-          .replace(/{v0cid}/g, v0CID)
-          .replace(/{v1cid}/g, v1CID)
-          .replace(/{path}/g, path ?? '')
-        )
-        .replace(/#/g, '%23')
-      )
-    }
-  
-    if(!uri) {
-      throw new Error(`URI Undefined`)
-    }
+  const [, origCID, path] = (
+    uri?.match(/^(?:ipfs|dweb):(?:\/\/)?([^/]+)(?:\/(.*))?$/) ?? []
+  )
 
-    return uri
-  };
+  if (origCID) {
+    const cid = CID.parse(origCID)
+    const v0CID = cid.toV0().toString()
+    const v1CID = cid.toV1().toString()
+    const pattern = IPFS_LINK_PATTERN
+    return (
+      encodeURI(
+        pattern
+        .replace(/{cid}/g, origCID)
+        .replace(/{v0cid}/g, v0CID)
+        .replace(/{v1cid}/g, v1CID)
+        .replace(/{path}/g, path ?? '')
+      )
+      .replace(/#/g, '%23')
+    )
+  }
+
+  if(!uri) {
+    throw new Error('URI Undefined')
+  }
+
+  return uri
+}
 
 export const capitalize = (str: string) => {
   if(!str?.split) return str

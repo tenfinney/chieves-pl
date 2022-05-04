@@ -16,21 +16,20 @@ import { useWeb3 } from 'lib/hooks'
 const Markdown = chakra(ReactMarkdown)
 
 const View: NextPage = () => {
-  const { query: { nftId } } = useRouter()
+  const { query: { nftId: idParam } } = useRouter()
   const [metadata, setMetadata] = useState<ERC1155Metadata>()
   const [error, setError] = useState<string>()
-  const {
-    contractProvider: provider,
-    contract: { address, abi },
-    roContract,
-  } = useWeb3()
+  const { roContract } = useWeb3()
+  const nftId = Array.isArray(idParam) ? idParam[0] : idParam
 
   useEffect(
     () => {
       const getMetadata = async () => {
         if(roContract && nftId) {
           try {
-            const metadataURI = await roContract.uri(ethers.BigNumber.from(BigInt(nftId)))
+            const metadataURI = await roContract.uri(
+              ethers.BigNumber.from(BigInt(nftId))
+            )
             const metadataURL = httpURL(metadataURI)
             if(!metadataURL) {
               throw new Error(`Couldn't find metadata for token #${nftId}.`)
@@ -109,9 +108,10 @@ const View: NextPage = () => {
           <chakra.source src={httpURL(animationURL)}/>
         </chakra.video>
       )}
-       {animationURL?.endsWith('.webp') && (
+      {animationURL?.endsWith('.webp') && (
         <Image
           src={httpURL(animationURL)}
+          alt={name}
           maxW={96} maxH={96}
         />
       )}

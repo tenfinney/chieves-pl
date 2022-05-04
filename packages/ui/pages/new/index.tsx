@@ -12,7 +12,7 @@ import Head from 'next/head'
 import { Header } from 'components'
 import { useRouter } from 'next/router'
 import { Event, utils as ethUtils } from 'ethers'
-import { MetaMaskError } from '../../lib/types'
+import { MetaMaskError, NestedError } from '../../lib/types'
 
 export const New: NextPage = () => (
   <Container maxW="full">
@@ -69,9 +69,8 @@ const Content: React.FC = () => {
       const [id, _controller] = event.args
       setTokenId(id.toHexString())
     } catch(error) {
-      console.error({ error })
       const msg = (
-        error.error?.message
+        (error as NestedError).error?.message
         ?? (error as MetaMaskError).data?.message
         ?? (error as Error).message
         ?? error

@@ -47,6 +47,10 @@ export type MetaMaskError = Error & {
   }
 }
 
+export type NestedError = {
+  error: Error
+}
+
 export type NamedString = {
   name: string
   content: string

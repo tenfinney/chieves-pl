@@ -2,20 +2,22 @@ import { useWeb3 } from 'lib/hooks'
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { ReactNode, useEffect, useState } from 'react'
-import { ERC1155Metadata, Maybe } from 'lib/types';
+import { ERC1155Metadata, Maybe } from 'lib/types'
 import { httpURL } from 'lib/helpers'
 import { HomeLink, OptionsForm } from 'components'
-import { Box, Container } from '@chakra-ui/react';
-import Head from 'next/head';
+import { Box } from '@chakra-ui/react'
+import Head from 'next/head'
 
 export const Edit: NextPage = () => {
   const { query: { nftId } } = useRouter()
   const [metadata, setMetadata] = useState<Maybe<ERC1155Metadata>>()
   const [error, setError] = useState<ReactNode>()
-  let [tokenId, setTokenId] = useState(nftId)
+  const [tokenId, setTokenId] = useState<string>()
   const { roContract } = useWeb3()
 
-  useEffect(() => { setTokenId(nftId) }, [nftId])
+  useEffect(() => {
+    setTokenId(Array.isArray(nftId) ? nftId[0] : nftId)
+  }, [nftId])
 
   useEffect(() => {
     const getMetadata = async () => {
@@ -36,9 +38,6 @@ export const Edit: NextPage = () => {
 
     getMetadata()
   }, [roContract, tokenId])
-  if(Array.isArray(tokenId)) {
-    [tokenId] = tokenId
-  }
 
   return (
     <Box>

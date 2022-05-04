@@ -1,5 +1,9 @@
-import { FormControl, FormLabel, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Select, chakra, Input, ModalFooter, Button } from '@chakra-ui/react';
-import { FormEvent, useState } from "react"
+import {
+  FormControl, FormLabel, Modal, ModalBody, ModalCloseButton,
+  ModalContent, ModalHeader, ModalOverlay, Select, chakra,
+  Input, ModalFooter, Button,
+} from '@chakra-ui/react'
+import { FormEvent, useState } from 'react'
 
 export type ModelModalProps = {
   isOpen: boolean
