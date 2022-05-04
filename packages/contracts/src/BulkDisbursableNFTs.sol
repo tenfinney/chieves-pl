@@ -58,7 +58,7 @@ contract BulkDisbursableNFTs is
   uint256 public constant ROLE_MASK = (2**ROLE_WIDTH - 1) << ROLE_BOUNDARY;
   uint256 public constant INTERNAL_MASK = (2**INTERNAL_WIDTH - 1) << INTERNAL_BOUNDARY;
   uint256 public constant COUNTER_MASK = (2**COUNTER_WIDTH - 1);
-  
+
   // 13 publicity bits defining groups to which
   // the the token information is accessible
 
@@ -89,7 +89,7 @@ contract BulkDisbursableNFTs is
   uint256 public constant USE_UNTIL     = 3 << REPETITION_BOUNDARY;
   uint256 public constant USE_AFTER     = 4 << REPETITION_BOUNDARY;
   uint256 public constant UNIQUE        = 1 << UNIQUENESS_BOUNDARY;
-  
+
 
   // Gating tokens control access to contract
   // functionality.
@@ -293,6 +293,7 @@ contract BulkDisbursableNFTs is
     __ERC1155Supply_init();
     __UUPSUpgradeable_init();
 
+    tokens.entries.push(0);
     setDescription(_name, _symbol);
   }
 
@@ -408,17 +409,36 @@ contract BulkDisbursableNFTs is
     view
     returns (bool has)
   {
+    has = gateToken(role, user, index) != 0;
+  }
+
+  function gateToken(
+    Role role,
+    address user,
+    uint256 index
+  )
+    public
+    virtual
+    view
+    returns (uint256 id)
+  {
     uint256 gate = roleToken(role);
-    has = (
-      balanceOf(user, gate) > 0
-      || balanceOf(user, gate | index) > 0
-      || balanceOf(user, gate | USE_ONCE) > 0
-      || balanceOf(user, gate | USE_ONCE | index) > 0
-      || balanceOf(user, gate | INTERNAL_MASK) > 0
-      || balanceOf(user, gate | INTERNAL_MASK | index) > 0
-      || balanceOf(user, gate | USE_ONCE | INTERNAL_MASK) > 0
-      || balanceOf(user, gate | USE_ONCE | INTERNAL_MASK | index) > 0
-    );
+    uint256[8] memory ids = [
+      gate | USE_ONCE | INTERNAL_MASK | index,
+      gate | USE_ONCE | index,
+      gate | USE_ONCE | INTERNAL_MASK,
+      gate | USE_ONCE,
+      gate | INTERNAL_MASK | index,
+      gate | INTERNAL_MASK,
+      gate | index,
+      gate
+    ];
+    for(uint8 i = 0; i < ids.length; i++) {
+      if(balanceOf(user, ids[i]) > 0) {
+        return ids[i];
+      }
+    }
+    id = 0;
   }
 
   /**
@@ -592,7 +612,7 @@ contract BulkDisbursableNFTs is
     virtual
     returns (uint256 id)
   {
-    uint256 tokenNum = tokens.entries.length + 1;
+    uint256 tokenNum = tokens.entries.length;
     id = VANILLA_TYPE | tokenNum;
 
     require(
@@ -601,7 +621,7 @@ contract BulkDisbursableNFTs is
     );
 
     tokens.entries.push(id);
-    tokens.indices[id] = tokens.entries.length;
+    tokens.indices[id] = tokenNum;
 
     _grantRole(Role.Minter, maintainer, tokenNum, true);
     _grantRole(Role.Configurer, maintainer, tokenNum, true);
@@ -645,7 +665,7 @@ contract BulkDisbursableNFTs is
       id & INTERNAL_MASK != INTERNAL_MASK,
       "Cannot mint internal tokens from outside."
     );
-    if((id & UNIQUE) == UNIQUE && balanceOf(recipient, id) > 0) {
+      if((id & UNIQUE) == UNIQUE && balanceOf(recipient, id) > 0) {
       return false;
     }
     _mint(recipient, id, amount, data);
@@ -669,6 +689,22 @@ contract BulkDisbursableNFTs is
     }
   }
 
+  function burn(
+    address owner,
+    uint256 id,
+    uint256 quantity
+  )
+    public
+    virtual
+    override
+  {
+    require(
+      hasRole(Role.Burner, owner, id) || isSuper(owner),
+      "You must have a Burner token to destroy tokens."
+    );
+    _burn(owner, id, quantity);
+  }
+
   /**
    * @return count The number of types of tokens.
    */
@@ -678,11 +714,11 @@ contract BulkDisbursableNFTs is
     virtual
     returns (uint256 count)
   {
-    count = tokens.entries.length;
+    count = tokens.entries.length - 1;
   }
 
   function tokenOfOwnerByIndex(
-    address owner, 
+    address owner,
     uint256 index
   )
     public
@@ -697,20 +733,20 @@ contract BulkDisbursableNFTs is
     id = owned[owner].entries[index];
   }
 
-  function tokenByIndex(uint256 index) 
+  function tokenByIndex(uint256 index)
     public
     view
     virtual
     returns (uint256 id)
   {
     require(
-      index < tokens.entries.length,
+      index <= tokens.entries.length && index > 0,
       "ERC-1155 Enumerable: token index out of bounds"
     );
     id = tokens.entries[index];
   }
 
-  function tokenIndex(uint256 id) 
+  function tokenIndex(uint256 id)
     public
     view
     virtual
@@ -721,7 +757,6 @@ contract BulkDisbursableNFTs is
       index != 0,
       "The requested token does not exist."
     );
-    index -= 1;
   }
 
   // The following functions are overrides required by Solidity.
@@ -754,17 +789,16 @@ contract BulkDisbursableNFTs is
               );
             } else {
               require(
-                hasRole(needed, ids[i]),
+                hasRole(needed, tokenIndex(ids[i])),
                 "You must have a Minter token to generate tokens."
               );
+              uint256 gate = gateToken(needed, _msgSender(), tokenIndex(ids[i]));
+              if(gate & USE_ONCE > 0) {
+                _burn(_msgSender(), gate, 1);
+              }
             }
           } else { // Transferer (or Burner)
-            if(to == address(0)) {
-              require(
-                hasRole(Role.Burner, ids[i]),
-                "You must have a Burner token to destroy tokens."
-              );
-            } else {
+            if(to != address(0)) {
               require(
                 hasRole(needed, ids[i]),
                 "You must have a Transferer token to transfer tokens."
@@ -782,14 +816,14 @@ contract BulkDisbursableNFTs is
         }
         if(owned[to].indices[ids[i]] == 0) {
           owned[to].entries.push(ids[i]);
-          owned[to].indices[ids[i]] = tokens.entries.length;
+          owned[to].indices[ids[i]] = owned[to].entries.length;
         }
       }
     }
     if(from != address(0)) {
       for(uint256 i = 0; i < ids.length; ++i) {
         if(balanceOf(from, ids[i]) <= amounts[i]) {
-          uint256 index = owned[from].indices[ids[i]];
+          uint256 index = owned[from].indices[ids[i]] - 1;
           delete owned[from].entries[index];
           delete owned[from].indices[ids[i]];
         }

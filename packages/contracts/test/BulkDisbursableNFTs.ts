@@ -77,7 +77,7 @@ describe('The Token Contract', () => {
       const tokens = await Promise.all(
         Array.from({ length: 4 }, (_, i) => i)
         .map(async (idx) => (
-          (await token.tokenByIndex(idx)).toBigInt()
+          (await token.tokenByIndex(idx + 1)).toBigInt()
         ))
       )
 
@@ -119,8 +119,8 @@ describe('The Token Contract', () => {
       await transact({
         method: 'grantRole(uint8,address)',
         args: [creatorRole, creator.address],
-      }) 
-    
+      })
+
       expect(
         await token['hasRole(uint8,address)'](creatorRole, creator.address),
         'after a generic role grant, the user will have the role'
@@ -132,14 +132,14 @@ describe('The Token Contract', () => {
         'with a generic role grant, specific permissions are granted',
       )
       .to.be.true
-      
+
       await expect(
         transact({ sender: creator, method: 'create()' }),
         'with a generic Creator token, a user can `create()`'
       )
       .to.eventually.be.fulfilled
 
-      const firstGate = (await token.tokenByIndex(2)).toBigInt()
+      const firstGate = (await token.tokenByIndex(3)).toBigInt()
       const minterRole = await token.roleValueForName("Minter")
       const minterOfNum2 = (
         await token['roleToken(uint8,uint256)'](minterRole, 2)
@@ -183,15 +183,15 @@ describe('The Token Contract', () => {
       await transact({
         method: 'setURI(uint256,string)',
         args: [minterGate, 'test'],
-      }) 
+      })
 
       expect(
         await token.uri(minterGate),
         'the generic gating token to have the specified URI',
       ).to.equal('test')
-    
+
       const specificGate = await token['roleToken(uint8,uint256)'](minterRole, 2)
-      
+
       expect(
         specificGate.toBigInt() - minterGate.toBigInt(),
         'there to be a difference in the generic & specific token ids'
@@ -201,12 +201,12 @@ describe('The Token Contract', () => {
         await token.uri(specificGate),
         'the single affect token to have the same URI',
       ).to.equal('test')
-    
+
       expect(
         await token.typeSupply(),
         'the number of token types to be zero',
       ).to.equal(0)
-    
+
       expect(
         await token['hasRole(uint8,address)'](minterRole, owner.address),
         'a user not granted a role not to have it',
@@ -236,6 +236,59 @@ describe('The Token Contract', () => {
         transact({ sender: creator, method: 'create()' }),
         'a user with a Creator role to be able to create new types',
       ).to.eventually.be.fulfilled
+    }
+  )
+
+  it(
+    'destroys a single use token after use',
+    async () => {
+      const tx = await token['create()']()
+      const receipt = await tx.wait()
+      let event = receipt.events.find(
+        (evt: Ethers.Event) => evt.event === 'Created'
+      )
+
+      expect(event).to.not.be.undefined
+
+      const [createdId, _controller] = event.args
+      const counterMask = await token.COUNTER_MASK()
+      const tokenIndex = createdId.toBigInt() & counterMask.toBigInt()
+
+      expect(tokenIndex).to.equal(1n)
+
+      const minterGate = await token.tokenByIndex(2)
+
+      await token.burn(owner.address, minterGate, 1)
+
+      expect(await token.totalSupply(minterGate)).to.equal(0)
+
+      const minterRole = await token.roleValueForName('Minter')
+      const minterToken = (
+        await token['roleToken(uint8,uint256)'](minterRole, tokenIndex)
+      )
+      const singleUse = await token.USE_ONCE()
+      const singleMinter = minterToken.toBigInt() | singleUse.toBigInt()
+
+      await transact({
+        method: 'mint(address,uint256,uint256,bytes)',
+        args: [creator.address, singleMinter, 1, []],
+      })
+
+      expect(await token.balanceOf(creator.address, singleMinter))
+      .to.equal(1)
+      expect(await token['hasRole(uint8,address,uint256)'](
+        minterRole, creator.address, tokenIndex
+      )).to.be.true
+
+      await transact({
+        sender: creator,
+        method: 'mint(address,uint256,uint256,bytes)',
+        args: [creator.address, createdId, 10, []],
+      })
+
+      expect(await token['hasRole(uint8,address,uint256)'](
+        minterRole, creator.address, tokenIndex
+      )).to.be.false
     }
   )
 })
