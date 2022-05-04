@@ -1,7 +1,4 @@
-import {
-  Box, chakra, Flex, Link as ChakraLink,
-  LinkProps, FlexProps, Tooltip,
-} from '@chakra-ui/react'
+import { Flex, FlexProps } from '@chakra-ui/react'
 import { LinkedSVG } from 'components'
 
 export const Header: React.FC<
@@ -9,13 +6,13 @@ export const Header: React.FC<
 > = ({ links = { cup: '/new', sign: '/' }, ...props }) => (
   <Flex  grow={1} {...props}>
     <LinkedSVG
-      w="40%" h="-webkit-fill-available"
+      w="min(40%, 75vh)" h="auto"
       svg="logo.svg"
       href={links.cup}
       title="Create A New Token"
     />
     <LinkedSVG
-      w="75%" h="-webkit-fill-available"
+      w="75%" h="auto"
       ml="-15%"
       svg="header.svg"
       href={links.sign}

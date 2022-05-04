@@ -145,8 +145,8 @@ const deploy = async (contract, _args = [], overrides = {}, libraries = {}) => {
     } catch(err) {} // fails if the proxy isn't yet connected
     if(!impl.new) {
       console.info(
-        ` ${chalk.hex('#FF0606')(loops)}: No contract found`
-        + ` at ${chalk.hex('#FFF013')(address)};`
+        ` ${chalk.hex('#FF0606')(loops)}: No new contract found`
+        + ` at ${chalk.hex('#FFF013')(proxy)};`
         + ` sleeping ${timeout}ms`
       )
       await sleep(timeout)

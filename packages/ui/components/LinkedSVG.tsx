@@ -14,6 +14,7 @@ export const LinkedSVG: React.FC<
     >
       <Box display="inline-block" w="full" h="full">
         <chakra.object
+          maxH="100%"
           {...{ data }}
           position="relative"
           zIndex={-1}

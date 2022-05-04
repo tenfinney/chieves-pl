@@ -1,0 +1,15 @@
+{
+  name: '’Chievemints Limiter',
+  description: 'The holder of this NFT can change the maximum allowed to be minted for a ’chievemint.',
+  decimals: 0,
+  external_url: 'https://metafam.github.io/chievemints/',
+  image: 'ipfs://{assets-cid}/max.svg',
+  background_color: 'FFF6E7',
+  properties: {},
+  attributes: [
+    {
+      trait_type: 'Token Type',
+      value: 'Permission Gating',
+    },
+  ],
+}

@@ -10,7 +10,7 @@ import '@nomiclabs/hardhat-etherscan'
 import '@openzeppelin/hardhat-upgrades'
 import 'dotenv/config'
 import { HardhatEthersHelpers } from '@nomiclabs/hardhat-ethers/types'
-import { HardhatUserConfig, HttpNetworkConfig } from 'hardhat/types'
+import { HardhatUserConfig, HttpNetworkConfig, HttpNetworkUserConfig } from 'hardhat/types'
 
 const { isAddress, getAddress, formatUnits } = utils
 
@@ -149,7 +149,16 @@ task('su', 'Add a superuser')
   const contract = (
     new ethers.Contract(address , abi, ethers.provider.getSigner())
   )
-  const { address: user } = args
+  let { address: user } = args
+  if(user.includes('.')) {
+    const rpc = (
+      (config.networks?.mainnet as HttpNetworkUserConfig)?.url
+    )
+    if(!rpc) throw new Error('No mainnet RPC defined.')
+    const provider = new ethers.providers.JsonRpcProvider(rpc)
+    console.debug(` 🚊 Looking Up: ${chalk.hex('#FCFF13')(user)}`)
+    user = await provider.resolveName(user)
+  }
   console.log(` 🍏 Setting ${user} as superuser on ${contractName} (${address})`)
   const suRole = await contract.roleValueForName('Superuser')
   const tx = await contract['grantRole(uint8,address)'](suRole, user)
@@ -174,11 +183,10 @@ task('grant', 'Grant a role')
     ` 🦐 Loaded ${chalk.hex('#88C677')(contractName)} From:`
     + ` ${chalk.hex('#E59AF9')(contractFile)}`
   )
-  const local = false
   const address = (
     fs
     .readFileSync(
-      `${config?.paths?.artifacts}/${local ? 'local/' : ''}${contractName}.address`
+      `${config?.paths?.artifacts}/${contractName}.address`
     )
     .toString()
     .trim()

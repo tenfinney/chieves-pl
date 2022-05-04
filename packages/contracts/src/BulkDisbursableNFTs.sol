@@ -49,7 +49,7 @@ contract BulkDisbursableNFTs is
   uint8 public constant ROLE_BOUNDARY = UNIQUENESS_BOUNDARY - ROLE_WIDTH;
   uint8 public constant INTERNAL_WIDTH = 1;
   uint8 public constant INTERNAL_BOUNDARY = ROLE_BOUNDARY - INTERNAL_WIDTH;
-  uint8 public constant COUNTER_WIDTH = 42;
+  uint8 public constant COUNTER_WIDTH = 32;
   uint256 public constant TEAM_MASK = (2**TEAM_WIDTH - 1) << TEAM_BOUNDARY;
   uint256 public constant TYPE_MASK = (2**TYPE_WIDTH - 1) << TYPE_BOUNDARY;
   uint256 public constant REQUIREMENT_MASK = (2**REQUIREMENT_WIDTH - 1) << REQUIREMENT_BOUNDARY;
@@ -129,6 +129,9 @@ contract BulkDisbursableNFTs is
   // properties of the system. The flag may be used
   // in conjunction with other types.
   uint256 public constant EXPERIMENTAL_TYPE = 2**TYPE_WIDTH << TYPE_BOUNDARY;
+
+  // Bits that can be set, but shouldn't affect matching
+  uint256 public constant NO_MATCH_FLAGS = USE_ONCE | INTERNAL_MASK;
 
   enum Role {
     // The first value is zero and all tokens should
@@ -315,9 +318,9 @@ contract BulkDisbursableNFTs is
     public
     virtual
     view
-    returns (uint256 tokenId)
+    returns (uint256 id)
   {
-    return roleToken(role, 0);
+    id = roleToken(role, 0);
   }
 
   /**
@@ -326,29 +329,23 @@ contract BulkDisbursableNFTs is
    */
   function roleToken(
     Role role,
-    uint256 id
+    uint256 index
   )
     public
     virtual
     view
-    returns (uint256 tokenId)
+    returns (uint256 id)
   {
     require(
-      tokenId < 2**COUNTER_WIDTH,
-      'Indices can be at most 42 bits.'
+      index < 2**COUNTER_WIDTH,
+      'Indices can be at most 32 bits.'
     );
-    console.log(id);
-    console.log(uint(role));
-    console.log(uint(role) << ROLE_BOUNDARY);
-    console.log(role == Role.Superuser ? 1 << UNIQUENESS_BOUNDARY : 0);
-    console.log(GATING_TYPE);
-    console.log('-------');
 
-    return (
+    id = (
       GATING_TYPE
       | (uint(role) << ROLE_BOUNDARY)
       | (role == Role.Superuser ? UNIQUENESS_MASK : 0)
-      | id
+      | index
     );
   }
 
@@ -362,7 +359,7 @@ contract BulkDisbursableNFTs is
     view
     returns (bool has)
   {
-    return hasRole(role, _msgSender());
+    has = hasRole(role, _msgSender());
   }
 
   /**
@@ -378,7 +375,7 @@ contract BulkDisbursableNFTs is
     view
     returns (bool has)
   {
-    return hasRole(role, user, 0);
+    has = hasRole(role, user, 0);
   }
 
   /**
@@ -394,7 +391,7 @@ contract BulkDisbursableNFTs is
     view
     returns (bool has)
   {
-    return hasRole(role, _msgSender(), id);
+    has = hasRole(role, _msgSender(), id);
   }
 
   /**
@@ -404,7 +401,7 @@ contract BulkDisbursableNFTs is
   function hasRole(
     Role role,
     address user,
-    uint256 id
+    uint256 index
   )
     public
     virtual
@@ -412,19 +409,15 @@ contract BulkDisbursableNFTs is
     returns (bool has)
   {
     uint256 gate = roleToken(role);
-    console.log(user);
-    console.log(uint8(role));
-    console.log(uint8(Role.Transferer));
-    console.log('--==--==--==--==--==--');    
-    return (
+    has = (
       balanceOf(user, gate) > 0
-      || balanceOf(user, gate | id) > 0
+      || balanceOf(user, gate | index) > 0
       || balanceOf(user, gate | USE_ONCE) > 0
-      || balanceOf(user, gate | USE_ONCE | id) > 0
+      || balanceOf(user, gate | USE_ONCE | index) > 0
       || balanceOf(user, gate | INTERNAL_MASK) > 0
-      || balanceOf(user, gate | INTERNAL_MASK | id) > 0
+      || balanceOf(user, gate | INTERNAL_MASK | index) > 0
       || balanceOf(user, gate | USE_ONCE | INTERNAL_MASK) > 0
-      || balanceOf(user, gate | USE_ONCE | INTERNAL_MASK | id) > 0
+      || balanceOf(user, gate | USE_ONCE | INTERNAL_MASK | index) > 0
     );
   }
 
@@ -438,7 +431,7 @@ contract BulkDisbursableNFTs is
     view
     returns (bool superuser)
   {
-    return isSuper(_msgSender());
+    superuser = isSuper(_msgSender());
   }
 
   /**
@@ -451,7 +444,7 @@ contract BulkDisbursableNFTs is
     view
     returns (bool superuser)
   {
-    return hasRole(Role.Superuser, user) || user == owner();
+    superuser = hasRole(Role.Superuser, user) || user == owner();
   }
 
   /**
@@ -475,18 +468,18 @@ contract BulkDisbursableNFTs is
   function grantRole(
     Role role,
     address user,
-    uint256 id
+    uint256 index
   )
     public
     virtual
   {
-    _grantRole(role, user, id, false);
+    _grantRole(role, user, index, false);
   }
 
   function _grantRole(
     Role role,
     address user,
-    uint256 id,
+    uint256 index,
     bool local
   )
     internal
@@ -500,14 +493,14 @@ contract BulkDisbursableNFTs is
         );
       } else {
         require(
-          hasRole(Role.Caster, id) || isSuper(),
+          hasRole(Role.Caster, index) || isSuper(),
           "You must have the Caster role to assign new roles."
         );
       }
     }
     _mint(
       user,
-      roleToken(role, id) | (local ? INTERNAL_MASK : 0),
+      roleToken(role, index) | (local ? INTERNAL_MASK : 0),
       1,
       ""
     );
@@ -523,17 +516,13 @@ contract BulkDisbursableNFTs is
     override
     returns (string memory metadata)
   {
-    string memory response = uris[id];
-    if(bytes(response).length == 0) {
-      console.log(id);
-      console.log(id & TYPE_MASK);
-      console.log(GATING_TYPE);
+    metadata = uris[id];
+    if(bytes(metadata).length == 0) {
       if(id & TYPE_MASK == GATING_TYPE) {
-        uint256 generic = id & ~COUNTER_MASK;
-        response = uris[generic];
+        uint256 generic = id & ~COUNTER_MASK & ~NO_MATCH_FLAGS;
+        metadata = uris[generic];
       }
     }
-    return response;
   }
 
   /**
@@ -587,7 +576,7 @@ contract BulkDisbursableNFTs is
     virtual
     returns (uint256 id)
   {
-    return create(_msgSender());
+    id = create(_msgSender());
   }
 
   /**
@@ -603,21 +592,20 @@ contract BulkDisbursableNFTs is
     virtual
     returns (uint256 id)
   {
-    uint256 tokenId = VANILLA_TYPE | (tokens.entries.length + 1);
+    uint256 tokenNum = tokens.entries.length + 1;
+    id = VANILLA_TYPE | tokenNum;
 
     require(
-      hasRole(Role.Creator, tokenId) || isSuper(),
+      hasRole(Role.Creator, id) || isSuper(),
       "You must have a Creator token to create new tokens."
     );
 
-    tokens.entries.push(tokenId);
-    _grantRole(Role.Minter, maintainer, tokenId, true);
-    _grantRole(Role.Configurer, maintainer, tokenId, true);
-    _grantRole(Role.Limiter, maintainer, tokenId, true);
+    tokens.entries.push(id);
+    _grantRole(Role.Minter, maintainer, tokenNum, true);
+    _grantRole(Role.Configurer, maintainer, tokenNum, true);
+    _grantRole(Role.Limiter, maintainer, tokenNum, true);
 
-    emit Created(tokenId, maintainer);
-
-    return tokenId;
+    emit Created(id, maintainer);
   }
 
   /**
@@ -688,7 +676,7 @@ contract BulkDisbursableNFTs is
     virtual
     returns (uint256 count)
   {
-    return tokens.entries.length;
+    count = tokens.entries.length;
   }
 
   function tokenOfOwnerByIndex(
@@ -698,13 +686,13 @@ contract BulkDisbursableNFTs is
     public
     view
     virtual
-    returns (uint256)
+    returns (uint256 id)
   {
     require(
       index < owned[owner].entries.length,
       "ERC-1155 Enumerable: token index out of bounds"
     );
-    return owned[owner].entries[index];
+    id = owned[owner].entries[index];
   }
 
   function tokenByIndex(uint256 index) 
@@ -717,7 +705,7 @@ contract BulkDisbursableNFTs is
       index < tokens.entries.length,
       "ERC-1155 Enumerable: token index out of bounds"
     );
-    return tokens.entries[index];
+    id = tokens.entries[index];
   }
 
   function tokenIndex(uint256 id) 
@@ -726,12 +714,11 @@ contract BulkDisbursableNFTs is
     virtual
     returns (uint256 index)
   {
-    uint256 idx = tokens.indices[id];
+    index = tokens.indices[id];
     require(
-      idx != 0,
+      index != 0,
       "The requested token does not exist."
     );
-    return idx;
   }
 
   // The following functions are overrides required by Solidity.

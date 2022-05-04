@@ -117,7 +117,7 @@ const files = await Promise.all(
   })
 )
 
-console.log('Uploading to NFT Storage.')
+console.log(' 🍤 Uploading to //nft.storage.')
 
 const metadataCID = await storage.storeDirectory(files)
 console.info(
@@ -129,7 +129,7 @@ for(const file of files) {
   const type = file.name.replace(/\.json$/, '')
   const typeId = await contract.roleValueForName(capitalize(type))  
   const tokenId = await contract['roleToken(uint8)'](typeId)
-  console.log({type,typeId,tokenId})
+
   if(!tokenId) {
     console.debug(
       `Couldn't find \`${type}\` on ${contractName}.`

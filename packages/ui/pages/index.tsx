@@ -15,11 +15,7 @@ import { useWeb3 } from 'lib/hooks'
 
 const Home: NextPage = () => {
   const [tokens, setTokens] = useState<Array<TokenState>>([])
-  const {
-    contractProvider: provider,
-    contract: { address, abi },
-    roContract,
-  } = useWeb3()
+  const { roContract } = useWeb3()
 
   const setToken = (index: number, info: Record<string, unknown>) => {
     setTokens((tkns: Array<TokenState>) => ([
@@ -35,12 +31,21 @@ const Home: NextPage = () => {
         if(roContract) {
           const typeCount = Number(await roContract.typeSupply())
 
-          await Promise.allSettled(
-            Array.from({ length: typeCount }).map(async (_, index) => {
-              const id = (await roContract.tokenByIndex(index)).toHexString()
+          const tokens = await Promise.all(
+            Array.from({ length: typeCount }).map(
+              async (_, index) => {
+                const id = (await roContract.tokenByIndex(index)).toHexString()
+                return { id }
+              }
+            )
+          )
+
+          setTokens(tokens)
+
+          await Promise.all(
+            tokens.map(async ({ id }, index) => {
               let metadata = null
               try {
-                setToken(index, { id })
                 let uri = await roContract.uri(id)
                 if(uri === '') uri = null
                 setToken(index, { uri })
@@ -90,9 +95,9 @@ const Home: NextPage = () => {
         />
       </Head>
 
-      <chakra.header>
+      <chakra.header h="45vh">
         <Flex maxW="40rem" margin="auto">
-          <Header mt="5vh" maxH="40vh"/>
+          <Header mt="5vh" h="40vh"/>
         </Flex>
       </chakra.header>
 

@@ -1,25 +1,26 @@
 import {
   Box, Flex, Spinner, Stack, Table, Tbody, Td, Text, Th, Thead, Tr,
-  Link as ChakraLink, Image, Tooltip, chakra,
+  Link as ChakraLink, Tooltip, chakra,
 } from '@chakra-ui/react'
 import { httpURL } from 'lib/helpers'
 import { TokenState } from 'lib/types'
 import NextLink from 'next/link'
 import Markdown from 'react-markdown'
 
-type Token = { token: TokenState, index?: number }
+type IndexedToken = { token: TokenState, index: number }
+type Token = { token: TokenState }
 
-const IdTd:React.FC<Token> = ({ token, index }) => (
-  <Td title={token?.id ? BigInt(token.id).toString(16) : ''}>
-    {/* <Tooltip
+const IdTd:React.FC<IndexedToken> = ({ token, index }) => (
+  <Td>
+    <Tooltip
       label={token.id != null ? (
-        BigInt(token.id).toString(16)
+        `0x${BigInt(token.id).toString(16)}`
       ) : (
-        'null'
+        '𝚄𝚗𝚔𝚗𝚘𝚠𝚗'
       )}
-    > */}
-      {index != null ? index + 1 : 'null'}
-    {/* </Tooltip> */}
+    >
+      <Text>{index + 1}</Text>
+    </Tooltip>
   </Td>
 )
 
@@ -33,7 +34,7 @@ const ErrorTd:React.FC<Token> = ({ token }) => (
   </Td>
 )
 
-const LoadingTd:React.FC<Token> = ({ token }) => (
+const LoadingTd:React.FC<Token> = () => (
   <Td colSpan={3}>
     <Flex justify="center">
       <Spinner thickness="4px"/>
@@ -56,7 +57,6 @@ const ImageTd:React.FC<Token> = ({ token }) => (
               )
             }
           >
-            {console.log({i: token.metadata.image})}
             {token.metadata?.image && (
               <chakra.object
                 data={httpURL(token.metadata.image)}
@@ -191,7 +191,7 @@ export const TokensTable: React.FC<{
       </Thead>
       <Tbody>
         {tokens.map((token: TokenState, index) => (
-          <Tr key={token.id}>
+          <Tr key={index}>
             <IdTd {...{ token, index }}/>
             {(() => {
               if(!token.uri && token.error) {
