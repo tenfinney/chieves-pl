@@ -12,10 +12,11 @@ import {
 } from '@chakra-ui/react'
 import { NFT_HOMEPAGE_BASE } from 'lib/constants'
 import { httpURL, isEmpty } from 'lib/helpers'
-import { Attribute, ERC1155Metadata, Maybe, OpenSeaAttribute } from 'lib/types'
+import {
+  Attribute, ERC1155Metadata, Maybe, OpenSeaAttribute,
+} from 'lib/types'
 import React, {
-  ChangeEvent, FormEvent, ReactNode, useCallback,
-  useEffect, useRef, useState,
+  ChangeEvent, useCallback, useEffect, useRef, useState,
 } from 'react'
 import Markdown from 'react-markdown'
 import {

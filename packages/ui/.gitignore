@@ -27,3 +27,4 @@
 # local contract deployment
 contracts/local/
 contracts/BulkDisbursableNFTs.bytecode.ts
+dist/

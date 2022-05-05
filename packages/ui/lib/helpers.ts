@@ -1,7 +1,7 @@
 import { CodedError, Fileish, FileListish, Maybe, NamedString } from 'lib/types'
 import { CID } from 'multiformats/cid'
-import { IPFS_LINK_PATTERN } from 'lib/constants'
-import { NETWORKS } from './networks'
+import { IPFS_LINK_PATTERN } from '@/lib/constants'
+import { NETWORKS } from '@/lib/networks'
 import CONFIG from 'config'
 import all from 'it-all'
 
@@ -134,7 +134,7 @@ export const ipfsify = async (filesOrURL: FileListish) => {
   return out
 }
 
-export const regexify = (str) => {
+export const regexify = (str: string) => {
   const matches = str.split(/((\w)\2{3,})/)
   const condensed = matches.map((m: string) => {
     const char = m[0]
@@ -150,4 +150,22 @@ export const regexify = (str) => {
   })
 
   return condensed.join('')
+}
+
+export const deregexify = (str: string) => {
+  const matches = str.split(/(\w\{\d+\})/)
+  const expanded = matches.map((m: string) => {
+    const char = m[0]
+    if(
+      m.length > 3
+      && /\w/.test(char)
+      && m.replace(new RegExp(`${char}+`, 'g'), '') === ''
+    ) {
+      return `${char}{${m.length}}`
+    } else {
+      return m
+    }
+  })
+
+  return expanded.join('')
 }

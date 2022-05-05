@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    "target": "ES2022",
     "lib": [
       "dom",
       "dom.iterable",
-      "esnext"
+      "esnext",
+      "ES2022",
     ],
     "types": ["node"],
     "allowJs": false,
@@ -12,15 +13,21 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
+    "module": "ES2022",
+    "moduleResolution": "Node",
+    "preserveConstEnums": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
+    "sourceMap": true,
     "incremental": true,
     "baseUrl": ".",
     "composite": true,
-    "noEmit": true
+    // "noEmit": true,
+    "paths": {
+      "@/lib/*": ["lib/*"]
+    },
+    "outDir": "dist",
   },
   "include": [
     "next-env.d.ts",
@@ -28,6 +35,7 @@
     "**/*.tsx"
   ],
   "exclude": [
-    "node_modules/"
+    "node_modules/",
+    "dist/"
   ]
 }
