@@ -111,11 +111,16 @@ export const OptionsForm: React.FC<{
           `Cannot connect to contract to ${purpose} metadata.`
         )
       }
-        
+      if(tokenId == null) {
+        throw new Error(
+          'invalid token id'
+        )
+      }  
+
       let tx
       if(max != null) {
         tx = await rwContract.configure(
-          Number(tokenId), metadata, max
+          BigInt(tokenId), metadata, max
         )
       } else if(tokenId != null) {
         console.log({r: rwContract})
@@ -240,6 +245,7 @@ export const OptionsForm: React.FC<{
         isClosable: true,
         duration: 10000
       })
+      console.debug((error as Error).stack)
     }
   }
     

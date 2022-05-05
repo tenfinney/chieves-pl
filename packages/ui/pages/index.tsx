@@ -34,7 +34,7 @@ const Home: NextPage = () => {
           const tokens = await Promise.all(
             Array.from({ length: typeCount }).map(
               async (_, index) => {
-                const id = (await roContract.tokenByIndex(index)).toHexString()
+                const id = (await roContract.tokenByIndex(index + 1)).toHexString()
                 return { id }
               }
             )

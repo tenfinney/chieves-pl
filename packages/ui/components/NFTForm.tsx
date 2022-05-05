@@ -252,7 +252,9 @@ export const NFTForm: React.FC<{
   )
 
   const addRow = () => {
-    setValue('attributes', [...attributes, {}])
+    // console.log({a: [...attributes, {}]})
+    console.log({attributes})
+    setValue('attributes', [...(attributes ?? []), {}])
   }
 
   return (
