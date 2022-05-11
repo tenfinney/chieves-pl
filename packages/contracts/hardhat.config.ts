@@ -155,12 +155,9 @@ task('mint', 'Mint a token for a user')
   const contract = (
     new ethers.Contract(address , abi, ethers.provider.getSigner())
   )
-  console.debug({contract})
-
   const tx = await contract['mint(address,uint256,uint256,bytes)'](
     args.address, args.tokenId, 1, [],
   )
-  console.debug({tx})
 
   console.info(`Minted with token id ${chalk.hex('#ff0000')(args.tokenId)} for ${chalk.hex('00ff00')(args.address)}`) 
 

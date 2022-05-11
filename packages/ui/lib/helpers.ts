@@ -134,7 +134,7 @@ export const ipfsify = async (filesOrURL: FileListish) => {
   return out
 }
 
-export const regexify = (str) => {
+export const regexify = (str: string) => {
   const matches = str.split(/((\w)\2{3,})/)
   const condensed = matches.map((m: string) => {
     const char = m[0]
