@@ -11,7 +11,7 @@
     "ui:start": "yarn workspace @metagame-chievemints/ui dev",
     "ui:test": "yarn workspace @metagame-chievemints/ui test",
     "ui:pub": "yarn workspace @metagame-chievemints/ui pub",
-    "build": "yarn workspace @metagame-chievemints/ui build --max-old-space-size=12288",
+    "build": "yarn workspace @metagame-chievemints/ui build",
     "fork": "yarn workspace @metagame-chievemints/contracts fork",
     "hh:node": "yarn workspace @metagame-chievemints/contracts chain",
     "hh:build": "yarn workspace @metagame-chievemints/contracts compile",
