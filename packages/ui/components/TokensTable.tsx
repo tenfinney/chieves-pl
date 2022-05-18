@@ -190,29 +190,34 @@ export const TokensTable: React.FC<{
         </Tr>
       </Thead>
       <Tbody>
-        {tokens.map((token: TokenState, index) => (
-          <Tr key={index}>
-            <IdTd {...{ token, index }}/>
-            {(() => {
-              if(!token.uri && token.error) {
-                return <ErrorTd {...{ token }}/>
-              }
-              if(!token.metadata) {
-                return <LoadingTd {...{ token }}/>
-              }
-              return (
-                <>
-                  <ImageTd {...{ token }}/>
-                  <DescriptionTd {...{ token }}/>
-                  <LinkTd {...{ token }}/>
-                </>
-              )
-            })()}
-            {token.uri && <URITd {...{ token }}/>}
-            <TotalTd {...{ token }}/>
-            <ActionsTd {...{ token }}/>
-          </Tr>
-        ))}
+        {tokens.map((token: TokenState, index) => {
+          if(token.gating) {
+            return null
+          }
+          return (
+            <Tr key={index}>
+              <IdTd {...{ token, index }}/>
+              {(() => {
+                if(!token.uri && token.error) {
+                  return <ErrorTd {...{ token }}/>
+                }
+                if(!token.metadata) {
+                  return <LoadingTd {...{ token }}/>
+                }
+                return (
+                  <>
+                    <ImageTd {...{ token }}/>
+                    <DescriptionTd {...{ token }}/>
+                    <LinkTd {...{ token }}/>
+                  </>
+                )
+              })()}
+              {token.uri && <URITd {...{ token }}/>}
+              <TotalTd {...{ token }}/>
+              <ActionsTd {...{ token }}/>
+            </Tr>
+          )
+        })}
       </Tbody>
     </Table>
   )
