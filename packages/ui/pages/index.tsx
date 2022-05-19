@@ -12,9 +12,13 @@ import { httpURL } from 'lib/helpers'
 import type { Maybe, ERC1155Metadata, TokenState } from 'lib/types'
 import { Header, TokensTable } from 'components'
 import { useWeb3 } from 'lib/hooks'
+import { useRouter } from 'next/router'
 
 const Home: NextPage = () => {
   const [tokens, setTokens] = useState<Array<TokenState>>([])
+  const { query: { gating = false } } = useRouter()
+  const [gatingVisible, setGatingVisible] = useState(!!gating)
+  console.log({gating, gatingVisible})
   const { roContract } = useWeb3()
 
   const setToken = (index: number, info: Record<string, unknown>) => {
@@ -34,8 +38,19 @@ const Home: NextPage = () => {
           const tokens = await Promise.all(
             Array.from({ length: typeCount }).map(
               async (_, index) => {
-                const id = (await roContract.tokenByIndex(index + 1)).toHexString()
-                return { id }
+                const id = (await roContract.tokenByIndex(index + 1))
+                const GATING_TYPE = await roContract.GATING_TYPE()
+                const TYPE_WIDTH = await roContract.TYPE_WIDTH()
+                const TYPE_BOUNDARY = await roContract.TYPE_BOUNDARY()
+                const gating = (
+                  !gatingVisible
+                  && (
+                    (id.toBigInt() & ((BigInt(2**TYPE_WIDTH - 1)) << BigInt(TYPE_BOUNDARY)))
+                    === GATING_TYPE.toBigInt()
+                  )
+                )
+
+                return { id: id.toHexString(), gating }
               }
             )
           )
@@ -43,7 +58,10 @@ const Home: NextPage = () => {
           setTokens(tokens)
 
           await Promise.all(
-            tokens.map(async ({ id }, index) => {
+            tokens.map(async ({ id, gating }, index) => {
+              if(gating) {
+                return null
+              }
               let metadata = null
               try {
                 let uri = await roContract.uri(id)

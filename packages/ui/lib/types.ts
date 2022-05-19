@@ -33,6 +33,7 @@ export type CodedError = Error & { code: number }
 
 export type TokenState = {
   id: string
+  gating?: boolean 
   uri?: string
   metadata?: ERC1155Metadata
   total?: number

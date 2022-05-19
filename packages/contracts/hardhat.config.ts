@@ -122,8 +122,9 @@ task('env', 'Display the execution environment', async () => {
   console.info({ __dirname, env: process.env, config })
 })
 
-task('su', 'Add a superuser')
+task('mint', 'Mint a token for a user')
 .addParam('address', 'Address of the user to promote')
+.addParam('tokenId', 'Id of the token to mint')
 .setAction(async (args, { ethers }) => {
   const [, srcDir] = config?.paths?.sources?.match(/^.*?\/?([^\/]+)\/?$/) ?? []
   if (!srcDir) throw new Error('ERROR - could not find source directory')
@@ -133,6 +134,7 @@ task('su', 'Add a superuser')
     .sync(`${contractsHome}/*/*`)
     .filter((name) => !/\.dbg\.json$/.test(name))
   )
+
   const { abi, contractName } = JSON.parse(
     fs.readFileSync(contractFile).toString()
   )
@@ -147,6 +149,48 @@ task('su', 'Add a superuser')
     .toString()
     .trim()
   )
+
+  console.debug(`Found contract at address: ${address}`)
+  
+  const contract = (
+    new ethers.Contract(address , abi, ethers.provider.getSigner())
+  )
+  const tx = await contract['mint(address,uint256,uint256,bytes)'](
+    args.address, args.tokenId, 1, [],
+  )
+
+  console.info(`Minted with token id ${chalk.hex('#ff0000')(args.tokenId)} for ${chalk.hex('00ff00')(args.address)}`) 
+
+})
+
+task('su', 'Add a superuser')
+.addParam('address', 'Address of the user to promote')
+.setAction(async (args, { ethers }) => {
+  const [, srcDir] = config?.paths?.sources?.match(/^.*?\/?([^\/]+)\/?$/) ?? []
+  if (!srcDir) throw new Error('ERROR - could not find source directory')
+  const contractsHome = `${config?.paths?.artifacts}/${srcDir}/`
+  const [contractFile] = (
+    glob
+    .sync(`${contractsHome}/*/*`)
+    .filter((name) => !/\.dbg\.json$/.test(name))
+  )
+  
+  const { abi, contractName } = JSON.parse(
+    fs.readFileSync(contractFile).toString()
+  )
+  console.debug(
+    ` 🦐 Loaded ${chalk.hex('#88C677')(contractName)} From:`
+    + ` ${chalk.hex('#E59AF9')(contractFile)}`
+  )
+  const address = (
+    fs.readFileSync(
+      `${config?.paths?.artifacts}/${contractName}.address`
+    )
+    .toString()
+    .trim()
+  )
+
+
   const contract = (
     new ethers.Contract(address , abi, ethers.provider.getSigner())
   )

@@ -11,7 +11,7 @@
     "ui:start": "yarn workspace @metagame-chievemints/ui dev",
     "ui:test": "yarn workspace @metagame-chievemints/ui test",
     "ui:pub": "yarn workspace @metagame-chievemints/ui pub",
-    "build": "yarn workspace @metagame-chievemints/ui build --max-old-space-size=12288",
+    "build": "yarn workspace @metagame-chievemints/ui build",
     "fork": "yarn workspace @metagame-chievemints/contracts fork",
     "hh:node": "yarn workspace @metagame-chievemints/contracts chain",
     "hh:build": "yarn workspace @metagame-chievemints/contracts compile",
@@ -60,5 +60,9 @@
     "eslint": "8.12.0",
     "jest": "^28.0.3",
     "typescript": "4.6.2"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.6.4",
+    "graphql": "^16.5.0"
   }
 }

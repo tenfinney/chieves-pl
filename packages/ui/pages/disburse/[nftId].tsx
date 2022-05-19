@@ -67,7 +67,7 @@ const Disburse: NextPage = () => {
   const [raw, setRaw] = useState('')
   const [action, setAction] = useState('whitelist')
   const {
-    ensProvider, address, roContract, connected, connect
+    ensProvider, address, roContract, rwContract, connected, connect, userProvider
   } = useWeb3()
   const [addresses, setAddresses] = useState<Array<string | ReactNode>>([])
   const toast = useToast()
@@ -129,12 +129,23 @@ const Disburse: NextPage = () => {
     },
     [roContract, tokenId],
   )
+  console.debug({rwContract, userProvider})
 
   const submit = useCallback(async (evt) => {
     evt.preventDefault()
 
+    if(!rwContract) {
+      toast({
+        title: `Contract Error!`,
+        description: 'Token is not Connected.',
+        status: 'error',
+        isClosable: true,
+        duration: 10000
+      })
+      return
+    }
     try {
-      const skip = evt.target.skip.checked
+      // const skip = evt.target.skip.checked
       const addrs = await Promise.all(
         split(raw)
         .map(async (name: string) => {
@@ -148,10 +159,20 @@ const Disburse: NextPage = () => {
       switch(action) {
         case 'mint': {
           console.debug('minting', { addrs })
+          const tx = await rwContract?.['mint(address[],uint256,bytes)'](
+            addrs, tokenId, []
+          )
+          await tx.wait()
           break
         }
         case 'whitelist': {
           console.debug('whitelist', { addrs })
+          addrs.map(async (addr) => {
+            const minterRole = await roContract?.roleValueForName('Minter')
+            const tx = await rwContract?.['mint(address,uint256,uint256,bytes)'](
+              addr, tokenId, 1, []
+            )
+          })
           break
         }
       }
@@ -164,7 +185,7 @@ const Disburse: NextPage = () => {
         duration: 10000
       })
     }
-  }, [action, addresses, ensProvider])
+  }, [action, addresses, ensProvider, roContract, rwContract, tokenId])
 
   if(error) {
     return (
@@ -246,7 +267,14 @@ const Disburse: NextPage = () => {
           </Checkbox>
         </FormControl>
         <FormControl textAlign="center">
-          <Button type="submit" colorScheme="green">Distribute</Button>
+          {console.debug({rwContract})}
+          {!rwContract ? (
+            <Button onClick={connect}>
+              Connect
+            </Button>
+          ) : (
+            <Button type="submit" colorScheme="green">Distribute</Button>
+          )}
         </FormControl>
       </Stack>
     </Container>
