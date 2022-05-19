@@ -5,7 +5,7 @@
       "dom",
       "dom.iterable",
       "esnext",
-      "ES2022",
+      "ES2022"
     ],
     "types": [
       "node"
@@ -15,7 +15,7 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
-    "module": "ES2022",
+    "module": "esnext",
     "moduleResolution": "Node",
     "preserveConstEnums": true,
     "resolveJsonModule": true,
@@ -27,9 +27,12 @@
     "composite": true,
     // "noEmit": true,
     "paths": {
-      "@/lib/*": ["lib/*"]
+      "@/lib/*": [
+        "lib/*"
+      ]
     },
     "outDir": "dist",
+    "noEmit": true
   },
   "include": [
     "next-env.d.ts",

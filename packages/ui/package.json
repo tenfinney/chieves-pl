@@ -2,8 +2,8 @@
   "name": "@metagame-chievemints/ui",
   "version": "0.2.0",
   "license": "CC0-1.0",
-  "homepage": "https://metafam.github.io/chievemints/",
-  "type": "module",
+  "homepage": "https://chiev.es",
+  "type": "commonjs",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

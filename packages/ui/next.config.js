@@ -1,7 +1,5 @@
-const prod = process.env.NODE_ENV === 'production'
-
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const config = {
   reactStrictMode: true,
   webpack: (config) => {
     config.module.rules = config.module.rules.map((rule) => {
@@ -34,4 +32,4 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+module.exports = config
