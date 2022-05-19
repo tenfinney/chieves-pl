@@ -167,7 +167,7 @@ task('su', 'Add a superuser')
 .addParam('address', 'Address of the user to promote')
 .setAction(async (args, { ethers }) => {
   const [, srcDir] = config?.paths?.sources?.match(/^.*?\/?([^\/]+)\/?$/) ?? []
-  if (!srcDir) throw new Error('ERROR - could not find source directory')
+  
   const contractsHome = `${config?.paths?.artifacts}/${srcDir}/`
   const [contractFile] = (
     glob
@@ -214,7 +214,9 @@ task('grant', 'Grant a role')
 .addParam('address', 'Address of the user to promote')
 .addParam('role', 'Role to grant')
 .setAction(async (args, { ethers }) => {
-  const [, srcDir] = config?.paths?.sources?.match(/^.*\/([^\/]+)\/?$/) ?? []
+  const srcDir = config?.paths?.sources
+  // const [, srcDir] = config?.paths?.sources?.match(/^.*\/([^\/]+)\/?$/) ?? []
+  if (!srcDir) throw new Error('ERROR - could not find source directory')
   const contractsHome = `${config?.paths?.artifacts}/${srcDir}/`
   const [contractFile] = (
     glob
@@ -236,12 +238,23 @@ task('grant', 'Grant a role')
     .toString()
     .trim()
   )
+  let { address: user, role } = args
+  if(user.includes('.')) {
+    const rpc = (
+      (config.networks?.mainnet as HttpNetworkUserConfig)?.url
+    )
+    if(!rpc) throw new Error('No mainnet RPC defined.')
+    const provider = new ethers.providers.JsonRpcProvider(rpc)
+    console.debug(` 🚊 Looking Up: ${chalk.hex('#FCFF13')(user)}`)
+    user = await provider.resolveName(user)
+  }
   const contract = (
     new ethers.Contract(address , abi, ethers.provider.getSigner())
   )
-  const { address: user } = args
-  console.log(` 🍏 Setting ${user} as superuser on ${contractName} (${address})`)
-  const tx = await contract['grantRole(uint8,address)'](Number(args.role), user)
+  console.log(` 🍏 Setting ${user} as ${role} on ${contractName} (${address})`)
+  const roleId = await contract.roleValueForName(role)
+  if(roleId === 0) throw new Error(`Can’t find “${role}”`)
+  const tx = await contract['grantRole(uint8,address)'](roleId, user)
   console.info(` 🕋 Tx: ${tx.hash}`)
 })
 
