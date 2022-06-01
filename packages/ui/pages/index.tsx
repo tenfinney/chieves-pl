@@ -13,14 +13,18 @@ import type { Maybe, ERC1155Metadata, TokenState } from 'lib/types'
 import { Header, TokensTable } from 'components'
 import { useWeb3 } from 'lib/hooks'
 import { useRouter } from 'next/router'
+import TokenFilterForm from 'components/TokenFilterForm'
 
 const Home: NextPage = () => {
   const [tokens, setTokens] = useState<Array<TokenState>>([])
-  const { query: { gating = false } } = useRouter()
+  let {
+    query: { gating = false, visible, limit: limitParam = 10, offset: offsetParam = 0 }
+  } = useRouter()
+  const [limit, setLimit] = useState(Number(limitParam))
+  const [offset, setOffset] = useState(Number(offsetParam))
   const [gatingVisible, setGatingVisible] = useState(!!gating)
-  console.log({gating, gatingVisible})
+  const [visibleList, setVisibleList] = useState<Array<string>>([])
   const { roContract } = useWeb3()
-
   const setToken = (index: number, info: Record<string, unknown>) => {
     setTokens((tkns: Array<TokenState>) => ([
       ...tkns.slice(0, index),
@@ -29,28 +33,59 @@ const Home: NextPage = () => {
     ]))
   }
 
+  useEffect(() => {
+    setGatingVisible(!!gating)
+  }, [gating])
+
+  useEffect(() => {
+    setOffset(Number(offsetParam))
+  }, [offsetParam])
+
+  useEffect(() => {
+    setLimit(Number(limitParam))
+  }, [limitParam])
+
+  useEffect(() => {
+    if (visible) {
+      if (Array.isArray(visible)) {
+        ([visible] = visible)
+      }
+      console.log({v:visible.split(/\s*,\s*/).filter((str) => str !== '')})
+      setVisibleList(visible.split(/\s*,\s*/).filter((str) => str !== ''))
+    }
+  }, [visible])
+
   useEffect(
     () => {
       const load = async () => {
         if(roContract) {
           const typeCount = Number(await roContract.typeSupply())
+          const GATING_TYPE = await roContract.GATING_TYPE()
+          const TYPE_WIDTH = await roContract.TYPE_WIDTH()
+          const TYPE_BOUNDARY = await roContract.TYPE_BOUNDARY()
 
+          const count = Math.min(limit, typeCount)
+          const start = offset < 0 ? typeCount + offset : offset 
           const tokens = await Promise.all(
-            Array.from({ length: typeCount }).map(
-              async (_, index) => {
-                const id = (await roContract.tokenByIndex(index + 1))
-                const GATING_TYPE = await roContract.GATING_TYPE()
-                const TYPE_WIDTH = await roContract.TYPE_WIDTH()
-                const TYPE_BOUNDARY = await roContract.TYPE_BOUNDARY()
-                const gating = (
-                  !gatingVisible
-                  && (
-                    (id.toBigInt() & ((BigInt(2**TYPE_WIDTH - 1)) << BigInt(TYPE_BOUNDARY)))
-                    === GATING_TYPE.toBigInt()
+            Array.from({ length: count }).map(
+              async (_, idx) => {
+                const index = start + idx + 1
+                const id = (await roContract.tokenByIndex(index))
+                const hide = (
+                  (
+                    !gatingVisible
+                    && (
+                      (id.toBigInt() & ((BigInt(2**TYPE_WIDTH - 1)) << BigInt(TYPE_BOUNDARY)))
+                      === GATING_TYPE.toBigInt()
+                    )
                   )
+                  || (
+                    visibleList.length > 0
+                    && !visibleList.includes((index).toString())
+                  ) 
                 )
 
-                return { id: id.toHexString(), gating }
+                return { id: id.toHexString(), hide, index }
               }
             )
           )
@@ -58,8 +93,8 @@ const Home: NextPage = () => {
           setTokens(tokens)
 
           await Promise.all(
-            tokens.map(async ({ id, gating }, index) => {
-              if(gating) {
+            tokens.map(async ({ id, hide }, index) => {
+              if(hide) {
                 return null
               }
               let metadata = null
@@ -100,7 +135,7 @@ const Home: NextPage = () => {
 
       load()
     },
-    [roContract],
+    [roContract, gatingVisible, visibleList, limit], 
   )
 
   return (
@@ -120,6 +155,14 @@ const Home: NextPage = () => {
       </chakra.header>
 
       <chakra.main>
+        <TokenFilterForm
+          {...{
+            limit, setLimit,
+            offset, setOffset,
+            gatingVisible, setGatingVisible,
+            visibleList, setVisibleList,
+          }}
+        />
         <TokensTable {...{ tokens }}/>
       </chakra.main>
     </Container>

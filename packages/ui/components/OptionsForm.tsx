@@ -281,7 +281,7 @@ export const OptionsForm: React.FC<{
           ))}
         </TabPanels>
       </Tabs>
-      <FormControl>
+      {/* <FormControl>
         <Flex align="center">
           <FormLabel _after={{ content: '":"' }}>Max&#xA0;Mintable</FormLabel>
           <Input
@@ -290,7 +290,7 @@ export const OptionsForm: React.FC<{
             {...register('maximum')}
           />
         </Flex>
-      </FormControl>
+      </FormControl> */}
       <Submit {...{ purpose, processing }} mb={3} />
     </Box>
   )

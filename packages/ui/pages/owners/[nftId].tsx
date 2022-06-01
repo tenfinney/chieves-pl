@@ -4,6 +4,7 @@ import { Box, Heading, ListItem, OrderedList } from '@chakra-ui/react'
 import { useWeb3 } from 'lib/hooks'
 import { useEffect, useState } from 'react'
 import { httpURL } from 'lib/helpers'
+import { HomeLink } from 'components'
 
 const NFT_OWNERS = gql`
   query NFTOwners($tokenId: String) {
@@ -66,10 +67,11 @@ export const Owners = () => {
             data.nfts[0].ownership.map(
               async (oship: Ownership) => {
                 let { owner } = oship
-                if(owner.includes('.')) {
-                  owner = (
+                  const ens = (
                     await ensProvider?.lookupAddress(owner)
-                  ) ?? 'Unknown'
+                  )
+                if (ens) {
+                  owner = ens 
                 }
                 return {
                   owner, quantity: oship.quantity,
@@ -85,8 +87,9 @@ export const Owners = () => {
   if (loading) return 'Loading…'
   if (error) return `Error! ${error.message}`
   return (
-    <Box>
-      <Heading mt={10} ml={4} fontSize={20}>
+    <Box ml={8}>
+      <HomeLink/>
+      <Heading mt={10} fontSize={20}>
         {title}
       </Heading>
       <OrderedList>

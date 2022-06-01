@@ -20,7 +20,7 @@ const IdTd:React.FC<IndexedToken> = ({ token, index }) => (
         '𝚄𝚗𝚔𝚗𝚘𝚠𝚗'
       )}
     >
-      <Text>{index + 1}</Text>
+      <Text>{token.index}</Text>
     </Tooltip>
   </Td>
 )
@@ -196,7 +196,7 @@ export const TokensTable: React.FC<{
       </Thead>
       <Tbody>
         {tokens.map((token: TokenState, index) => {
-          if(token.gating) {
+          if(token.hide) {
             return null
           }
           return (

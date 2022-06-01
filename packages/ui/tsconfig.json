@@ -38,7 +38,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "pages/api/export.ts"  ],
   "exclude": [
     "node_modules/",
     "dist/"

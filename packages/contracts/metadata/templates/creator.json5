@@ -1,0 +1,15 @@
+{
+  name: '’Chievemints Creator',
+  description: 'Holders of this token can create new token types.',
+  decimals: 0,
+  external_url: 'https://metafam.github.io/chievemints/edit/',
+  image: 'ipfs://{assets-cid}/creator.svg',
+  background_color: '01525B',
+  properties: {},
+  attributes: [
+    {
+      trait_type: 'Token Type',
+      value: 'Permission Gating',
+    },
+  ],
+}
