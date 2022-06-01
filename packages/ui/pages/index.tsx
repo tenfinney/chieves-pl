@@ -17,8 +17,8 @@ import TokenFilterForm from 'components/TokenFilterForm'
 
 const Home: NextPage = () => {
   const [tokens, setTokens] = useState<Array<TokenState>>([])
-  let {
-    query: { gating = false, visible, limit: limitParam = 10, offset: offsetParam = 0 }
+  const {
+    query: { gating = false, visible: visibleParam, limit: limitParam = 10, offset: offsetParam = 0 }
   } = useRouter()
   const [limit, setLimit] = useState(Number(limitParam))
   const [offset, setOffset] = useState(Number(offsetParam))
@@ -46,14 +46,15 @@ const Home: NextPage = () => {
   }, [limitParam])
 
   useEffect(() => {
+    let visible = visibleParam
     if (visible) {
-      if (Array.isArray(visible)) {
+      if(Array.isArray(visible)) {
         ([visible] = visible)
       }
       console.log({v:visible.split(/\s*,\s*/).filter((str) => str !== '')})
       setVisibleList(visible.split(/\s*,\s*/).filter((str) => str !== ''))
     }
-  }, [visible])
+  }, [visibleParam])
 
   useEffect(
     () => {

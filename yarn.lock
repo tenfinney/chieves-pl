@@ -14,9 +14,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/client@npm:^3.6.4":
-  version: 3.6.4
-  resolution: "@apollo/client@npm:3.6.4"
+"@apollo/client@npm:^3.6.6":
+  version: 3.6.6
+  resolution: "@apollo/client@npm:3.6.6"
   dependencies:
     "@graphql-typed-document-node/core": ^3.1.1
     "@wry/context": ^0.6.0
@@ -42,7 +42,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 87afb1fc0669ac60b439e19d327c1d7dcf80ecf5cd8ff86a8361cfadd5a6b7261ed4165907ce88316cd36d8764aeb1e121fa1db7bf328410472517634ca1c58f
+  checksum: 3cf430f406d3f4b5a316f36830a115452f27b7db47e1b7161725603e444332355e5a8fde992c3ec9268b44e8db8030e1ab021f965a186667eaa8af1d144c2beb
   languageName: node
   linkType: hard
 
@@ -3661,6 +3661,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@metagame-chievemints/ui@workspace:packages/ui"
   dependencies:
+    "@apollo/client": ^3.6.6
     "@babel/core": ^7.0.0
     "@babel/preset-env": ^7.17.10
     "@babel/preset-typescript": ^7.16.7
@@ -3719,7 +3720,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@metagame-chievemints@workspace:."
   dependencies:
-    "@apollo/client": ^3.6.4
     "@testing-library/jest-dom": ^5.16.4
     "@testing-library/react": ^13.2.0
     "@types/eslint": ^8

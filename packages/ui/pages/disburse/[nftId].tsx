@@ -136,7 +136,7 @@ const Disburse: NextPage = () => {
 
     if(!rwContract) {
       toast({
-        title: `Contract Error!`,
+        title: 'Contract Error!',
         description: 'Token is not Connected.',
         status: 'error',
         isClosable: true,

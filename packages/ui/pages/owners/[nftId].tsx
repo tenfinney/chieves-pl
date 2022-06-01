@@ -5,6 +5,8 @@ import { useWeb3 } from 'lib/hooks'
 import { useEffect, useState } from 'react'
 import { httpURL } from 'lib/helpers'
 import { HomeLink } from 'components'
+import { NextPage } from 'next'
+import Head from 'next/head'
 
 const NFT_OWNERS = gql`
   query NFTOwners($tokenId: String) {
@@ -88,6 +90,10 @@ export const Owners = () => {
   if (error) return `Error! ${error.message}`
   return (
     <Box ml={8}>
+      <Head>
+        <title>Owners</title>
+      </Head>
+
       <HomeLink/>
       <Heading mt={10} fontSize={20}>
         {title}
@@ -95,7 +101,6 @@ export const Owners = () => {
       <OrderedList>
         {ownerships.map((ownership, idx) => (
           <ListItem key={idx} ml={6}>
-            {console.debug({ownership})}
             {`${ownership.owner} (${ownership.quantity})`}
           </ListItem>
         ))}
