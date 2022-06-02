@@ -6,14 +6,15 @@ export const Header: React.FC<
 > = ({ links = { cup: '/new', sign: '/' }, ...props }) => (
   <Flex  grow={1} {...props}>
     <LinkedSVG
-      w="min(40%, 75vh)" h="auto"
+      w="min(40%, 50vh)" h="auto"
+      ml="-5%"
       svg="logo.svg"
       href={links.cup}
       title="Create A New Token"
     />
     <LinkedSVG
-      w="75%" h="auto"
-      ml="-15%"
+      w="50%" h="auto"
+      ml="-10%"
       svg="header.svg"
       href={links.sign}
       title="View Existing Tokens"

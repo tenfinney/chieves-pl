@@ -42,7 +42,7 @@ export const Edit: NextPage = () => {
   return (
     <Box>
       <Head>
-        <title>’𝖈𝖍𝖎𝖊𝖛𝖊: Ⲉⲇⲓⲧ #{tokenId}</title>
+        <title>SmartLaw Cred Token #{tokenId}</title>
       </Head>
       <HomeLink/>
       <OptionsForm

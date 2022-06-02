@@ -32,7 +32,7 @@ const View: NextPage = () => {
             )
             const metadataURL = httpURL(metadataURI)
             if(!metadataURL) {
-              throw new Error(`Couldn't find metadata for token #${nftId}.`)
+              throw new Error(`Couldn't find metadata for Cred Token #${nftId}.`)
             }
             const response = await fetch(metadataURL)
             const data = await response.text()
@@ -75,10 +75,10 @@ const View: NextPage = () => {
   return (
     <Stack align="center" position="relative">
       <Head>
-        <title>’𝖈𝖍𝖎𝖊𝖛𝖊: 𝓥ⲓⲉⲱ #{nftId}</title>
+        <title>Cred View #{nftId}</title>
         <meta
           name="description"
-          content="MetaGame’s ’Chievemint NFTs"
+          content="SmartLaw Cred Tokens"
         />
       </Head>
       <HomeLink/>

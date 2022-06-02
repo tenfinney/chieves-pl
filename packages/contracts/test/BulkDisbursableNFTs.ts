@@ -30,7 +30,7 @@ beforeEach(async () => {
 
   token = await upgrades.deployProxy(
     Token,
-    ['MetaGame ’Chievemints', 'MG’s 🏆s'],
+    ['SmartLaw Cred'],
     { kind: 'uups', timeout: 10 * 60 * 1000 },
   )
 })

@@ -142,16 +142,16 @@ const Home: NextPage = () => {
   return (
     <Container maxW="full">
       <Head>
-        <title>𝔐𝔢𝔱𝔞𝔊𝔞𝔪𝔢’𝔰 ’𝓒𝓱𝓲𝓮𝓿𝓮𝓶𝓲𝓷𝓽𝓼</title>
+        <title>SmartLaw Cred Tokens</title>
         <meta
           name="description"
-          content="MetaGame’s ’Chievemint NFTs"
+          content="SmartLaw Cred Tokens"
         />
       </Head>
 
-      <chakra.header h="45vh">
+      <chakra.header h="25vh">
         <Flex maxW="40rem" margin="auto">
-          <Header mt="5vh" h="40vh"/>
+          <Header mt="5vh" h="20vh"/>
         </Flex>
       </chakra.header>
 

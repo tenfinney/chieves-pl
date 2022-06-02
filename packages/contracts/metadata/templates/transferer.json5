@@ -2,7 +2,7 @@
   name: '’Chievemints Transferer',
   description: 'By default ’chievemints cannot be transfered.\n\nHolders of this token can do transfers.',
   decimals: 0,
-  external_url: 'https://metafam.github.io/chievemints/disburse/',
+  external_url: 'https://tenfinney.github.io/cred/disburse/',
   image: 'ipfs://{assets-cid}/transfer.svg',
   background_color: 'FFB273',
   properties: {},

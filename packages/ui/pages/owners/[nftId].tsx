@@ -11,7 +11,7 @@ import Head from 'next/head'
 const NFT_OWNERS = gql`
   query NFTOwners($tokenId: String) {
     nfts(where:{ 
-      contract: "0x2fd05e332fcb602772337a5684b189f26a92cfab",
+      contract: "0xa77e11B845e31e2c24dDc004fb8f93759C097274",
       tokenID: $tokenId
     }) {
       ownership {
@@ -62,7 +62,7 @@ export const Owners = () => {
     const process = async () => {
       if(data) {
         if(data.nfts.length !== 1) {
-          throw new Error(`Got ${data.nfts.length} NFTs`)
+          throw new Error(`Got ${data.nfts.length} Digital Token`)
         }
         setOwnerships(
           await Promise.all(

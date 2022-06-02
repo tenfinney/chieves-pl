@@ -55,7 +55,7 @@ export const TokenFilterForm: React.FC<{
       sx={{ a: { textDecoration: 'underline' } }}
     >
       <FormControl>
-        <Flex align="center" my={1}>
+        <Flex align="center" maxW="100px" my={1}>
           <FormLabel _after={{ content: '":"' }}>Limit</FormLabel>
           <Input
             type="number"
@@ -65,7 +65,7 @@ export const TokenFilterForm: React.FC<{
         </Flex>
       </FormControl>
       <FormControl>
-        <Flex align="center" my={1}>
+        <Flex align="center" maxW="100px" my={1}>
           <FormLabel _after={{ content: '":"' }}>Offset</FormLabel>
           <Input
             type="number"

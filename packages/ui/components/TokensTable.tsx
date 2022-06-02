@@ -146,21 +146,21 @@ const ActionsTd:React.FC<Token> = ({ token }) => (
     <Flex justify="center" fontSize="150%">
       <NextLink href={`/edit/${token.id}`} passHref>
         <ChakraLink>
-          <Tooltip label="Edit Metadata" hasArrow>
+          <Tooltip label="Edit Token Metadata" hasArrow>
             ✏️
           </Tooltip>
         </ChakraLink>
       </NextLink>
       <NextLink href={`/view/${token.id}`} passHref>
         <ChakraLink ml={2}>
-          <Tooltip label="View This NFT" hasArrow>
+          <Tooltip label="View this NFT" hasArrow>
             👁
           </Tooltip>
         </ChakraLink>
       </NextLink>
       <NextLink href={`/disburse/${token.id}`} passHref>
         <ChakraLink ml={2}>
-          <Tooltip label="Disburse This NFT" hasArrow>
+          <Tooltip label="Disburse this NFT" hasArrow>
             💸
           </Tooltip>
         </ChakraLink>

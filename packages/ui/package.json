@@ -2,7 +2,7 @@
   "name": "@metagame-chievemints/ui",
   "version": "0.2.0",
   "license": "CC0-1.0",
-  "homepage": "https://chiev.es",
+  "homepage": "https://cred.freeweb3.com",
   "type": "commonjs",
   "scripts": {
     "dev": "next dev",

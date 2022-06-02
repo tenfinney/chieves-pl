@@ -17,7 +17,7 @@ import { MetaMaskError, NestedError } from '../../lib/types'
 export const New: NextPage = () => (
   <Container maxW="full">
     <Head>
-      <title>’𝖈𝖍𝖎𝖊𝖛𝖊: Ⲛⲉⲱ Ⲧⲟⲕⲉⲛ</title>
+      <title>New SmartLaw Cred Token</title>
     </Head>
     <chakra.header>
       <Flex justify="center">
@@ -53,7 +53,7 @@ const Content: React.FC = () => {
     try {
       if(!rwContract) {
         throw new Error(
-          'Connect your wallet to reserve an id.'
+          'Connect your Web3 account to reserve an ID.'
         )
       }
       const tx = await rwContract['create()']()
@@ -63,7 +63,7 @@ const Content: React.FC = () => {
       )
       if(!event) {
         throw new Error(
-          'Couldn’t find a creation event.'
+          'Couldn’t find a token creation event.'
         )
       }
       const [id, _controller] = event.args
@@ -94,7 +94,7 @@ const Content: React.FC = () => {
           <Heading textAlign="center">
             Create A New
             <chakra.span
-              title="Non-Fungible Token"
+              title="Unique Cred Token"
               ml={2}
             >
               NFT
@@ -152,12 +152,12 @@ const Content: React.FC = () => {
                   colorScheme="green"
                   onClick={reserve}
                 >
-                  Reserve An ID
+                  Reserve a Token ID
                 </Button>
               )
             }
             return (
-              <Text>¿How’d we get here?</Text>
+              <Text>How did we get here?</Text>
             )
           })()}
         </Stack>

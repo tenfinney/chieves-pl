@@ -102,7 +102,7 @@ const deploy = async (contract: string, _args = [], overrides = {}, libraries = 
     )
     deployed = await upgrades.deployProxy(
       artifacts,
-      ['MetaGame ’Chievemints', 'MG’s 🏆s'],
+      ['SmartLaw Cred Tokens'],
       { kind: 'uups', timeout: 10 * 60 * 1000 },
     )
   } else {
