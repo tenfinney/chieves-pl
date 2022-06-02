@@ -20,8 +20,8 @@ export const New: NextPage = () => (
       <title>New SmartLaw Cred Token</title>
     </Head>
     <chakra.header>
-      <Flex justify="center">
-        <Header my="7vh" maxW="xl"/>
+      <Flex justify="left">
+        <Header my="1vh" maxW="xl"/>
       </Flex>
     </chakra.header>
     <chakra.main>
@@ -92,12 +92,12 @@ const Content: React.FC = () => {
       <Center>
         <Stack>
           <Heading textAlign="center">
-            Create A New
+            Create a new
             <chakra.span
               title="Unique Cred Token"
               ml={2}
             >
-              NFT
+              Cred Token
             </chakra.span>
           </Heading>
           {(() => {
@@ -152,12 +152,12 @@ const Content: React.FC = () => {
                   colorScheme="green"
                   onClick={reserve}
                 >
-                  Reserve a Token ID
+                  Reserve a Cred Token ID
                 </Button>
               )
             }
             return (
-              <Text>How did we get here?</Text>
+              <Text>We are glad you showed up!</Text>
             )
           })()}
         </Stack>

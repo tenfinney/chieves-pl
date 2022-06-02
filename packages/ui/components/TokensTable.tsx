@@ -100,7 +100,7 @@ const LinkTd:React.FC<Token> = ({ token }) => (
         fontSize="150%"
       >
         <Tooltip label={token.metadata.external_url} hasArrow>
-          🌐
+        🔗
         </Tooltip>
       </ChakraLink>
     )}
@@ -113,7 +113,7 @@ const URITd:React.FC<Token> = ({ token }) => (
       <Flex justify="center" fontSize="150%">
         <ChakraLink href={httpURL(token.uri)} isExternal>
           <Tooltip label={token.uri} hasArrow>
-            🔗
+          👑
           </Tooltip>
         </ChakraLink>
         <ChakraLink
@@ -154,14 +154,14 @@ const ActionsTd:React.FC<Token> = ({ token }) => (
       <NextLink href={`/view/${token.id}`} passHref>
         <ChakraLink ml={2}>
           <Tooltip label="View this NFT" hasArrow>
-            👁
+          🔆
           </Tooltip>
         </ChakraLink>
       </NextLink>
       <NextLink href={`/disburse/${token.id}`} passHref>
         <ChakraLink ml={2}>
           <Tooltip label="Disburse this NFT" hasArrow>
-            💸
+          🌀
           </Tooltip>
         </ChakraLink>
       </NextLink>
@@ -191,7 +191,7 @@ export const TokensTable: React.FC<{
           <Th>Link</Th>
           <Th>Metadata</Th>
           <Th>Total</Th>
-          <Th>Actions</Th>
+          <Th>Token Actions</Th>
         </Tr>
       </Thead>
       <Tbody>

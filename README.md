@@ -1,4 +1,4 @@
-# ’Chievemints
+# SmartLaw Cred Tokens
 
 ![SmartLaw Cred Tokens](packages/ui/public/logo.svg)
 

@@ -10,7 +10,7 @@ import {
 import Markdown from 'react-markdown'
 import { httpURL } from 'lib/helpers'
 import type { Maybe, ERC1155Metadata, TokenState } from 'lib/types'
-import { Header, TokensTable } from 'components'
+import { Header, Header0, TokensTable } from 'components'
 import { useWeb3 } from 'lib/hooks'
 import { useRouter } from 'next/router'
 import TokenFilterForm from 'components/TokenFilterForm'
@@ -151,7 +151,10 @@ const Home: NextPage = () => {
 
       <chakra.header h="25vh">
         <Flex maxW="40rem" margin="auto">
-          <Header mt="5vh" h="20vh"/>
+          <Header0 mt="1vh" h="10vh"/>
+        </Flex>
+        <Flex maxW="40rem" margin="auto">
+          <Header mt="2vh" h="20vh"/>
         </Flex>
       </chakra.header>
 

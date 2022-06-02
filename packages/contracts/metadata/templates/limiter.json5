@@ -1,5 +1,5 @@
 {
-  name: '’Chievemints Limiter',
+  name: 'Cred Token Limiter',
   description: 'The holder of this NFT can change the maximum allowed to be minted for a ’chievemint.',
   decimals: 0,
   external_url: 'https://tenfinney.github.io/cred/',

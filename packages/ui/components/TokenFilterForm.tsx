@@ -55,35 +55,6 @@ export const TokenFilterForm: React.FC<{
       sx={{ a: { textDecoration: 'underline' } }}
     >
       <FormControl>
-        <Flex align="center" maxW="100px" my={1}>
-          <FormLabel _after={{ content: '":"' }}>Limit</FormLabel>
-          <Input
-            type="number"
-            placeholder="Number of tokens to display."
-            {...register('limit')}
-          />
-        </Flex>
-      </FormControl>
-      <FormControl>
-        <Flex align="center" maxW="100px" my={1}>
-          <FormLabel _after={{ content: '":"' }}>Offset</FormLabel>
-          <Input
-            type="number"
-            placeholder="Number of tokens offset from Token 1."
-            {...register('offset')}
-          />
-        </Flex>
-      </FormControl>
-      <FormControl>
-        <Flex align="center" my={1} >
-          <FormLabel _after={{ content: '":"' }}>Visible&#xA0;List</FormLabel>
-          <Input
-            placeholder="Comma separated list of indices."
-            {...register('visibleList')}
-          />
-        </Flex>
-      </FormControl>
-      <FormControl>
         <Flex align="center" my={1}>
           <Controller
             control={control}
@@ -98,6 +69,35 @@ export const TokenFilterForm: React.FC<{
                 View&#xA0;Permission&#xA0;Tokens
               </Checkbox>
             )}
+          />
+        </Flex>
+      </FormControl>
+      <FormControl>
+        <Flex align="center" maxW="200px" my={1}>
+          <FormLabel _after={{ content: '":"' }}>Limit</FormLabel>
+          <Input
+            type="number"
+            placeholder="Number of tokens to display."
+            {...register('limit')}
+          />
+        </Flex>
+      </FormControl>
+      <FormControl>
+        <Flex align="center" maxW="200px" my={1}>
+          <FormLabel _after={{ content: '":"' }}>Offset</FormLabel>
+          <Input
+            type="number"
+            placeholder="Number of tokens offset from Token 1."
+            {...register('offset')}
+          />
+        </Flex>
+      </FormControl>
+      <FormControl>
+        <Flex align="center" maxW="600px" my={1} >
+          <FormLabel _after={{ content: '":"' }}>Visible&#xA0;List</FormLabel>
+          <Input
+            placeholder="Comma separated list of token IDs."
+            {...register('visibleList')}
           />
         </Flex>
       </FormControl>
