@@ -7,7 +7,7 @@ import {
 import { utils, Contract } from 'ethers'
 import R from 'ramda'
 
-const initializerArgs = ['MetaGame ’Chievemints', 'MG’s 🏆s']
+const initializerArgs = ['SmartLaw Tokens', 'WLX']
 
 const chain = (
   process.env.HARDHAT_NETWORK ?? config.defaultNetwork
