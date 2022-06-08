@@ -1,18 +1,26 @@
 import { Flex, FlexProps } from '@chakra-ui/react'
 import { LinkedSVG } from 'components'
 
-export const Header0: React.FC<
+export const Header: React.FC<
   FlexProps & { links?: Record<'cup' | 'sign', string> }
 > = ({ links = { cup: '/new', sign: '/' }, ...props }) => (
   <Flex  grow={1} {...props}>
     <LinkedSVG
-      w="min(20%, 20vh)" h="auto"
-      ml="-5%"
-      svg="smartlaw-w.png"
+      w="min(40%, 50vh)" h="auto"
+      ml="-20%"
+      svg="logo.svg"
       href={links.cup}
       title="Create A New Token"
+    />
+    <LinkedSVG
+      w="50%" h="auto"
+      maxH="500px"
+      ml="-10%"
+      svg="header.svg"
+      href={links.sign}
+      title="View Existing Tokens"
     />
   </Flex>
 )
 
-export default Header0
+export default Header

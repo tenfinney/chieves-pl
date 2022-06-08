@@ -1,0 +1,119 @@
+import { useRouter } from 'next/router'
+import { gql, useQuery } from '@apollo/client'
+import { Box, Heading, ListItem, OrderedList } from '@chakra-ui/react'
+import { useWeb3 } from 'lib/hooks'
+import { useEffect, useState } from 'react'
+import { httpURL } from 'lib/helpers'
+import { HomeLink } from 'components'
+import { NextPage } from 'next'
+import Head from 'next/head'
+
+const NFT_OWNERS = gql`
+  query NFTOwners(
+    
+    $tokenId: String
+    # $limit: Int
+    # $lastId: String
+  ) {
+    nfts(where:{ 
+      contract: "0xa77e11b845e31e2c24ddc004fb8f93759c097274",
+      tokenID: $tokenId
+    }) {
+      # ownership(first: $limit, where: {id: }) {
+      ownership {
+        owner
+        quantity
+      }
+    }
+  }
+`
+
+export type Ownership = {
+  owner: string
+  quantity: number
+}
+
+export const Owners = () => {
+  let { query: { nftId } } = useRouter()
+  const [ownerships, setOwnerships] = (
+    useState<Array<Ownership>>([])
+  )
+  console.debug({nftId})
+  if(Array.isArray(nftId)) {
+    nftId = nftId[0]
+  }
+  const decId = nftId ? BigInt(nftId).toString() : null
+  const { loading, error, data } = useQuery(
+    NFT_OWNERS,
+    { variables: { tokenId: decId } },
+  )
+  console.log({data})
+  const [title, setTitle] = useState('𝘜𝘯𝘬𝘯𝘰𝘸𝘯')
+  const { ensProvider, roContract } = useWeb3()
+  console.debug({loading, error, data})
+  
+  useEffect(() => {
+    const lookup = async () => {
+      if(nftId) {
+        const uri = await roContract?.uri(nftId)
+        const response = await fetch(httpURL(uri))
+        const data = await response.json()
+        console.debug({data})
+        setTitle(data.name)
+      }
+    }
+    lookup()
+  }, [roContract])
+
+  useEffect(() => {
+    const process = async () => {
+      if(data) {
+        if(data.nfts.length !== 1) {
+          throw new Error(`Got ${data.nfts.length} Digital Token`)
+        }
+        setOwnerships(
+          await Promise.all(
+            data.nfts[0].ownership.map(
+              async (oship: Ownership) => {
+                let { owner } = oship
+                  const ens = (
+                    await ensProvider?.lookupAddress(owner)
+                  )
+                if (ens) {
+                  owner = ens 
+                }
+                return {
+                  owner, quantity: oship.quantity,
+                }
+              }  
+            )
+          )
+        )
+      }
+    }
+    process()
+  }, [data])
+  if (loading) return 'Loading…'
+  if (error) return `Error! ${error.message}`
+  return (
+    <Box ml={8}>
+      <Head>
+        <title>Owners</title>
+      </Head>
+
+      <HomeLink/>
+      <Heading mt={10} fontSize={20}>
+        {title}
+      </Heading>
+      <OrderedList>
+        {ownerships.map((ownership, idx) => (
+          <ListItem key={idx} ml={6}>
+            {`${ownership.owner} (${ownership.quantity})`}
+          </ListItem>
+        ))}
+      </OrderedList>
+    </Box>
+  )
+}
+
+export default Owners
