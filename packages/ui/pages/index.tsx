@@ -48,10 +48,9 @@ const Home: NextPage = () => {
   useEffect(() => {
     let visible = visibleParam
     if (visible) {
-      if(Array.isArray(visible)) {
+      if (Array.isArray(visible)) {
         ([visible] = visible)
       }
-      console.log({v:visible.split(/\s*,\s*/).filter((str) => str !== '')})
       setVisibleList(visible.split(/\s*,\s*/).filter((str) => str !== ''))
     }
   }, [visibleParam])
