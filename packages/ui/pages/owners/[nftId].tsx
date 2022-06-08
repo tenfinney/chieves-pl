@@ -1,18 +1,27 @@
 import { useRouter } from 'next/router'
 import { gql, useQuery } from '@apollo/client'
-import { Box, Heading, ListItem, OrderedList } from '@chakra-ui/react'
+import { Box, Heading, ListItem, OrderedList, Link } from '@chakra-ui/react'
 import { useWeb3 } from 'lib/hooks'
 import { useEffect, useState } from 'react'
 import { httpURL } from 'lib/helpers'
 import { HomeLink } from 'components'
+import contractAddress from 'contracts/polygon/BulkDisbursableNFTs.address'
 
+const LIMIT = 100
 const NFT_OWNERS = gql`
-  query NFTOwners($tokenId: String) {
+  query NFTOwners(
+    $tokenId: String
+    $contractAddress: String
+    $startAfter: String
+  ) {
     nfts(where:{ 
-      contract: "0x2fd05e332fcb602772337a5684b189f26a92cfab",
+      contract: $contractAddress,
       tokenID: $tokenId
     }) {
-      ownership {
+      ownership(where: {
+        id_gt: $startAfter
+      }) {
+        id
         owner
         quantity
       }
@@ -21,23 +30,31 @@ const NFT_OWNERS = gql`
 `
 
 export type Ownership = {
+  id: string
   owner: string
   quantity: number
 }
 
 export const Owners = () => {
-  let { query: { nftId } } = useRouter()
+  const { query } = useRouter()
+  let { nftId } = query
+  const { start_after: startAfter = '', offset = 0 } = query
+
   const [ownerships, setOwnerships] = (
     useState<Array<Ownership>>([])
   )
-  console.debug({nftId})
+  console.debug({nftId, startAfter })
   if(Array.isArray(nftId)) {
     nftId = nftId[0]
   }
   const decId = nftId ? BigInt(nftId).toString() : null
   const { loading, error, data } = useQuery(
     NFT_OWNERS,
-    { variables: { tokenId: decId } },
+    { variables: {
+      tokenId: decId,
+      contractAddress: contractAddress.toLowerCase(),
+      startAfter,
+    } },
   )
   const [title, setTitle] = useState('𝘜𝘯𝘬𝘯𝘰𝘸𝘯')
   const { ensProvider, roContract } = useWeb3()
@@ -74,7 +91,7 @@ export const Owners = () => {
                   owner = ens 
                 }
                 return {
-                  owner, quantity: oship.quantity,
+                  owner, quantity: oship.quantity, id: oship.id,
                 }
               }  
             )
@@ -92,7 +109,7 @@ export const Owners = () => {
       <Heading mt={10} fontSize={20}>
         {title}
       </Heading>
-      <OrderedList>
+      <OrderedList start={Number(offset) + 1}>
         {ownerships.map((ownership, idx) => (
           <ListItem key={idx} ml={6}>
             {console.debug({ownership})}
@@ -100,6 +117,13 @@ export const Owners = () => {
           </ListItem>
         ))}
       </OrderedList>
+      {ownerships.length === LIMIT && (
+        <Link href={
+          `?start_after=${ownerships.slice(-1)[0].id}&offset=${Number(offset) + LIMIT}`
+        }>
+          Next
+        </Link>
+      )}
     </Box>
   )
 }
