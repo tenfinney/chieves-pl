@@ -9,11 +9,17 @@ import { NextPage } from 'next'
 import Head from 'next/head'
 
 const NFT_OWNERS = gql`
-  query NFTOwners($tokenId: String) {
+  query NFTOwners(
+    
+    $tokenId: String
+    # $limit: Int
+    # $lastId: String
+  ) {
     nfts(where:{ 
-      contract: "0xa77e11B845e31e2c24dDc004fb8f93759C097274",
+      contract: "0xa77e11b845e31e2c24ddc004fb8f93759c097274",
       tokenID: $tokenId
     }) {
+      # ownership(first: $limit, where: {id: }) {
       ownership {
         owner
         quantity
@@ -41,6 +47,7 @@ export const Owners = () => {
     NFT_OWNERS,
     { variables: { tokenId: decId } },
   )
+  console.log({data})
   const [title, setTitle] = useState('𝘜𝘯𝘬𝘯𝘰𝘸𝘯')
   const { ensProvider, roContract } = useWeb3()
   console.debug({loading, error, data})

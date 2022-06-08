@@ -1,9 +1,9 @@
 {
-  name: '’Chievemints Superuser',
+  name: 'SmartLaw Superuser',
   description: 'A holder of this token has permission to perform nearly all the functions on the ’chievemints NFT contract.\n\nThey are not able to transfer other user’s ’chievemints.',
   decimals: 0,
-  external_url: 'https://tenfinney.github.io/cred/',
-  image: "ipfs://{assets-cid}/cop's hat.svg",
+  external_url: 'https://cred.freeweb3.com/',
+  image: "ipfs://{assets-cid}/trident.svg",
   background_color: 'D2BBFF',
   properties: {},
   attributes: [

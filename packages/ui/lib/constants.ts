@@ -5,5 +5,5 @@ export const IPFS_LINK_PATTERN = (
 )
 
 export const NFT_HOMEPAGE_BASE = (
-  'https://tenfinney.github.io/cred/view'
+  'https://cred.freeweb3.com/view'
 )

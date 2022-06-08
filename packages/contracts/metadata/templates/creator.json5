@@ -1,8 +1,8 @@
 {
-  name: '’Chievemints Creator',
+  name: 'SmartLaw Creator',
   description: 'Holders of this token can create new token types.',
   decimals: 0,
-  external_url: 'https://tenfinney.github.io/cred/edit/',
+  external_url: 'https://cred.freeweb3.com/edit/',
   image: 'ipfs://{assets-cid}/creator.svg',
   background_color: '01525B',
   properties: {},

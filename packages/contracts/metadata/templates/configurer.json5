@@ -1,9 +1,9 @@
 {
-  name: '’Chievemints Configurer',
+  name: 'SmartLaw Configurer',
   description: 'Holders of this token can update the metadata associated with a token.',
   decimals: 0,
-  external_url: 'https://tenfinney.github.io/cred/edit/',
-  image: 'ipfs://{assets-cid}/wrench & screwdriver.svg',
+  external_url: 'https://cred.freeweb3.com/edit/',
+  image: 'ipfs://{assets-cid}/configurer.svg',
   background_color: '01525B',
   properties: {},
   attributes: [

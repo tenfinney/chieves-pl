@@ -20,7 +20,7 @@ export const New: NextPage = () => (
       <title>New SmartLaw Cred Token</title>
     </Head>
     <chakra.header>
-      <Flex justify="left">
+      <Flex justify="center">
         <Header my="1vh" maxW="xl"/>
       </Flex>
     </chakra.header>

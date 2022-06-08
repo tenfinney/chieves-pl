@@ -149,12 +149,12 @@ const Home: NextPage = () => {
         />
       </Head>
 
-      <chakra.header h="25vh">
+      <chakra.header h="30vh">
         <Flex maxW="40rem" margin="auto">
           <Header0 mt="1vh" h="10vh"/>
         </Flex>
         <Flex maxW="40rem" margin="auto">
-          <Header mt="2vh" h="20vh"/>
+          <Header mt="1vh" h="20vh"/>
         </Flex>
       </chakra.header>
 
