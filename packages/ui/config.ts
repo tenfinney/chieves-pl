@@ -20,6 +20,10 @@ export const CONFIG = {
   ipfs: ipfsHTTPClient({
     host: 'ipfs.infura.io', port: 5001, protocol: 'https'
   }),  
+  nftGraph: (
+    process.env.NEXT_PUBLIC_NFT_GRAPH
+    ?? 'https://api.thegraph.com/subgraphs/name/alberthaotan/nft-matic'
+  ),
 }
 
 export default CONFIG
