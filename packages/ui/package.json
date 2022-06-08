@@ -13,7 +13,8 @@
     "pub": "yarn build && next export && touch out/.nojekyll && yarn deploy",
     "clean": "rm -rf .next/ out/",
     "itest": "jest --watch",
-    "test": "jest"
+    "test": "jest",
+    "vercel": "vercel"
   },
   "dependencies": {
     "@apollo/client": "^3.6.6",

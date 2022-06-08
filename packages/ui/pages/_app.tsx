@@ -7,10 +7,14 @@ import {
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
+  useQuery,
+  gql
 } from '@apollo/client'
+import { CONFIG } from 'config'
+
 
 const client = new ApolloClient({
-  uri: 'https://api.thegraph.com/subgraphs/name/alberthaotan/nft-matic',
+  uri: CONFIG.nftGraph,
   cache: new InMemoryCache(),
 })
 
