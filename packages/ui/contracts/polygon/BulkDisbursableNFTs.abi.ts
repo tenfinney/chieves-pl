@@ -208,6 +208,25 @@ export default [
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "Roles",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "account",
         "type": "address"
@@ -325,7 +344,7 @@ export default [
   {
     "inputs": [
       {
-        "internalType": "enum BulkDisbursableNFTs.Role[]",
+        "internalType": "enum Bits.Role[]",
         "name": "roles",
         "type": "uint8[]"
       }
@@ -349,7 +368,7 @@ export default [
         "type": "address"
       },
       {
-        "internalType": "enum BulkDisbursableNFTs.Role[]",
+        "internalType": "enum Bits.Role[]",
         "name": "roles",
         "type": "uint8[]"
       }
@@ -381,7 +400,7 @@ export default [
   {
     "inputs": [
       {
-        "internalType": "enum BulkDisbursableNFTs.Role",
+        "internalType": "enum Bits.Role",
         "name": "toDisable",
         "type": "uint8"
       },
@@ -418,7 +437,7 @@ export default [
   {
     "inputs": [
       {
-        "internalType": "enum BulkDisbursableNFTs.Role",
+        "internalType": "enum Bits.Role",
         "name": "role",
         "type": "uint8"
       },
@@ -447,7 +466,7 @@ export default [
   {
     "inputs": [
       {
-        "internalType": "enum BulkDisbursableNFTs.Role",
+        "internalType": "enum Bits.Role",
         "name": "role",
         "type": "uint8"
       },
@@ -465,7 +484,7 @@ export default [
   {
     "inputs": [
       {
-        "internalType": "enum BulkDisbursableNFTs.Role",
+        "internalType": "enum Bits.Role",
         "name": "role",
         "type": "uint8"
       },
@@ -488,7 +507,7 @@ export default [
   {
     "inputs": [
       {
-        "internalType": "enum BulkDisbursableNFTs.Role",
+        "internalType": "enum Bits.Role",
         "name": "role",
         "type": "uint8"
       }
@@ -507,7 +526,7 @@ export default [
   {
     "inputs": [
       {
-        "internalType": "enum BulkDisbursableNFTs.Role",
+        "internalType": "enum Bits.Role",
         "name": "role",
         "type": "uint8"
       },
@@ -536,7 +555,7 @@ export default [
   {
     "inputs": [
       {
-        "internalType": "enum BulkDisbursableNFTs.Role",
+        "internalType": "enum Bits.Role",
         "name": "role",
         "type": "uint8"
       },
@@ -560,7 +579,7 @@ export default [
   {
     "inputs": [
       {
-        "internalType": "enum BulkDisbursableNFTs.Role",
+        "internalType": "enum Bits.Role",
         "name": "role",
         "type": "uint8"
       },
@@ -727,6 +746,19 @@ export default [
   },
   {
     "inputs": [],
+    "name": "numRoles",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "owner",
     "outputs": [
       {
@@ -761,7 +793,7 @@ export default [
   {
     "inputs": [
       {
-        "internalType": "enum BulkDisbursableNFTs.Role",
+        "internalType": "enum Bits.Role",
         "name": "role",
         "type": "uint8"
       }
@@ -780,7 +812,7 @@ export default [
   {
     "inputs": [
       {
-        "internalType": "enum BulkDisbursableNFTs.Role",
+        "internalType": "enum Bits.Role",
         "name": "role",
         "type": "uint8"
       },
@@ -799,25 +831,6 @@ export default [
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "roleName",
-        "type": "string"
-      }
-    ],
-    "name": "roleValueForName",
-    "outputs": [
-      {
-        "internalType": "enum BulkDisbursableNFTs.Role",
-        "name": "role",
-        "type": "uint8"
-      }
-    ],
-    "stateMutability": "pure",
     "type": "function"
   },
   {

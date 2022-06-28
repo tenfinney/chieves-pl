@@ -196,6 +196,9 @@ const main = async () => {
       address: implementationAddress,
       constructorArguments: [],
     })
+    const library = await deploy({
+      contract: 'Bits'
+    })
   } catch(err) {
     console.error((err as Error).message)
   }

@@ -2,7 +2,7 @@ import { NextPage } from 'next'
 import { OptionsForm } from 'components'
 import {
   Button, Center, Flex, Heading, Spinner, Text, chakra,
-  Stack, Container, useToast,
+  Stack, Container, useToast, Table, Thead, Th, Tr, Tbody, Td, Checkbox, Input,
 } from '@chakra-ui/react'
 import { useWeb3 } from 'lib/hooks'
 import { useCallback, useEffect, useState } from 'react'
@@ -13,6 +13,7 @@ import { Header } from 'components'
 import { useRouter } from 'next/router'
 import { Event, utils as ethUtils } from 'ethers'
 import { MetaMaskError, NestedError } from '../../lib/types'
+import { useForm } from 'react-hook-form'
 
 export const New: NextPage = () => (
   <Container maxW="full">
@@ -28,17 +29,19 @@ export const New: NextPage = () => (
       <Content/>
     </chakra.main>
   </Container>
-) 
+)
 
 const Content: React.FC = () => {
   const {
-    rwContract, connecting, connect, chain, address,
+    ensProvider, constsContract, rwContract, connecting, connect, chain, address,
   } = useWeb3()
   const { query: { tokenId: id } } = useRouter()
   const [tokenId, setTokenId] = (
     useState(Array.isArray(id) ? id[0] : id)
   )
+  const [roles, setRoles] = useState<Array<string>>([])
   const [working, setWorking] = useState(false)
+  const { register, handleSubmit } = useForm()
   const toast = useToast()
 
   useEffect(() => {
@@ -47,7 +50,23 @@ const Content: React.FC = () => {
     }
   }, [id])
 
-  const reserve = useCallback(async () => {
+  useEffect(() => {
+    const load = async () => {
+      if(constsContract) {
+        const numRoles = await constsContract.numRoles()
+        const roles = await Promise.all(
+          Array.from({ length: numRoles }).map(async (_, idx) => (
+            await constsContract.roleNameByIndex(idx)
+          ))
+        )
+        setRoles(roles)
+      }
+    }
+
+    load()
+  }, [constsContract])
+
+  const reserve = useCallback(async (data) => {
     setWorking(true)
 
     try {
@@ -56,7 +75,47 @@ const Content: React.FC = () => {
           'Connect your wallet to reserve an id.'
         )
       }
-      const tx = await rwContract['create()']()
+      if(!constsContract){
+        throw new Error('Library not loaded.')
+      }
+      if(!ensProvider){
+        throw new Error('ENS provider not defined.')
+      }
+      const grants: Array<number> = []
+      const disables: Array<number> = []
+      await Promise.all(Object.entries(data).map(
+        async ([key, value]: [key: string, value: unknown]) => {
+          if(typeof value === 'boolean' && value) {
+            const [_, type, role] = key.match(/^(grant|disable)\((.+)\)$/) ?? []
+            console.log({type, role})
+            const roleId = await constsContract.roleValueForName(role)
+            switch(type) {
+              case 'grant': {
+                grants.push(roleId)
+                break
+              }
+              case 'disable': {
+                disables.push(roleId)
+                break
+              }
+              default: {
+                throw new Error(`Unknown operation: ${type}`)
+              }
+            }
+          }
+        }
+      ))
+
+      let { maintainer } = data
+      if(maintainer === '') {
+        maintainer = address
+      }
+      if(maintainer.includes('.')){
+        maintainer = ensProvider.lookupAddress(maintainer)
+      }
+      const tx = await rwContract['create(address,uint8[],uint8[])'](
+        maintainer, grants, disables
+      )
       const receipt = await tx.wait()
       const event = receipt.events.find(
         (evt: Event) => evt.event === 'Created'
@@ -69,6 +128,7 @@ const Content: React.FC = () => {
       const [id, _controller] = event.args
       setTokenId(id.toHexString())
     } catch(error) {
+      console.error({error})
       const msg = (
         (error as NestedError).error?.message
         ?? (error as MetaMaskError).data?.message
@@ -92,7 +152,7 @@ const Content: React.FC = () => {
       <Center>
         <Stack>
           <Heading textAlign="center">
-            Create A New
+            Create a new
             <chakra.span
               title="Non-Fungible Token"
               ml={2}
@@ -142,18 +202,49 @@ const Content: React.FC = () => {
               return (
                 <Flex justify="center" mt={7}>
                   <Spinner/>
-                  <Text ml={2}>Reserving…</Text>
+                  <Text ml={2}>Reserving your token…</Text>
                 </Flex>
               )
             }
             if(!tokenId) {
               return (
-                <Button
-                  colorScheme="green"
-                  onClick={reserve}
+                <Stack
+                  as="form"
+                  onSubmit={handleSubmit(reserve)}
                 >
-                  Reserve An ID
-                </Button>
+                  <Input
+                    {...register('maintainer')}
+                    placeholder="Maintainer Address (default Creator)"
+                  />
+                  <Table mb={5}>
+                    <Thead>
+                      <Tr>
+                        <Th>Role</Th>
+                        <Th>Grant</Th>
+                        <Th>Disable</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {roles.map((role) => (
+                        <Tr>
+                          <Td>{role}</Td>
+                          <Td textAlign="center">
+                            <Checkbox {...register(`grant(${role})`)}/>
+                          </Td>
+                          <Td textAlign="center">
+                          <Checkbox {...register(`disable(${role})`)}/>
+                          </Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                  <Button
+                    colorScheme="green"
+                    type="submit"
+                  >
+                    Reserve an ID
+                  </Button>
+                </Stack>
               )
             }
             return (
