@@ -381,6 +381,24 @@ export default [
   {
     "inputs": [
       {
+        "internalType": "enum BulkDisbursableNFTs.Role",
+        "name": "toDisable",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "disableRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "id",
         "type": "uint256"

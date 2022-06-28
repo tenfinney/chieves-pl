@@ -40,7 +40,6 @@ export const TokenFilterForm: React.FC<{
 
   }
   useEffect(() => {
-    console.log({offset})
     setValue('limit', limit)
     setValue('offset', offset)
     setValue('visibleList', visibleList.join(', '))

@@ -65,30 +65,33 @@ const Home: NextPage = () => {
           const TYPE_BOUNDARY = await constsContract.TYPE_BOUNDARY()
 
           const count = Math.min(limit, typeCount)
-          const start = offset < 0 ? typeCount + offset : offset 
-          const tokens = await Promise.all(
+          const start = offset < 0 ? typeCount + offset : offset
+          const tokens = (await Promise.all(
             Array.from({ length: count }).map(
               async (_, idx) => {
-                const index = start + idx + 1
-                const id = (await roContract.tokenByIndex(index))
-                const hide = (
-                  (
-                    !gatingVisible
-                    && (
-                      (id.toBigInt() & ((BigInt(2**TYPE_WIDTH - 1)) << BigInt(TYPE_BOUNDARY)))
-                      === GATING_TYPE.toBigInt()
+                try {
+                  const index = start + idx + 1
+                  const id = (await roContract.tokenByIndex(index))
+                  const hide = (
+                    (
+                      !gatingVisible
+                      && (
+                        (id.toBigInt() & ((BigInt(2**TYPE_WIDTH - 1)) << BigInt(TYPE_BOUNDARY)))
+                        === GATING_TYPE.toBigInt()
+                      )
+                    )
+                    || (
+                      visibleList.length > 0
+                      && !visibleList.includes((index).toString())
                     )
                   )
-                  || (
-                    visibleList.length > 0
-                    && !visibleList.includes((index).toString())
-                  ) 
-                )
-
-                return { id: id.toHexString(), hide, index }
+                  return { id: id.toHexString(), hide, index }
+                } catch(err) {
+                  return null
+                }
               }
             )
-          )
+          )).filter((tkn): tkn is TokenState => Boolean(tkn))
 
           setTokens(tokens)
 
@@ -115,7 +118,6 @@ const Home: NextPage = () => {
                   console.error('JSON Error', { error, data })
                 }
               } catch(error) {
-                console.warn({ error })
                 setToken(index, {
                   error: (error as Error).message ?? error
                 })
@@ -135,7 +137,7 @@ const Home: NextPage = () => {
 
       load()
     },
-    [roContract, constsContract, gatingVisible, visibleList, limit], 
+    [roContract, constsContract, gatingVisible, visibleList, limit],
   )
 
   return (
