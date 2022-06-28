@@ -30,7 +30,7 @@ beforeEach(async () => {
     'BulkDisbursableNFTs'
   )
   const Bits = await ethers.getContractFactory(
-    'bits'
+    'Bits'
   )
   token = await upgrades.deployProxy(
     Token,
@@ -344,6 +344,59 @@ describe('The Token Contract', () => {
       ).to.equal(5)
     }
 
+  )
+
+  it(
+    'permits unrestricted transfers.',
+    async () => {
+      const creatorRole = await token['roleValueForName(string)']('Creator')
+      const creatorGate = await token['roleToken(uint8)'](creatorRole)
+
+      await transact({
+        method: 'grantRole(uint8,address)',
+        args: [creatorRole, creator.address],
+      })
+
+      expect(
+        await token.balanceOf(creator.address, creatorGate),
+        'a user to have a gating token when granted a role'
+      ).to.equal(1)
+
+      expect(
+        await token['hasRole(uint8,address)'](creatorRole, creator.address),
+        'a user granted a role to have it',
+      ).to.be.true
+
+      const minterRole = await token['roleValueForName(string)']('Minter')
+      const lastIndex = (await token.typeSupply()).toBigInt()
+      await transact({ sender: creator, method: 'create(uint8[])', args: [[minterRole]] })
+      expect((await token.typeSupply()).toBigInt() - lastIndex).to.equal(2n)
+      const createdId = await token.tokenByIndex(lastIndex +1n)
+
+      await expect(
+        transact({
+          sender: creator,
+          method: 'mint(address,uint256,uint256,bytes)',
+          args: [creator.address,createdId,5,[]]
+        }),
+        'a user with a Creator role to be able to create new types',
+      ).to.eventually.be.fulfilled
+
+      expect(
+        await token.balanceOf(creator.address, createdId),
+        'a user to have a gating token when granted a role'
+      ).to.equal(5)
+
+      const transfererRole = await token['roleValueForName(string)']('Transferer')
+      await token.disableRole(
+        transfererRole, createdId
+      )
+      await transact({
+        sender: creator,
+        method: "safeTransferFrom(address,address,uint256,uint256,bytes)",
+        args: [creator.address, owner.address, createdId, 2, []],
+      })
+    }
   )
 
 
