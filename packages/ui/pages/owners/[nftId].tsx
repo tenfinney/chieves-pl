@@ -112,7 +112,6 @@ export const Owners = () => {
       <OrderedList start={Number(offset) + 1}>
         {ownerships.map((ownership, idx) => (
           <ListItem key={idx} ml={6}>
-            {console.debug({ownership})}
             {`${ownership.owner} (${ownership.quantity})`}
           </ListItem>
         ))}
