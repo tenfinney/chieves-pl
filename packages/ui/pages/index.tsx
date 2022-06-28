@@ -155,6 +155,7 @@ const Home: NextPage = () => {
         <Flex maxW="40rem" margin="auto">
           <Header mt="1vh" h="20vh"/>
         </Flex>
+
       </chakra.header>
 
       <chakra.main>

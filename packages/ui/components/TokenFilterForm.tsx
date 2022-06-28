@@ -1,59 +1,95 @@
 import { FormValues } from '@/lib/types'
-import { Box, Button, Checkbox, Flex, FormControl, FormLabel, Input } from '@chakra-ui/react'
+import {
+  Box,
+  Button,
+  Checkbox,
+  Flex,
+  FormControl,
+  FormLabel,
+  Input,
+  Text,
+} from '@chakra-ui/react'
 import { Dispatch, SetStateAction, useEffect, useRef } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import { Header1 } from 'components'
 
 export type FilterValues = {
-  limit: number
-  offset: number
-  visibleList: string
-  gatingVisible: boolean
-}
+  limit: number;
+  offset: number;
+  visibleList: string;
+  gatingVisible: boolean;
+};
 
 export const TokenFilterForm: React.FC<{
-  limit: number
+  limit: number;
 
-  setLimit: (limit: SetStateAction<number>) => void
-  offset: number
-  setOffset: (offset: SetStateAction<number>) => void
-  gatingVisible: boolean
-  setGatingVisible: (gatingVisible: SetStateAction<boolean>) => void
-  visibleList: Array<string>
-  setVisibleList: (visibleList: SetStateAction<Array<string>>) => void 
+  setLimit: (limit: SetStateAction<number>) => void;
+  offset: number;
+  setOffset: (offset: SetStateAction<number>) => void;
+  gatingVisible: boolean;
+  setGatingVisible: (gatingVisible: SetStateAction<boolean>) => void;
+  visibleList: Array<string>;
+  setVisibleList: (visibleList: SetStateAction<Array<string>>) => void;
 }> = ({
-  limit = 10, setLimit, offset = 0, setOffset,
-  gatingVisible = false, setGatingVisible,
-  visibleList = [], setVisibleList
+  limit = 10,
+  setLimit,
+  offset = 0,
+  setOffset,
+  gatingVisible = false,
+  setGatingVisible,
+  visibleList = [],
+  setVisibleList,
 }) => {
   const {
-    register, handleSubmit, control, setValue,
-    formState: {
-      errors, isSubmitting: processing, isDirty: dirty,
-    },
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors, isSubmitting: processing, isDirty: dirty },
   } = useForm<FilterValues>()
   const submit = async (data: FilterValues) => {
-    console.log({data})
+    console.log({ data })
     setLimit(Number(data.limit))
     setOffset(Number(data.offset))
     setGatingVisible(data.gatingVisible)
-    setVisibleList(data.visibleList?.split(/\s*,\s*/).filter((str) => str !== ''))
-
+    setVisibleList(
+      data.visibleList?.split(/\s*,\s*/).filter((str) => str !== '')
+    )
   }
   useEffect(() => {
-    console.log({offset})
+    console.log({ offset })
     setValue('limit', limit)
     setValue('offset', offset)
     setValue('visibleList', visibleList.join(', '))
     setValue('gatingVisible', gatingVisible)
-    
   }, [limit, offset, visibleList, gatingVisible])
 
   return (
     <Box
-      as="form" onSubmit={handleSubmit(submit)}
-      mt={10} mb="1rem" maxW={['100%', 'min(85vw, 50em)']}
+      as="form"
+      onSubmit={handleSubmit(submit)}
+      mt={10}
+      ml={20}
+      mb="1rem"
+      maxW={['100%", "min(85vw, 50em)']}
       sx={{ a: { textDecoration: 'underline' } }}
     >
+      <Header1/>
+      <Text fontSize="24pt" mt="1rem" fontWeight="bold">
+        ERC-1155 Token Minting
+      </Text>
+      <Text fontSize="18pt" fontWeight="bold">
+        Digital Tokens on the Polygon EVM Blockchain and IPFS
+      </Text>
+      <Text fontSize="12pt" fontWeight="regular">
+        Each token reservation mints one (1) master token and three (3) role
+        tokens. Minter, Configurer, Limiter tokens are automatically minted with
+        the master token and can be assigned to third-parties for
+        administration.
+      </Text>
+      <br />
+      <hr/>
+      <br />
       <FormControl>
         <Flex align="center" my={1}>
           <Controller
@@ -61,11 +97,7 @@ export const TokenFilterForm: React.FC<{
             name="gatingVisible"
             defaultValue={gatingVisible}
             render={({ field: { onChange, value, ref } }) => (
-              <Checkbox
-                onChange={onChange}
-                ref={ref}
-                isChecked={value}
-              >
+              <Checkbox onChange={onChange} ref={ref} isChecked={value}>
                 View&#xA0;Permission&#xA0;Tokens
               </Checkbox>
             )}
@@ -73,7 +105,7 @@ export const TokenFilterForm: React.FC<{
         </Flex>
       </FormControl>
       <FormControl>
-        <Flex align="center" maxW="200px" my={1}>
+        <Flex align="center" maxW="200px" my={4}>
           <FormLabel _after={{ content: '":"' }}>Limit</FormLabel>
           <Input
             type="number"
@@ -83,7 +115,7 @@ export const TokenFilterForm: React.FC<{
         </Flex>
       </FormControl>
       <FormControl>
-        <Flex align="center" maxW="200px" my={1}>
+        <Flex align="center" maxW="200px" my={4}>
           <FormLabel _after={{ content: '":"' }}>Offset</FormLabel>
           <Input
             type="number"
@@ -93,7 +125,7 @@ export const TokenFilterForm: React.FC<{
         </Flex>
       </FormControl>
       <FormControl>
-        <Flex align="center" maxW="600px" my={1} >
+        <Flex align="center" maxW="600px" my={1}>
           <FormLabel _after={{ content: '":"' }}>Visible&#xA0;List</FormLabel>
           <Input
             placeholder="Comma separated list of token IDs."
@@ -102,10 +134,10 @@ export const TokenFilterForm: React.FC<{
         </Flex>
       </FormControl>
 
+      <Button type="submit" size="lg" colorScheme='green' ml='0px' mt='20px'>View</Button>
+      <Header1/>
 
-      <Button type="submit">
-        View
-      </Button>
+
     </Box>
   )
 }
