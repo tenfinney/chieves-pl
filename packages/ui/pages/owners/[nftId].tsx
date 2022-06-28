@@ -1,6 +1,9 @@
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 import { gql, useQuery } from '@apollo/client'
-import { Box, Heading, ListItem, OrderedList, Link } from '@chakra-ui/react'
+import {
+  Box, Heading, ListItem, OrderedList, Link as ChakraLink
+} from '@chakra-ui/react'
 import { useWeb3 } from 'lib/hooks'
 import { useEffect, useState } from 'react'
 import { httpURL } from 'lib/helpers'
@@ -71,7 +74,7 @@ export const Owners = () => {
       }
     }
     lookup()
-  }, [roContract])
+  }, [nftId, roContract])
 
   useEffect(() => {
     const process = async () => {
@@ -84,9 +87,9 @@ export const Owners = () => {
             data.nfts[0].ownership.map(
               async (oship: Ownership) => {
                 let { owner } = oship
-                  const ens = (
-                    await ensProvider?.lookupAddress(owner)
-                  )
+                const ens = (
+                  await ensProvider?.lookupAddress(owner)
+                )
                 if (ens) {
                   owner = ens 
                 }
@@ -117,10 +120,18 @@ export const Owners = () => {
         ))}
       </OrderedList>
       {ownerships.length === LIMIT && (
-        <Link href={
-          `?start_after=${ownerships.slice(-1)[0].id}&offset=${Number(offset) + LIMIT}`
-        }>
-          Next
+        <Link
+          href={{
+            pathname: '/owners',
+            query: {
+              nftId,
+              start_after: ownerships.slice(-1)[0].id,
+              offset: Number(offset) + LIMIT,
+            },
+          }}
+          passHref
+        >
+          <ChakraLink>Next</ChakraLink>
         </Link>
       )}
     </Box>
