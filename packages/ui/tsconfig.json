@@ -25,7 +25,6 @@
     "incremental": true,
     "baseUrl": ".",
     "composite": true,
-    // "noEmit": true,
     "paths": {
       "@/lib/*": [
         "lib/*"

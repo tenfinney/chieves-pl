@@ -6,70 +6,31 @@ import {
 } from 'hardhat'
 import { utils, Contract } from 'ethers'
 import R from 'ramda'
-import { Maybe } from '../../ui/lib/types'
 
-const name = 'BulkDisbursableNFTs'
-
-const DEBUG = false
-const debug = (...info: Array<unknown>) => {
-  if (DEBUG) console.debug(...info)
-}
+const initializerArgs = ['MetaGame ’Chievemints', 'MG’s 🏆s']
 
 const chain = (
   process.env.HARDHAT_NETWORK ?? config.defaultNetwork
 )
-
-const main = async () => {
-  console.log(`\n\n 📡 Deploying: ${name}…\n`)
-
-  const proxy = await deploy(name)
-
-  //const yourContract = await ethers.getContractAt('YourContract', '0xaAC799eC2d00C013f1F11c37E654e59B0429DF6A') //<-- if you want to instantiate a version of a contract at a specific address!
-  //If you want to verify your contract on tenderly.co (see setup details in the scaffold-eth README!)
-  /*
-  await tenderlyVerify(
-    {contractName: 'YourContract',
-     contractAddress: yourContract.address
-  })
-  */
-
-  const implementationAddress = (
-    await upgrades.erc1967.getImplementationAddress(proxy.address)
-  )
-
-  const verification = (
-    await tenderlyVerify({ contract: name, address: implementationAddress })
-  )
-
-  try {
-    console.log(chalk.hex('#FFD25E')(
-      `\n 🔍 Verifying ${chalk.hex('#8454FF')(implementationAddress)}`
-      + ` on ${['polygon', 'mumbai'].includes(chain) ? 'Polygon' : 'Ether'}scan…\n`
-    ))
-    await run('verify:verify', {
-      address: implementationAddress,
-      constructorArguments: [],
-    })
-  } catch(err) {
-    console.error((err as Error).message)
-  }
-
-  let saveDir = config.paths.artifacts
-  if(process.env.PWD && saveDir.startsWith(process.env.PWD)) {
-    saveDir = saveDir.substring(process.env.PWD.length + 1)
-  }
-  console.log(
-    '\n 💾  Artifacts (address, abi, and args) saved to:'
-    + ` ${chalk.hex('#87FF37')(saveDir)}\n\n` 
-  )
-}
 
 const fileTemplates = {
   address: `artifacts/${network.name}/{contract}.address`,
   args: `artifacts/${network.name}/{contract}.args`,
 }
 
-const deploy = async (contract: string, _args = [], overrides = {}, libraries = {}) => {
+type DeployArgs = {
+  contract: string
+  args?: Array<any>
+  libraries?: Record<string, string>
+  proxy?: boolean
+}
+
+const deploy = async ({
+  contract,
+  args = [],
+  libraries = {},
+  proxy = false,
+}: DeployArgs) => {
   const files = Object.fromEntries(
     Object.entries(fileTemplates).map(
       ([name, template]) => {
@@ -87,99 +48,110 @@ const deploy = async (contract: string, _args = [], overrides = {}, libraries = 
 
   if(!ethers) throw new Error('`ethers` is not defined.')
 
-  const args = _args ?? []
+  args ??= []
   const artifacts = await ethers.getContractFactory(
     contract, { libraries }
   )
 
-  let deployed
+  let deployment
   let impl: { new?: string, old?: string } = {}
 
-  if(!fs.existsSync(files.address)) {
-    console.log(
-      `\n 🥂 ${chalk.hex('#FF7D31')(files.address)} doesn't exist;`
-      + ' creating a new proxy…'
-    )
-    deployed = await upgrades.deployProxy(
-      artifacts,
-      ['SmartLaw Cred Tokens'],
-      { kind: 'uups', timeout: 10 * 60 * 1000 },
-    )
-  } else {
-    const existing = (
-      fs.readFileSync(files.address).toString().trim()
-    )
-    impl.old = (
-      await upgrades.erc1967.getImplementationAddress(existing)
-    )
+  if(proxy) {
+    if(!fs.existsSync(files.address)) {
+      console.log(
+        `\n 🥂 ${chalk.hex('#FF7D31')(files.address)} doesn't exist;`
+        + ' creating a new proxy…'
+      )
+      deployment = await upgrades.deployProxy(
+        artifacts,
+        args,
+        { kind: 'uups', timeout: 10 * 60 * 1000 },
+      )
+    } else {
+      const existing = (
+        fs.readFileSync(files.address).toString().trim()
+      )
+      impl.old = (
+        await upgrades.erc1967.getImplementationAddress(existing)
+      )
 
-    console.log(
-      `\n ⚇ Existing deployment proxied at ${chalk.hex('#AD4EFF')(existing)}`
-      + ` for implementation ${chalk.hex('#87BED5')(impl.old)};`
-      + ' upgrading'
-    )
-    deployed = await upgrades.upgradeProxy(
-      existing,
-      artifacts,
-      { kind: 'uups', timeout: 10 * 60 * 1000 },
-    )
+      console.log(
+        `\n ⚇ Existing deployment proxied at ${chalk.hex('#AD4EFF')(existing)}`
+        + ` for implementation ${chalk.hex('#87BED5')(impl.old)};`
+        + ' upgrading'
+      )
+      deployment = await upgrades.upgradeProxy(
+        existing,
+        artifacts,
+        { kind: 'uups', timeout: 10 * 60 * 1000 },
+      )
+    }
+  } else {
+    deployment = await artifacts.deploy()
   }
 
   const {
-    address: proxy,
+    address: deployed,
     signer: signator,
     deployTransaction: {
       gasPrice: gas, hash: tx, chainId: chain,
     },
-  } = deployed
+  } = deployment
   const signer = await signator.getAddress()
-  const gasPrice = gas ?? 'Undefined'
+  const gasPrice = gas ?? '𝕌𝕟𝕕𝕖𝕗𝕚𝕟𝕖𝕕'
 
   console.debug(
     ` 🍅 ${chalk.hex('#00AA7F')('Deployed in TX:')} `
     + chalk.hex('#6572AA')(tx)
   )
-  let loops = 0
-  const timeout =  4 * 1000
-  const maxLoops = 25
-  let done = false
 
-  while(!done && ++loops <= maxLoops) {
-    try {
-      impl.new = (
-        await upgrades.erc1967.getImplementationAddress(proxy)
-      )
-    } catch(err) {} // fails if the proxy isn't yet connected
-    done = impl.new != null && impl.old !== impl.new
-    if(!done) {
-      console.info(
-        ` ${chalk.hex('#FF0606')(loops.toString())}:`
-        + ' No new implmentation found at'
-        + ` ${chalk.hex('#FFF013')(proxy)};`
-        + ` sleeping ${timeout / 1000}s`
-      )
-      await sleep(timeout)
+  if(proxy) {
+    let loops = 0
+    const timeout =  4 * 1000
+    const maxLoops = 25
+    let done = false
+
+    while(!done && ++loops <= maxLoops) {
+      try {
+        impl.new = (
+          await upgrades.erc1967.getImplementationAddress(deployed)
+        )
+      } catch(err) {} // fails if the proxy isn't yet connected
+      done = impl.new != null && impl.old !== impl.new
+      if(!done) {
+        console.info(
+          ` ${chalk.hex('#FF0606')(loops.toString())}:`
+          + ' No new implmentation found at'
+          + ` ${chalk.hex('#FFF013')(deployed)};`
+          + ` sleeping ${timeout / 1000}s`
+        )
+        await sleep(timeout)
+      }
+    }
+
+    if(!impl.new) {
+      throw new Error('Proxy implementation never loaded.')
     }
   }
 
-  if(!impl.new) {
-    throw new Error('Proxy implementation never loaded.')
-  }
-
   console.log(
-    `\n 📄 ${chalk.cyan(contract)},`
-    + ` deployed as a proxy at ${chalk.magenta(proxy)}`
-    + ` to the implementation at ${chalk.hex('#DE307E')(impl.new)}`
+    `\n 📄 ${chalk.cyan(contract)}, deployed`
+    + (proxy ? (
+      ` as a proxy at ${chalk.magenta(deployed)}`
+      + ` to the implementation at ${chalk.hex('#DE307E')(impl.new)}`
+    ) : (
+      ` to address ${chalk.magenta(deployed)}`
+    ))
     + ` by ${chalk.hex('#5A5FA5')(signer)}`
     + ` on chain ${chalk.bold.yellowBright(`#${chain}`)}`
     + ` ${chalk.green(`(saved to ${files.address})`)}.`
   )
-  fs.writeFileSync(files.address, proxy)
+  fs.writeFileSync(files.address, deployed)
 
   let gasInfo = '𐌵ⲛⲕⲛⲟⲱⲛ'
   if(typeof(gasPrice) === 'number') {
     const gasUsed = (
-      deployed.deployTransaction.gasLimit.mul(gasPrice)
+      deployment.deployTransaction.gasLimit.mul(gasPrice)
     )
     gasInfo = (
       `${utils.formatEther(gasUsed)} `
@@ -189,7 +161,7 @@ const deploy = async (contract: string, _args = [], overrides = {}, libraries = 
 
   console.log(`\n ⛽ ${chalk.hex('#C6A831')(gasInfo)}`)
 
-  const encoded = abiEncodeArgs(deployed, args)
+  const encoded = abiEncodeArgs(deployment, args)
 
   if(encoded && encoded.length > 2) {
     console.log(
@@ -199,23 +171,58 @@ const deploy = async (contract: string, _args = [], overrides = {}, libraries = 
     fs.writeFileSync(files.args, encoded.slice(2))
   }
 
-  return deployed
+  return deployment
 }
 
-// ------ utils -------
+const main = async () => {
+  const primary = 'BulkDisbursableNFTs'
+  console.log(`\n\n 📡 Deploying: ${chalk.hex('#0E9907')(primary)}…\n`)
 
-// abi encodes contract arguments
-// useful when you want to manually verify the contracts
-// for example, on Etherscan
+  const deployment = await deploy({
+    contract: primary,
+    proxy: true,
+    args: initializerArgs,
+  })
+
+  const implementationAddress = (
+    await upgrades.erc1967.getImplementationAddress(deployment.address)
+  )
+  try {
+    console.log(chalk.hex('#FFD25E')(
+      `\n 🔍 Verifying ${chalk.hex('#8454FF')(implementationAddress)}`
+      + ` on ${['polygon', 'mumbai'].includes(chain) ? 'Polygon' : 'Ether'}scan…\n`
+    ))
+    await run('verify:verify', {
+      address: implementationAddress,
+      constructorArguments: [],
+    })
+    const library = await deploy({
+      contract: 'Bits'
+    })
+  } catch(err) {
+    console.error((err as Error).message)
+  }
+
+  let saveDir = config.paths.artifacts
+  if(process.env.PWD && saveDir.startsWith(process.env.PWD)) {
+    saveDir = saveDir.substring(process.env.PWD.length + 1)
+  }
+  console.log(
+    '\n 💾  Artifacts (address, abi, and args) saved to:'
+    + ` ${chalk.hex('#87FF37')(saveDir)}\n\n`
+  )
+}
+
 const abiEncodeArgs = (deployed: Contract, args: Array<unknown>) => {
   if (
     args
     && deployed
     && R.hasPath(['interface', 'deploy'], deployed)
   ) {
+    const inputs = deployed.interface.deploy.inputs
     return (
       utils.defaultAbiCoder.encode(
-        deployed.interface.deploy.inputs, args
+        inputs, inputs.length === 0 ? [] : args,
       )
     )
   }
@@ -229,44 +236,6 @@ const isSolidity = (filename: string) => (
 const sleep = (ms: number) => (
   new Promise(resolve => setTimeout(resolve, ms))
 )
-
-// If you want to verify on https://tenderly.co/
-const tenderlyVerify = async ({
-  contract: name, address, network = null,
-}: {
-  contract: string, address: string, network?: Maybe<string>,
-}) => {
-  let tenderlyNetworks = [
-    'kovan', 'goerli', 'mainnet', 'rinkeby', 'ropsten',
-    'matic', 'mumbai', 'xDai', 'POA',
-  ]
-  network ??= chain
-
-  if(!tenderlyNetworks.includes(network)) {
-    console.error(chalk.grey(
-      ` 🧐 Contract verification not supported`
-      + ` on ${chalk.hex('#98FFC1')(network)}.`
-    ))
-  } else {
-    console.log(
-      '\n 📁 Attempting tenderly verification of'
-      + ` ${chalk.hex('#98FFC1')(name)}`
-      + ` (${chalk.hex('#FF2EFC')(address)}) on`
-      + ` ${chalk.green(network)}.`
-    )
-
-    console.log(chalk.hex('#00AAFF')(
-      '\n 🎙 Persisting Tenderly artifacts…\n'
-    ))
-    await tenderly.persistArtifacts({ name, address })
-
-    return (
-      tenderly.verify({
-        name, address, network
-      })
-    )
-  }
-}
 
 main()
 .then(() => process.exit(0))

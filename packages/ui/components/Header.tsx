@@ -12,7 +12,7 @@ export const Header: React.FC<
       ml="-5%"
       svg="header.png"
       href={links.cup}
-      title="Create A New Token"
+      title="Create a new Token"
     />
     <LinkedSVG
       w="min(50%, 50vh)" h="auto"

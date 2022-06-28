@@ -21,6 +21,7 @@ export type Web3ContextType = {
   ensProvider?: JsonRpcProvider
   contractProvider?: JsonRpcProvider
   roContract?: Contract
+  constsContract?: Contract
   rwContract?: Contract
   address?: string
   chain?: string
@@ -68,6 +69,8 @@ export const Web3ContextProvider: React.FC = (
     const [connected, setConnected] = useState(false)
     const [contractAddress, setContractAddress] = useState(null)
     const [abi, setABI] = useState(null)
+    const [constsContractAddress, setConstsContractAddress] = useState(null)
+    const [constsABI, setConstsABI] = useState(null)
 
     const web3Modal = useMemo(
       () => {
@@ -109,6 +112,16 @@ export const Web3ContextProvider: React.FC = (
         }
       },
       [contractProvider, abi, contractAddress],
+    )
+    const constsContract = useMemo(
+      () => {
+        if(constsContractAddress && constsABI) {
+          return (
+            new Contract(constsContractAddress, constsABI, contractProvider)
+          )
+        }
+      },
+      [contractProvider, constsABI, constsContractAddress],
     )
 
     const rwContract = useMemo(
@@ -203,6 +216,23 @@ export const Web3ContextProvider: React.FC = (
 
       libs()
     }, [])
+
+    useEffect(() => {
+      const libs = async () => {
+        const { contractNetwork: chain } = CONFIG
+        import(
+          `../contracts/${chain}/Bits.address`
+        )
+        .then(({ default: addr }) => setConstsContractAddress(addr))
+
+        import (
+          `../contracts/${chain}/Bits.abi`
+        )
+        .then(({ default: abi }) => setConstsABI(abi))
+      }
+
+      libs()
+    }, [])
         
 
     const isMetaMask = useMemo(
@@ -221,6 +251,7 @@ export const Web3ContextProvider: React.FC = (
           ensProvider,
           contractProvider,
           roContract,
+          constsContract,
           rwContract,
           connect,
           disconnect,

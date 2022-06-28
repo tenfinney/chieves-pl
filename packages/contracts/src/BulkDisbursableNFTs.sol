@@ -9,30 +9,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "hardhat/console.sol";
 
-contract BulkDisbursableNFTs is
- Initializable, ERC1155Upgradeable, OwnableUpgradeable,
- ERC1155BurnableUpgradeable, ERC1155SupplyUpgradeable, UUPSUpgradeable
-{
-  struct CheckableList {
-    uint256[] entries;
-    mapping (uint256 => uint256) indices;
-  }
-
-  // Note that because the contract is proxied, the
-  // storage members and order cannot change
-  string public name;
-  string public symbol;
-
-  mapping (uint256 => string) private uris;
-
-  // To allow enumeration of all the tokens, a list is kept.
-  CheckableList private tokens;
-
-  // To allow listing the tokens held by a user, a map
-  // of owner to a list of tokens is maintained.
-  mapping (address => CheckableList) private owned;
-
-  // Each _WIDTH is the number of bits given to the
+library Bits {
+    // Each _WIDTH is the number of Bits given to the
   // particular field. The _BOUNDARY is the bit before
   // the first bit of the field.
   uint8 public constant TEAM_WIDTH = 13;
@@ -59,7 +37,7 @@ contract BulkDisbursableNFTs is
   uint256 public constant INTERNAL_MASK = (2**INTERNAL_WIDTH - 1) << INTERNAL_BOUNDARY;
   uint256 public constant COUNTER_MASK = (2**COUNTER_WIDTH - 1);
 
-  // 13 publicity bits defining groups to which
+  // 13 publicity Bits defining groups to which
   // the the token information is accessible
 
   // Error: Constants of non-value type not yet implemented.
@@ -97,7 +75,7 @@ contract BulkDisbursableNFTs is
   // Membership tokens represent being given
   // access to a team's information.
   uint256 public constant MEMBERSHIP_TYPE    = 2 << TYPE_BOUNDARY;
-  // Address tokens have a lower 160 bits which
+  // Address tokens have a lower 160 Bits which
   // correspond to an Ethereum address.
   uint256 public constant ADDRESS_TYPE       = 3 << TYPE_BOUNDARY; // ¿?
   // Time tokens are divisible tokens to be
@@ -123,7 +101,8 @@ contract BulkDisbursableNFTs is
   // Vanilla NFTs are created by using `create` to reserve
   // an id.
   uint256 public constant VANILLA_TYPE       = 9 << TYPE_BOUNDARY;
-
+  // Disables role check
+  uint256 public constant DISABLING_TYPE     = 10 << TYPE_BOUNDARY;
 
   // Experimental tokens are meant to demonstrate
   // properties of the system. The flag may be used
@@ -133,7 +112,9 @@ contract BulkDisbursableNFTs is
   // Bits that can be set, but shouldn't affect matching
   uint256 public constant NO_MATCH_FLAGS = USE_ONCE | INTERNAL_MASK;
 
-  enum Role {
+  uint8 public constant numRoles = 11;
+
+    enum Role {
     // The first value is zero and all tokens should
     // have a positive value.
     Reserved00,
@@ -180,59 +161,25 @@ contract BulkDisbursableNFTs is
     // Oracles provide information about the world.
     // Trusted information like the length of
     // videos submitted for time tokens.
-    Oracle,
+    Oracle
+  }
 
-    // These spots are reserved because the storage
-    // layout has to remain the same.
-    Reserved01,
-    Reserved02,
-    Reserved03,
-    Reserved04,
-    Reserved05,
-    Reserved06,
-    Reserved07,
-    Reserved08,
-    Reserved09,
-    Reserved10,
-    Reserved11,
-    Reserved12,
-    Reserved13,
-    Reserved14,
-    Reserved15,
-    Reserved16,
-    Reserved17,
-    Reserved18,
-    Reserved19,
-    Reserved20,
-    Reserved21,
-    Reserved22,
-    Reserved23,
-    Reserved24,
-    Reserved25,
-    Reserved26,
-    Reserved27,
-    Reserved28,
-    Reserved29,
-    Reserved30,
-    Reserved31,
-    Reserved32,
-    Reserved33,
-    Reserved34,
-    Reserved35,
-    Reserved36,
-    Reserved37,
-    Reserved38,
-    Reserved39,
-    Reserved40,
-    Reserved41,
-    Reserved42,
-    Reserved43,
-    Reserved44,
-    Reserved45,
-    Reserved46,
-    Reserved47,
-    Reserved48,
-    Reserved49
+  function roleNameByIndex(uint8 index)
+    public
+    pure
+    returns (string memory name)
+  {
+    if(index == 0) return "Superuser";
+    if(index == 1) return "Minter";
+    if(index == 2) return "Caster";
+    if(index == 3) return "Transferer";
+    if(index == 4) return "Configurer";
+    if(index == 5) return "Maintainer";
+    if(index == 6) return "Creator";
+    if(index == 7) return "Limiter";
+    if(index == 8) return "Burner";
+    if(index == 9) return "Destroyer";
+    if(index == 10) return "Oracle";
   }
 
   function roleValueForName(string memory roleName)
@@ -274,8 +221,39 @@ contract BulkDisbursableNFTs is
     if(hash == keccak256(abi.encodePacked('Oracle'))) {
       return Role.Oracle;
     }
-    revert('Unknown role type.');
+    revert(string(abi.encodePacked('Unknown role type: ', roleName)));
   }
+
+
+
+}
+
+contract BulkDisbursableNFTs is
+ Initializable, ERC1155Upgradeable, OwnableUpgradeable,
+ ERC1155BurnableUpgradeable, ERC1155SupplyUpgradeable, UUPSUpgradeable
+{
+
+  struct CheckableList {
+    uint256[] entries;
+    mapping (uint256 => uint256) indices;
+  }
+
+  // Note that because the contract is proxied, the
+  // storage members and order cannot change
+  string public name;
+  string public symbol;
+
+  mapping (uint256 => string) private uris;
+
+  // To allow enumeration of all the tokens, a list is kept.
+  CheckableList private tokens;
+
+  // To allow listing the tokens held by a user, a map
+  // of owner to a list of tokens is maintained.
+  mapping (address => CheckableList) private owned;
+
+  uint8 public constant numRoles = 11;
+  string[11] public Roles;
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
@@ -315,7 +293,7 @@ contract BulkDisbursableNFTs is
    * single other token, but this method creates a token for id zero
    * which allows it to operate on any token.
    */
-  function roleToken(Role role)
+  function roleToken(Bits.Role role)
     public
     virtual
     view
@@ -329,7 +307,7 @@ contract BulkDisbursableNFTs is
    * other token, given by id.
    */
   function roleToken(
-    Role role,
+    Bits.Role role,
     uint256 index
   )
     public
@@ -338,14 +316,14 @@ contract BulkDisbursableNFTs is
     returns (uint256 id)
   {
     require(
-      index < 2**COUNTER_WIDTH,
-      'Indices can be at most 32 bits.'
+      index < 2**Bits.COUNTER_WIDTH,
+      'Indices can be at most 32 Bits.'
     );
 
     id = (
-      GATING_TYPE
-      | (uint(role) << ROLE_BOUNDARY)
-      | (role == Role.Superuser ? UNIQUENESS_MASK : 0)
+      Bits.GATING_TYPE
+      | (uint(role) << Bits.ROLE_BOUNDARY)
+      | (role == Bits.Role.Superuser ? Bits.UNIQUENESS_MASK : 0)
       | index
     );
   }
@@ -354,7 +332,7 @@ contract BulkDisbursableNFTs is
    * @notice Checks if the message sender has the specified gating
    * role.
    */
-  function hasRole(Role role)
+  function hasRole(Bits.Role role)
     public
     virtual
     view
@@ -368,7 +346,7 @@ contract BulkDisbursableNFTs is
    * role.
    */
   function hasRole(
-    Role role,
+    Bits.Role role,
     address user
   )
     public
@@ -384,7 +362,7 @@ contract BulkDisbursableNFTs is
    * role for the listed token id.
    */
   function hasRole(
-    Role role,
+    Bits.Role role,
     uint256 id
   )
     public
@@ -400,20 +378,20 @@ contract BulkDisbursableNFTs is
    * role for the listed token id.
    */
   function hasRole(
-    Role role,
+    Bits.Role role,
     address user,
-    uint256 index
+    uint256 id
   )
     public
     virtual
     view
     returns (bool has)
   {
-    has = gateToken(role, user, index) != 0;
+    has = gateToken(role, user, tokens.indices[id]) != 0;
   }
 
   function gateToken(
-    Role role,
+    Bits.Role role,
     address user,
     uint256 index
   )
@@ -423,13 +401,21 @@ contract BulkDisbursableNFTs is
     returns (uint256 id)
   {
     uint256 gate = roleToken(role);
+
+    uint256 disabledIndex = (
+      tokens.indices[gate | Bits.DISABLING_TYPE | index]
+    );
+    if (disabledIndex != 0){
+      return tokens.entries[disabledIndex];
+    }
+
     uint256[8] memory ids = [
-      gate | USE_ONCE | INTERNAL_MASK | index,
-      gate | USE_ONCE | index,
-      gate | USE_ONCE | INTERNAL_MASK,
-      gate | USE_ONCE,
-      gate | INTERNAL_MASK | index,
-      gate | INTERNAL_MASK,
+      gate | Bits.USE_ONCE | Bits.INTERNAL_MASK | index,
+      gate | Bits.USE_ONCE | index,
+      gate | Bits.USE_ONCE | Bits.INTERNAL_MASK,
+      gate | Bits.USE_ONCE,
+      gate | Bits.INTERNAL_MASK | index,
+      gate | Bits.INTERNAL_MASK,
       gate | index,
       gate
     ];
@@ -464,7 +450,7 @@ contract BulkDisbursableNFTs is
     view
     returns (bool superuser)
   {
-    superuser = hasRole(Role.Superuser, user) || user == owner();
+    superuser = hasRole(Bits.Role.Superuser, user) || user == owner();
   }
 
   /**
@@ -472,7 +458,7 @@ contract BulkDisbursableNFTs is
    * role given to the specified user.
    */
   function grantRole(
-    Role role,
+    Bits.Role role,
     address user
   )
     public
@@ -486,7 +472,7 @@ contract BulkDisbursableNFTs is
    * role given to the specified user.
    */
   function grantRole(
-    Role role,
+    Bits.Role role,
     address user,
     uint256 index
   )
@@ -497,7 +483,7 @@ contract BulkDisbursableNFTs is
   }
 
   function _grantRole(
-    Role role,
+    Bits.Role role,
     address user,
     uint256 index,
     bool local
@@ -506,26 +492,36 @@ contract BulkDisbursableNFTs is
     virtual
   {
     if(!local) {
-      if(role == Role.Superuser) {
+      if(role == Bits.Role.Superuser) {
         require(
           isSuper(),
           "You must be a superuser to create new ones."
         );
       } else {
         require(
-          hasRole(Role.Caster, index) || isSuper(),
+          hasRole(Bits.Role.Caster, index) || isSuper(),
           "You must have the Caster role to assign new roles."
         );
       }
     }
     _mint(
       user,
-      roleToken(role, index) | (local ? INTERNAL_MASK : 0),
+      roleToken(role, index) | (local ? Bits.INTERNAL_MASK : 0),
       1,
       ""
     );
   }
 
+  function disableRole(Bits.Role toDisable, uint256 tokenId)
+    public
+  {
+    uint256 id = roleToken(toDisable, tokens.indices[tokenId]);
+    id |= Bits.DISABLING_TYPE;
+    uint256 tokenNum = tokens.entries.length;
+    tokens.entries.push(id);
+    tokens.indices[id] = tokenNum;
+
+  }
   /**
    * @return metadata The metadata URI associated with the given token.
    */
@@ -538,8 +534,8 @@ contract BulkDisbursableNFTs is
   {
     metadata = uris[id];
     if(bytes(metadata).length == 0) {
-      if(id & TYPE_MASK == GATING_TYPE) {
-        uint256 generic = id & ~COUNTER_MASK & ~NO_MATCH_FLAGS;
+      if(id & Bits.TYPE_MASK == Bits.GATING_TYPE) {
+        uint256 generic = id & ~Bits.COUNTER_MASK & ~Bits.NO_MATCH_FLAGS;
         metadata = uris[generic];
       }
     }
@@ -556,7 +552,7 @@ contract BulkDisbursableNFTs is
     virtual
   {
     require(
-      hasRole(Role.Configurer, id) || isSuper(),
+      hasRole(Bits.Role.Configurer, id) || isSuper(),
       "You must have a Configurer token to change metadata."
     );
     uris[id] = newURI;
@@ -575,7 +571,7 @@ contract BulkDisbursableNFTs is
     virtual
   {
     require(
-      hasRole(Role.Limiter, id) || isSuper(),
+      hasRole(Bits.Role.Limiter, id) || isSuper(),
       "You must have a Limiter token to change quantity."
     );
     max;
@@ -596,8 +592,26 @@ contract BulkDisbursableNFTs is
     virtual
     returns (uint256 id)
   {
-    id = create(_msgSender());
+    Bits.Role[] memory roles = new Bits.Role [](0);
+    id = create(_msgSender(), roles, roles);
   }
+
+  /**
+   * @notice Call `create` with the message sender as the
+   * maintainer.
+   * @return id The reserved token id.
+   */
+  function create(
+    Bits.Role[] memory grants,
+    Bits.Role[] memory disables
+  )
+    public
+    virtual
+    returns (uint256 id)
+  {
+    id = create(_msgSender(), grants, disables);
+  }
+
 
   /**
    * @notice Reserve a new token id & mint gating tokens
@@ -606,27 +620,30 @@ contract BulkDisbursableNFTs is
    * @return id The reserved token id.
    */
   function create(
-    address maintainer
+    address maintainer,
+    Bits.Role[] memory grants,
+    Bits.Role[] memory disables
   )
     public
     virtual
     returns (uint256 id)
   {
     uint256 tokenNum = tokens.entries.length;
-    id = VANILLA_TYPE | tokenNum;
+    id = Bits.VANILLA_TYPE | tokenNum;
 
     require(
-      hasRole(Role.Creator, id) || isSuper(),
+      hasRole(Bits.Role.Creator, id) || isSuper(),
       "You must have a Creator token to create new tokens."
     );
 
     tokens.entries.push(id);
     tokens.indices[id] = tokenNum;
-
-    _grantRole(Role.Minter, maintainer, tokenNum, true);
-    _grantRole(Role.Configurer, maintainer, tokenNum, true);
-    _grantRole(Role.Limiter, maintainer, tokenNum, true);
-
+    for (uint256 i = 0; i < grants.length; i++){
+      _grantRole(grants[i], maintainer, tokenNum, true);
+    }
+    for (uint256 i = 0; i < disables.length; i++){
+      disableRole(disables[i], tokenNum );
+    }
     emit Created(id, maintainer);
   }
 
@@ -662,10 +679,10 @@ contract BulkDisbursableNFTs is
     returns (bool minted)
   {
     require(
-      id & INTERNAL_MASK != INTERNAL_MASK,
+      id & Bits.INTERNAL_MASK != Bits.INTERNAL_MASK,
       "Cannot mint internal tokens from outside."
     );
-      if((id & UNIQUE) == UNIQUE && balanceOf(recipient, id) > 0) {
+      if((id & Bits.UNIQUE) == Bits.UNIQUE && balanceOf(recipient, id) > 0) {
       return false;
     }
     _mint(recipient, id, amount, data);
@@ -699,7 +716,7 @@ contract BulkDisbursableNFTs is
     override
   {
     require(
-      hasRole(Role.Burner, owner, id) || isSuper(owner),
+      hasRole(Bits.Role.Burner, owner, id) || isSuper(owner),
       "You must have a Burner token to destroy tokens."
     );
     _burn(owner, id, quantity);
@@ -740,9 +757,14 @@ contract BulkDisbursableNFTs is
     returns (uint256 id)
   {
     require(
-      index <= tokens.entries.length && index > 0,
+      index > 0,
+      "ERC-1155 Enumerable: tokens indexed from 1"
+    );
+    require(
+      index <= tokens.entries.length,
       "ERC-1155 Enumerable: token index out of bounds"
     );
+
     id = tokens.entries[index];
   }
 
@@ -773,27 +795,27 @@ contract BulkDisbursableNFTs is
   {
     if(!isSuper()) {
       for(uint256 i = 0; i < ids.length; ++i) {
-        if(ids[i] & INTERNAL_MASK != INTERNAL_MASK) {
-          Role needed = (
+        if(ids[i] & Bits.INTERNAL_MASK != Bits.INTERNAL_MASK) {
+          Bits.Role needed = (
             from == address(0) ? (
-              Role.Minter
+              Bits.Role.Minter
             ) : (
-              Role.Transferer
+              Bits.Role.Transferer
             )
           );
-          if(needed == Role.Minter) {
-            if(ids[i] & TYPE_MASK == GATING_TYPE) {
+          if(needed == Bits.Role.Minter) {
+            if(ids[i] & Bits.TYPE_MASK == Bits.GATING_TYPE) {
               require(
-                hasRole(Role.Caster, ids[i]) || isSuper(),
+                hasRole(Bits.Role.Caster, ids[i]) || isSuper(),
                 "You must have a Caster token to mint token gates."
               );
             } else {
+              uint256 gate = gateToken(needed, _msgSender(), tokenIndex(ids[i]));
               require(
-                hasRole(needed, tokenIndex(ids[i])),
+                hasRole(needed, ids[i]),
                 "You must have a Minter token to generate tokens."
               );
-              uint256 gate = gateToken(needed, _msgSender(), tokenIndex(ids[i]));
-              if(gate & USE_ONCE > 0) {
+              if(gate & Bits.USE_ONCE > 0) {
                 _burn(_msgSender(), gate, 1);
               }
             }
@@ -840,7 +862,7 @@ contract BulkDisbursableNFTs is
     override
   {
     require(
-      hasRole(Role.Maintainer) || isSuper(),
+      hasRole(Bits.Role.Maintainer) || isSuper(),
       "You must have a Maintainer token to upgrade the contract."
     );
   }
