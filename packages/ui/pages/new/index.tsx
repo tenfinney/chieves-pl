@@ -88,7 +88,7 @@ const Content: React.FC = () => {
           if(typeof value === 'boolean' && value) {
             const [_, type, role] = key.match(/^(grant|disable)\((.+)\)$/) ?? []
             console.log({type, role})
-            const roleId = await constsContract.roleValueForName(role)
+            const roleId = await rwContract.roleValueForName(role)
             switch(type) {
               case 'grant': {
                 grants.push(roleId)
@@ -111,7 +111,7 @@ const Content: React.FC = () => {
         maintainer = address
       }
       if(maintainer.includes('.')){
-        maintainer = ensProvider.lookupAddress(maintainer)
+        maintainer = await ensProvider.resolveName(maintainer);
       }
       const tx = await rwContract['create(address,uint8[],uint8[])'](
         maintainer, grants, disables
