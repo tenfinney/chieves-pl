@@ -117,7 +117,7 @@ const publishContract = ({ name, container }: PubParams) => {
 
 async function main() {
   if(!fs.existsSync(publishDir)) {
-    fs.mkdirSync(publishDir)
+    fs.mkdirSync(publishDir, { recursive: true })
   }
   const finalContractList: Array<PubParams> = []
   const parent = path.join(artifactsDir, sourceDir)
