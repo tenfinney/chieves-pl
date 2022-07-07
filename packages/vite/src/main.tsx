@@ -1,22 +1,21 @@
-import { useState, useEffect } from 'react'
-import type { NextPage } from 'next'
-import Head from 'next/head'
+import { useState, useEffect, useMemo } from 'react'
+import { ethers } from 'ethers'
+import { Helmet } from 'react-helmet'
 import {
   Container, Flex, chakra,
 } from '@chakra-ui/react'
-import { httpURL } from '@/lib/helpers'
-import type { TokenState } from '@/lib/types'
-import {
-  Header, TokensTable, TokenFilterForm,
-} from '@/components'
-import { useWeb3 } from '@/lib/hooks'
-import { useRouter } from 'next/router'
+import Markdown from 'react-markdown'
+import { httpURL } from './lib/helpers'
+import type { Maybe, ERC1155Metadata, TokenState } from './lib/types'
+import { Header, TokensTable } from './components'
+import { useWeb3 } from './lib/hooks'
+import TokenFilterForm from './components/TokenFilterForm'
 
-const Home: NextPage = () => {
+const Home = () => {
   const [tokens, setTokens] = useState<Array<TokenState>>([])
   const {
-    query: { gating = false, visible: visibleParam, limit: limitParam = 100, offset: offsetParam = 0 }
-  } = useRouter()
+    query: { gating = false, visible = "", limit: limitParam = 10, offset: offsetParam = 0 }
+  } = {query: {}} //useRouter()
   const [limit, setLimit] = useState(Number(limitParam))
   const [offset, setOffset] = useState(Number(offsetParam))
   const [gatingVisible, setGatingVisible] = useState(!!gating)
@@ -43,14 +42,14 @@ const Home: NextPage = () => {
   }, [limitParam])
 
   useEffect(() => {
-    let visible = visibleParam
-    if (visible) {
-      if (Array.isArray(visible)) {
-        ([visible] = visible)
-      }
+    // if (visible) {
+      // let visibleParam = visible
+      // if (Array.isArray(visibleParam)) {
+      //   ([visibleParam] = visibleParam)
+      // }
       setVisibleList(visible.split(/\s*,\s*/).filter((str) => str !== ''))
-    }
-  }, [visibleParam])
+    // }
+  }, [visible])
 
   useEffect(
     () => {
@@ -140,13 +139,13 @@ const Home: NextPage = () => {
 
   return (
     <Container maxW="full">
-      <Head>
+      <Helmet>
         <title>SmartLaw Cred Tokens</title>
         <meta
           name="description"
           content="SmartLaw Cred Tokens"
         />
-      </Head>
+      </Helmet>
 
       {/* <chakra.header h="10vh">
         <Flex maxW="40rem" margin="auto">

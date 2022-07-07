@@ -833,7 +833,7 @@ export default [
     "outputs": [
       {
         "internalType": "string",
-        "name": "",
+        "name": "name",
         "type": "string"
       }
     ],
@@ -881,6 +881,25 @@ export default [
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "roleName",
+        "type": "string"
+      }
+    ],
+    "name": "roleValueForName",
+    "outputs": [
+      {
+        "internalType": "enum BulkDisbursableNFTs.Role",
+        "name": "role",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "pure",
     "type": "function"
   },
   {

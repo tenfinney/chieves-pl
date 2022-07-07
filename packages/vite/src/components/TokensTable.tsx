@@ -73,7 +73,7 @@ const ImageTd:React.FC<Token> = ({ token }) => (
             <Text as="em">Untitled</Text>
           )}</Text>
         </ChakraLink>
-      </NextLink>
+      </ChakraLink>
     </Stack>
   </Td>
 )
@@ -154,21 +154,21 @@ const ActionsTd:React.FC<Token> = ({ token }) => (
             ✏️
           </Tooltip>
         </ChakraLink>
-      </NextLink>
-      <NextLink href={`/view/${token.id}`} passHref>
+      </ChakraLink>
+      <ChakraLink href={`/view/${token.id}`} >
         <ChakraLink ml={2}>
           <Tooltip label="View this NFT" hasArrow>
           🔆
           </Tooltip>
         </ChakraLink>
-      </NextLink>
-      <NextLink href={`/disburse/${token.id}`} passHref>
+      </ChakraLink>
+      <ChakraLink href={`/disburse/${token.id}`} >
         <ChakraLink ml={2}>
           <Tooltip label="Disburse this NFT" hasArrow>
           🌀
           </Tooltip>
         </ChakraLink>
-      </NextLink>
+      </ChakraLink>
     </Flex>
   </Td>
 )

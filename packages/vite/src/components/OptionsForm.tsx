@@ -12,7 +12,7 @@ import {
 import { useCallback, useState } from 'react'
 import { useWeb3 } from '@/lib/hooks'
 import { useForm } from 'react-hook-form'
-import { useRouter } from 'next/router'
+// import { useRouter } from 'next/router'
 import JSON5 from 'json5'
 import {
   ERC1155Metadata, FormValues, Maybe, OpenSeaAttribute, Attribute,
@@ -26,7 +26,7 @@ export const OptionsForm: React.FC<{
   purpose = 'create', tokenId, metadata
 }) => {
   const { rwContract } = useWeb3()
-  const router = useRouter()
+  // const router = useRouter()
   const {
     register, handleSubmit, watch, setValue,
     formState: {
@@ -59,7 +59,8 @@ export const OptionsForm: React.FC<{
           
       return router.push(`/view/${regexify(tokenId)}`)
     },
-    [purpose, router, rwContract, tokenId],
+    // [purpose, router, rwContract, tokenId],
+    [purpose, rwContract, tokenId],
   )
 
   const buildMeta = async (data: FormValues) => {
@@ -150,7 +151,6 @@ export const OptionsForm: React.FC<{
           }
         }
       })()
-
       if(!metadata) {
         throw new Error('Metadata is undefined.')
       }

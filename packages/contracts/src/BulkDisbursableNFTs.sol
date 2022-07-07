@@ -118,7 +118,6 @@ contract BulkDisbursableNFTs is
  Initializable, ERC1155Upgradeable, OwnableUpgradeable,
  ERC1155BurnableUpgradeable, ERC1155SupplyUpgradeable, UUPSUpgradeable
 {
-
   struct CheckableList {
     uint256[] entries;
     mapping (uint256 => uint256) indices;
@@ -138,7 +137,7 @@ contract BulkDisbursableNFTs is
   // of owner to a list of tokens is maintained.
   mapping (address => CheckableList) private owned;
 
-  string[11] public Roles;
+  string[11] public Roles; // remove this when redeploying the contract
 
   mapping (uint256 => int64) public maxes;
 
@@ -197,7 +196,7 @@ contract BulkDisbursableNFTs is
   function roleNameByIndex(Role index)
     public
     pure
-    returns (string memory)
+    returns (string memory name)
   {
     if(index == Role.Superuser) return "Superuser";
     if(index == Role.Minter) return "Minter";
@@ -562,7 +561,25 @@ contract BulkDisbursableNFTs is
     uris[id] = newURI;
     emit URI(newURI, id);
   }
-  
+
+  /**
+    * @notice ¡Unimplmemented! Set the maximum number of tokens
+    * allowed to be minted. Trumps the Minter role.
+   */
+  function setMax(
+    uint256 id,
+    uint256 max
+  )
+    public
+    virtual
+  {
+    require(
+      hasRole(Role.Limiter, id) || isSuper(),
+      "You must have a Limiter token to change quantity."
+    );
+    max;
+  }
+
   /**
    * @notice Event fired when a new token type is created.
    */
@@ -794,15 +811,6 @@ contract BulkDisbursableNFTs is
           );
           if(needed == Role.Minter) {
             if(maxes[ids[i]] >= 0) {
-              console.log(
-                "ts: %d, qty: %d, max: %d",
-                totalSupply(ids[i]),
-                amounts[i]
-              );
-              console.logInt(maxes[ids[i]]);
-              console.logInt(
-                int256(totalSupply(ids[i]) + amounts[i])
-              );
               require(
                 int256(totalSupply(ids[i]) + amounts[i]) <= maxes[ids[i]],
                 "Maximum mint allowance exceeded."
