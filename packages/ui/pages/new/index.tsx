@@ -33,7 +33,7 @@ export const New: NextPage = () => (
 
 const Content: React.FC = () => {
   const {
-    ensProvider, constsContract, rwContract, connecting, connect, chain, address,
+    ensProvider, roContract, rwContract, connecting, connect, chain, address,
   } = useWeb3()
   const { query: { tokenId: id } } = useRouter()
   const [tokenId, setTokenId] = (
@@ -52,11 +52,12 @@ const Content: React.FC = () => {
 
   useEffect(() => {
     const load = async () => {
-      if(constsContract) {
-        const numRoles = await constsContract.numRoles()
+      if(roContract) {
+        console.log({roContract})
+        const numRoles = (await roContract.roleIndexForName('ReservedLast')) - 1
         const roles = await Promise.all(
           Array.from({ length: numRoles }).map(async (_, idx) => (
-            await constsContract.roleNameByIndex(idx)
+            await roContract.roleNameByIndex(idx + 1)
           ))
         )
         setRoles(roles)
@@ -64,7 +65,7 @@ const Content: React.FC = () => {
     }
 
     load()
-  }, [constsContract])
+  }, [roContract])
 
   const reserve = useCallback(async (data) => {
     setWorking(true)
@@ -75,7 +76,7 @@ const Content: React.FC = () => {
           'Connect your wallet to reserve an id.'
         )
       }
-      if(!constsContract){
+      if(!roContract){
         throw new Error('Library not loaded.')
       }
       if(!ensProvider){
@@ -88,7 +89,7 @@ const Content: React.FC = () => {
           if(typeof value === 'boolean' && value) {
             const [_, type, role] = key.match(/^(grant|disable)\((.+)\)$/) ?? []
             console.log({type, role})
-            const roleId = await rwContract.roleValueForName(role)
+            const roleId = await rwContract.roleIndexForName(role)
             switch(type) {
               case 'grant': {
                 grants.push(roleId)

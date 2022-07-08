@@ -3671,6 +3671,7 @@ __metadata:
     "@emotion/styled": ^11
     "@ethersproject/contracts": ^5.5.0
     "@ethersproject/providers": ^5.5.3
+    "@openzeppelin/contracts": ^4.7.0
     "@testing-library/jest-dom": ^5.16.4
     "@testing-library/react": ^13.2.0
     "@types/babel__preset-env": ^7
@@ -4049,6 +4050,13 @@ __metadata:
   version: 4.5.2
   resolution: "@openzeppelin/contracts-upgradeable@npm:4.5.2"
   checksum: bd6a12eb83d8e3194e0847ffb248a1063668e2bf723afd21066316090de9b02e95af6057086a95fa21b0d09a2ef0ea057459bb5f5645dfff298e59e8c3267692
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/contracts@npm:^4.7.0":
+  version: 4.7.0
+  resolution: "@openzeppelin/contracts@npm:4.7.0"
+  checksum: ac917e668505ffbd300fcb00fd2f39b5f1153f77f82d482988336a881134b806b2d820f4293962691ef4d6f9f8ee5ecc71da82c6eb6ad2f02810511e90fa0d96
   languageName: node
   linkType: hard
 
