@@ -225,8 +225,8 @@ const Content: React.FC = () => {
                       </Tr>
                     </Thead>
                     <Tbody>
-                      {roles.map((role) => (
-                        <Tr>
+                      {roles.map((role, idx) => (
+                        <Tr key={idx}>
                           <Td>{role}</Td>
                           <Td textAlign="center">
                             <Checkbox {...register(`grant(${role})`)}/>

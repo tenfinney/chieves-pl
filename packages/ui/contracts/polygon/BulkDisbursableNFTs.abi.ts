@@ -345,7 +345,12 @@ export default [
     "inputs": [
       {
         "internalType": "enum Bits.Role[]",
-        "name": "roles",
+        "name": "grants",
+        "type": "uint8[]"
+      },
+      {
+        "internalType": "enum Bits.Role[]",
+        "name": "disables",
         "type": "uint8[]"
       }
     ],
@@ -369,7 +374,12 @@ export default [
       },
       {
         "internalType": "enum Bits.Role[]",
-        "name": "roles",
+        "name": "grants",
+        "type": "uint8[]"
+      },
+      {
+        "internalType": "enum Bits.Role[]",
+        "name": "disables",
         "type": "uint8[]"
       }
     ],
