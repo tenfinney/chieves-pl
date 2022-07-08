@@ -24,6 +24,7 @@
     "@emotion/styled": "^11",
     "@ethersproject/contracts": "^5.5.0",
     "@ethersproject/providers": "^5.5.3",
+    "@openzeppelin/contracts": "^4.7.0",
     "@walletconnect/encoding": "^1.0.1",
     "@walletconnect/web3-provider": "*",
     "babel-plugin-inline-react-svg": "^2.0.1",
