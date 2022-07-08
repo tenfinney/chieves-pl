@@ -152,8 +152,39 @@ const Content: React.FC = () => {
                   colorScheme="green"
                   onClick={reserve}
                 >
-                  Reserve a Cred Token ID
-                </Button>
+                  <Input
+                    {...register('maintainer')}
+                    placeholder="Maintainer Address (default Creator)"
+                  />
+                  <Table mb={5}>
+                    <Thead>
+                      <Tr>
+                        <Th>Role</Th>
+                        <Th>Grant</Th>
+                        <Th>Disable</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {roles.map((role, idx) => (
+                        <Tr key={idx}>
+                          <Td>{role}</Td>
+                          <Td textAlign="center">
+                            <Checkbox {...register(`grant(${role})`)}/>
+                          </Td>
+                          <Td textAlign="center">
+                          <Checkbox {...register(`disable(${role})`)}/>
+                          </Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                  <Button
+                    colorScheme="green"
+                    type="submit"
+                  >
+                    Reserve an ID
+                  </Button>
+                </Stack>
               )
             }
             return (
