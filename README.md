@@ -1,4 +1,4 @@
-# SmartLaw Cred Tokens
+# SmartLaw Access Tokens
 
 ![SmartLaw Cred Tokens](packages/ui/public/logo.svg)
 
