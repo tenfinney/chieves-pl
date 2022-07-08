@@ -56,7 +56,47 @@ const Content: React.FC = () => {
           'Connect your Web3 account to reserve an ID.'
         )
       }
-      const tx = await rwContract['create()']()
+      if(!roContract){
+        throw new Error('Library not loaded.')
+      }
+      if(!ensProvider){
+        throw new Error('ENS provider not defined.')
+      }
+      const grants: Array<number> = []
+      const disables: Array<number> = []
+      await Promise.all(Object.entries(data).map(
+        async ([key, value]: [key: string, value: unknown]) => {
+          if(typeof value === 'boolean' && value) {
+            const [_, type, role] = key.match(/^(grant|disable)\((.+)\)$/) ?? []
+            console.log({type, role})
+            const roleId = await rwContract.roleIndexForName(role)
+            switch(type) {
+              case 'grant': {
+                grants.push(roleId)
+                break
+              }
+              case 'disable': {
+                disables.push(roleId)
+                break
+              }
+              default: {
+                throw new Error(`Unknown operation: ${type}`)
+              }
+            }
+          }
+        }
+      ))
+
+      let { maintainer } = data
+      if(maintainer === '') {
+        maintainer = address
+      }
+      if(maintainer.includes('.')){
+        maintainer = await ensProvider.resolveName(maintainer)
+      }
+      const tx = await rwContract['create(address,uint8[],uint8[])'](
+        maintainer, grants, disables
+      )
       const receipt = await tx.wait()
       const event = receipt.events.find(
         (evt: Event) => evt.event === 'Created'
