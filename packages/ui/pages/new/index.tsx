@@ -112,7 +112,7 @@ const Content: React.FC = () => {
         maintainer = address
       }
       if(maintainer.includes('.')){
-        maintainer = await ensProvider.resolveName(maintainer);
+        maintainer = await ensProvider.resolveName(maintainer)
       }
       const tx = await rwContract['create(address,uint8[],uint8[])'](
         maintainer, grants, disables
