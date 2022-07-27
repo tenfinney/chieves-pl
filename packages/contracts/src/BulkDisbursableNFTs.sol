@@ -139,6 +139,8 @@ contract BulkDisbursableNFTs is
   mapping (address => CheckableList) private owned;
 
   string[11] public Roles;
+  
+  mapping (uint256 => int64) public maxes;
 
   enum Role {
     // The first value is zero and all tokens should
@@ -477,12 +479,12 @@ contract BulkDisbursableNFTs is
   function grantRole(
     Role role,
     address user,
-    uint256 index
+    uint256 id
   )
     public
     virtual
   {
-    _grantRole(role, user, index, false);
+    _grantRole(role, user, id == 0 ? 0 : tokenIndex(id), false);
   }
 
   function _grantRole(
@@ -561,25 +563,7 @@ contract BulkDisbursableNFTs is
     uris[id] = newURI;
     emit URI(newURI, id);
   }
-
-  /**
-    * @notice ¡Unimplmemented! Set the maximum number of tokens
-    * allowed to be minted. Trumps the Minter role.
-   */
-  function setMax(
-    uint256 id,
-    uint256 max
-  )
-    public
-    virtual
-  {
-    require(
-      hasRole(Role.Limiter, id) || isSuper(),
-      "You must have a Limiter token to change quantity."
-    );
-    max;
-  }
-
+  
   /**
    * @notice Event fired when a new token type is created.
    */
@@ -650,20 +634,6 @@ contract BulkDisbursableNFTs is
     emit Created(id, maintainer);
   }
 
-  /**
-   * @notice Set the properties of a previously created token.
-   */
-  function configure(
-    uint256 id,
-    string calldata newURI,
-    uint256 max
-  )
-    public
-    virtual
-  {
-    setURI(id, newURI);
-    setMax(id, max);
-  }
 
   /**
    * @notice Create new tokens instances.
@@ -707,6 +677,18 @@ contract BulkDisbursableNFTs is
     for(uint256 i = 0; i < to.length; ++i) {
       mint(to[i], id, 1, data);
     }
+  }
+
+  function getMax(uint256 id) public view returns (int64 max) {
+    max = maxes[id];
+  }
+
+  function setMax(uint256 id, int64 max) public {
+    require(
+      hasRole(Role.Limiter, id) || isSuper(),
+      "You must have a Limiter token to change quantity."
+    );
+    maxes[id] = max;
   }
 
   function burn(
@@ -807,6 +789,10 @@ contract BulkDisbursableNFTs is
             )
           );
           if(needed == Role.Minter) {
+            require(
+              maxes[ids[i]] >= 0 && int256(totalSupply(ids[i])) > maxes[ids[i]],
+              "Maximum mint allowance exceeded."
+            );
             if(ids[i] & Bits.TYPE_MASK == Bits.GATING_TYPE) {
               require(
                 hasRole(Role.Caster, ids[i]) || isSuper(),

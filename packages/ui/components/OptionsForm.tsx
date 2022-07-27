@@ -1,7 +1,7 @@
 import {
   Box,
   Button, ButtonProps, Flex, FormControl,
-  FormLabel, Input, Spinner, Tab, TabList, TabPanel,
+  FormLabel, Input, Spinner, Stack, Tab, TabList, TabPanel,
   TabPanels, Tabs, Text, useToast,
 } from '@chakra-ui/react'
 import { URIForm, JSONForm, NFTForm } from 'components/forms'
@@ -17,6 +17,7 @@ import {
 } from 'lib/types'
 import { isEmpty } from 'lib/helpers'
 import { Attribute, MetaMaskError } from '../lib/types'
+import { MaxForm } from './MaxForm'
 
 const Submit: React.FC<ButtonProps & {
   purpose: string
@@ -85,7 +86,7 @@ const Submit: React.FC<ButtonProps & {
 
 export const OptionsForm: React.FC<{
   purpose?: 'create' | 'update'
-  tokenId?: string
+  tokenId: string
   metadata?: Maybe<ERC1155Metadata>
 }> = ({
   purpose = 'create', tokenId, metadata
@@ -250,49 +251,52 @@ export const OptionsForm: React.FC<{
   }
     
   return (
-    <Box
-      as="form" onSubmit={handleSubmit(submit)}
-      mt={10} mb="20rem" maxW={['100%', 'min(85vw, 50em)']}
-      sx={{ a: { textDecoration: 'underline' } }}
-    >
-      <Submit {...{ purpose, processing }} mb={3} />
-      <Tabs
-        mx={[0, 5]}
-        isFitted
-        variant="enclosed"
-        onChange={(idx) => setTab(idx)}
+    <Stack>
+      <Box
+        as="form" onSubmit={handleSubmit(submit)}
+        mt={10} maxW={['100%', 'min(85vw, 50em)']}
+        sx={{ a: { textDecoration: 'underline' } }}
       >
-        <TabList mb="1em">
-          <Tab>Fields</Tab>
-          <Tab>URI</Tab>
-          <Tab>JSON5</Tab>
-        </TabList>
-        <TabPanels>
-          {[NFTForm, URIForm, JSONForm].map((Form, idx) => (
-            <TabPanel key={idx} p={0}>
-              <Form {...{
-                register,
-                watch,
-                setValue,
-                tokenId,
-                metadata,
-              }} />
-            </TabPanel>
-          ))}
-        </TabPanels>
-      </Tabs>
-      {/* <FormControl>
+        <Submit {...{ purpose, processing }} mb={3} />
+        <Tabs
+          mx={[0, 5]}
+          isFitted
+          variant="enclosed"
+          onChange={(idx) => setTab(idx)}
+        >
+          <TabList mb="1em">
+            <Tab>Fields</Tab>
+            <Tab>URI</Tab>
+            <Tab>JSON5</Tab>
+          </TabList>
+          <TabPanels>
+            {[NFTForm, URIForm, JSONForm].map((Form, idx) => (
+              <TabPanel key={idx} p={0}>
+                <Form {...{
+                  register,
+                  watch,
+                  setValue,
+                  tokenId,
+                  metadata,
+                }} />
+              </TabPanel>
+            ))}
+          </TabPanels>
+        </Tabs>
+        {/* <FormControl>
         <Flex align="center">
-          <FormLabel _after={{ content: '":"' }}>Max&#xA0;Mintable</FormLabel>
-          <Input
-            type="number"
-            placeholder="¿Maximum number of tokens allowed?"
-            {...register('maximum')}
-          />
+        <FormLabel _after={{ content: '":"' }}>Max&#xA0;Mintable</FormLabel>
+        <Input
+        type="number"
+        placeholder="¿Maximum number of tokens allowed?"
+        {...register('maximum')}
+        />
         </Flex>
       </FormControl> */}
-      <Submit {...{ purpose, processing }} mb={3} />
-    </Box>
+        <Submit {...{ purpose, processing }} mb={3} />
+      </Box>
+      <MaxForm {...{ tokenId }}/>
+    </Stack>
   )
 }
 

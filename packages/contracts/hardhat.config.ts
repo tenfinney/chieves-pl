@@ -205,7 +205,7 @@ task('su', 'Add a superuser')
     user = await provider.resolveName(user)
   }
   console.log(` 🍏 Setting ${user} as superuser on ${contractName} (${address})`)
-  const suRole = await contract.roleValueForName('Superuser')
+  const suRole = await contract.roleIndexForName('Superuser')
   const tx = await contract['grantRole(uint8,address)'](suRole, user)
   console.info(` 🕋 Tx: ${tx.hash}`)
 })
@@ -213,6 +213,7 @@ task('su', 'Add a superuser')
 task('grant', 'Grant a role')
 .addParam('address', 'Address of the user to promote')
 .addParam('role', 'Role to grant')
+.addParam('token', 'TokenId to grant for')
 .setAction(async (args, { ethers }) => {
   const srcDir = config?.paths?.sources
   // const [, srcDir] = config?.paths?.sources?.match(/^.*\/([^\/]+)\/?$/) ?? []
@@ -220,7 +221,7 @@ task('grant', 'Grant a role')
   const contractsHome = `${config?.paths?.artifacts}/${srcDir}/`
   const [contractFile] = (
     glob
-    .sync(`${contractsHome}/*/*`)
+    .sync(`${contractsHome}/*/Bulk*`)
     .filter((name) => !/\.dbg\.json$/.test(name))
   )
   const { abi, contractName } = JSON.parse(
@@ -238,7 +239,7 @@ task('grant', 'Grant a role')
     .toString()
     .trim()
   )
-  let { address: user, role } = args
+  let { address: user, role, token } = args
   if(user.includes('.')) {
     const rpc = (
       (config.networks?.mainnet as HttpNetworkUserConfig)?.url
@@ -252,10 +253,15 @@ task('grant', 'Grant a role')
     new ethers.Contract(address , abi, ethers.provider.getSigner())
   )
   console.log(` 🍏 Setting ${user} as ${role} on ${contractName} (${address})`)
-  const roleId = await contract.roleValueForName(role)
+  const roleId = await contract.roleIndexForName(role)
   if(roleId === 0) throw new Error(`Can’t find “${role}”`)
-  const tx = await contract['grantRole(uint8,address)'](roleId, user)
-  console.info(` 🕋 Tx: ${tx.hash}`)
+  let tx 
+  if(token) {
+    tx = await contract['grantRole(uint8,address,uint256)'](roleId, user, token)
+  } else {
+    tx = await contract['grantRole(uint8,address)'](roleId, user)
+  }  
+    console.info(` 🕋 Tx: ${tx.hash}`)
 })
 
 task('wallet', 'Create a wallet (pk) link', async (_, { ethers }) => {
