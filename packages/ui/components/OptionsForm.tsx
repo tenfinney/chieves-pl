@@ -86,7 +86,7 @@ const Submit: React.FC<ButtonProps & {
 
 export const OptionsForm: React.FC<{
   purpose?: 'create' | 'update'
-  tokenId: string
+  tokenId?: string
   metadata?: Maybe<ERC1155Metadata>
 }> = ({
   purpose = 'create', tokenId, metadata
@@ -116,7 +116,7 @@ export const OptionsForm: React.FC<{
         throw new Error(
           'invalid token id'
         )
-      }  
+      }
 
       let tx
       if(max != null) {
@@ -194,7 +194,7 @@ export const OptionsForm: React.FC<{
     try {
       const name = `metadata.${(new Date()).toISOString()}.json`
       let metadata = await (async () => {
-        switch (tab) {
+        switch(tab) {
           case FIELD_FORM: {
             return {
               name,

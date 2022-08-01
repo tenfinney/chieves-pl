@@ -126,7 +126,6 @@ export const ipfsify = async (filesOrURL: FileListish) => {
     { pin: true, wrapWithDirectory: true }
   ))
   const [{ cid }] = result.slice(-1)
-  console.debug({ list, cid, result })
   const out = list.map((entry) => (
     `ipfs://${cid.toString()}/`
     + (entry as File).name
@@ -134,14 +133,25 @@ export const ipfsify = async (filesOrURL: FileListish) => {
   return out
 }
 
-export const regexify = (str: string) => {
-  const matches = str.split(/((\w)\2{3,})/)
+export const regexify = (str?: string) => {
+  if(!str) return str
+
+  let matches = str.split(/((\w)\2{3,})/g)
+  for(let i = 0; i < matches.length - 1; i++) {
+    const str = matches[i]
+    const next = matches[i + 1]
+    if((new Set([...str, ...next])).size === 1) {
+      matches[i] += next
+      matches[i + 1] = ''
+    }
+  }
+  matches = matches.filter((m) => m !== '')
   const condensed = matches.map((m: string) => {
-    const char = m[0]
+    const [char] = m
     if(
       m.length > 3
       && /\w/.test(char)
-      && m.replace(new RegExp(`${char}+`, 'g'), '') === ''
+      && (new Set(m)).size === 1
     ) {
       return `${char}{${m.length}}`
     } else {
@@ -152,20 +162,19 @@ export const regexify = (str: string) => {
   return condensed.join('')
 }
 
-export const deregexify = (str: string) => {
+export const deregexify = (str?: string) => {
+  if(!str) return str
+
   const matches = str.split(/(\w\{\d+\})/)
+  console.info({ matches })
   const expanded = matches.map((m: string) => {
-    const char = m[0]
-    if(
-      m.length > 3
-      && /\w/.test(char)
-      && m.replace(new RegExp(`${char}+`, 'g'), '') === ''
-    ) {
-      return `${char}{${m.length}}`
+    const [_, char, count] = m.match(/^(.)\{(\d+)\}/) ?? []
+    if(char && count) {
+      return char.repeat(Number(count) - 1)
     } else {
       return m
     }
   })
-
+  console.info({ expanded })
   return expanded.join('')
 }

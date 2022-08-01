@@ -1,17 +1,16 @@
-import { AddIcon, CloseIcon, ExternalLinkIcon } from '@chakra-ui/icons'
 import {
-  Input, chakra, Select, Td, Tooltip, Button,
-  useDisclosure, Tr,
+  AddIcon, CloseIcon, ExternalLinkIcon
+} from '@chakra-ui/icons'
+import {
+  Input, chakra, Select, Td, Tooltip, Button, Tr,
   UnorderedList, ListItem, FormControl, Flex,
-  FormLabel, Box, Text, Link, Image, Tabs,
+  FormLabel, Text, Link, Image, Tabs,
   TabList, Tab, TabPanels, TabPanel, Textarea,
-  Table, Thead, Th, Tbody, ModalFooter, Modal,
-  ModalOverlay, ModalContent, ModalHeader,
-  ModalCloseButton, ModalBody,
-  Radio, RadioGroup, SimpleGrid, Stack, Center,
+  Table, Thead, Th, Tbody, Radio, RadioGroup,
+  SimpleGrid, Stack, Center,
 } from '@chakra-ui/react'
 import { NFT_HOMEPAGE_BASE } from 'lib/constants'
-import { httpURL, isEmpty } from 'lib/helpers'
+import { httpURL, isEmpty, regexify } from 'lib/helpers'
 import {
   Attribute, ERC1155Metadata, Maybe, OpenSeaAttribute,
 } from 'lib/types'
@@ -155,7 +154,6 @@ export const NFTForm: React.FC<{
     homepage, description, color, images, attributes, animation,
   } = watch()
   const [wearables, setWearables] = useState({})
-  const { isOpen, onOpen, onClose } = useDisclosure()
 
   const setImage = useCallback(
     (file) => setValue('images', [file]), []
@@ -178,12 +176,13 @@ export const NFTForm: React.FC<{
       if(!isEmpty(attrs)) {
         setValue(
           'attributes',
-          ((attrs ?? []).map(({
-            trait_type: name,
-            value,
-            display_type: type = 'string',
-          }: OpenSeaAttribute) => (
-            { name, value, type }
+          ((attrs ?? []).map(
+            ({
+              trait_type: name,
+              value,
+              display_type: type = 'string',
+            }: OpenSeaAttribute) => (
+              { name, value, type }
             )
           ))
         )
@@ -202,7 +201,7 @@ export const NFTForm: React.FC<{
     if(!homepage || isEmpty(homepage) || homepage.endsWith('𝘜𝘯𝘬𝘯𝘰𝘸𝘯')) {
       setValue(
         'homepage',
-        `${NFT_HOMEPAGE_BASE}/${tokenId}`
+        `${NFT_HOMEPAGE_BASE}/${regexify(tokenId)}`
       )
     }
   }, [homepage, setValue, tokenId])

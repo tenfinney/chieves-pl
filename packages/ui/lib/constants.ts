@@ -5,5 +5,5 @@ export const IPFS_LINK_PATTERN = (
 )
 
 export const NFT_HOMEPAGE_BASE = (
-  'https://metafam.github.io/chievemints/view'
+  'https://chiev.es/view'
 )

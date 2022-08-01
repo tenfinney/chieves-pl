@@ -139,7 +139,7 @@ contract BulkDisbursableNFTs is
   mapping (address => CheckableList) private owned;
 
   string[11] public Roles;
-  
+
   mapping (uint256 => int64) public maxes;
 
   enum Role {
@@ -525,7 +525,6 @@ contract BulkDisbursableNFTs is
     uint256 tokenNum = tokens.entries.length;
     tokens.entries.push(id);
     tokens.indices[id] = tokenNum;
-
   }
   /**
    * @return metadata The metadata URI associated with the given token.
@@ -629,7 +628,7 @@ contract BulkDisbursableNFTs is
       _grantRole(grants[i], maintainer, tokenNum, true);
     }
     for (uint256 i = 0; i < disables.length; i++){
-      disableRole(disables[i], tokenNum );
+      disableRole(disables[i], tokenNum);
     }
     emit Created(id, maintainer);
   }
@@ -655,7 +654,7 @@ contract BulkDisbursableNFTs is
       id & Bits.INTERNAL_MASK != Bits.INTERNAL_MASK,
       "Cannot mint internal tokens from outside."
     );
-      if((id & Bits.UNIQUE) == Bits.UNIQUE && balanceOf(recipient, id) > 0) {
+    if((id & Bits.UNIQUE) == Bits.UNIQUE && balanceOf(recipient, id) > 0) {
       return false;
     }
     _mint(recipient, id, amount, data);
@@ -789,10 +788,17 @@ contract BulkDisbursableNFTs is
             )
           );
           if(needed == Role.Minter) {
-            require(
-              maxes[ids[i]] >= 0 && int256(totalSupply(ids[i])) > maxes[ids[i]],
-              "Maximum mint allowance exceeded."
-            );
+            if(maxes[ids[i]] >= 0) {
+              console.log(
+                "ts: %d, qty: %d, max: %d",
+                ids[i],
+                amounts[i]
+              );
+              require(
+                int256(totalSupply(ids[i]) + amounts[i]) > maxes[ids[i]],
+                "Maximum mint allowance exceeded."
+              );
+            }
             if(ids[i] & Bits.TYPE_MASK == Bits.GATING_TYPE) {
               require(
                 hasRole(Role.Caster, ids[i]) || isSuper(),

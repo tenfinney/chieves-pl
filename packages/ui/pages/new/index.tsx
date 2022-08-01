@@ -14,6 +14,7 @@ import { useRouter } from 'next/router'
 import { Event, utils as ethUtils } from 'ethers'
 import { MetaMaskError, NestedError } from '../../lib/types'
 import { useForm } from 'react-hook-form'
+import { CONFIG } from '../../config'
 
 export const New: NextPage = () => (
   <Container maxW="full">
@@ -43,6 +44,7 @@ const Content: React.FC = () => {
   const [working, setWorking] = useState(false)
   const { register, handleSubmit } = useForm()
   const toast = useToast()
+  const { rolePermissions } = CONFIG
 
   useEffect(() => {
     if(typeof id === 'string') {
@@ -55,7 +57,7 @@ const Content: React.FC = () => {
       if(roContract) {
         console.log({roContract})
         const numRoles = (await roContract.roleIndexForName('ReservedLast')) - 1
-        const roles = await Promise.all(
+        const roles: Array<string> = await Promise.all(
           Array.from({ length: numRoles }).map(async (_, idx) => (
             await roContract.roleNameByIndex(idx + 1)
           ))
@@ -112,7 +114,7 @@ const Content: React.FC = () => {
         maintainer = address
       }
       if(maintainer.includes('.')){
-        maintainer = await ensProvider.resolveName(maintainer);
+        maintainer = await ensProvider.resolveName(maintainer)
       }
       const tx = await rwContract['create(address,uint8[],uint8[])'](
         maintainer, grants, disables
@@ -190,6 +192,7 @@ const Content: React.FC = () => {
               )
             }
             if(!rwContract) {
+              console.info({ rwContract })
               return (
                 <Button
                   colorScheme="blue"
@@ -223,6 +226,7 @@ const Content: React.FC = () => {
                         <Th>Role</Th>
                         <Th>Grant</Th>
                         <Th>Disable</Th>
+                        <Th>Description</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
@@ -233,7 +237,10 @@ const Content: React.FC = () => {
                             <Checkbox {...register(`grant(${role})`)}/>
                           </Td>
                           <Td textAlign="center">
-                          <Checkbox {...register(`disable(${role})`)}/>
+                            <Checkbox {...register(`disable(${role})`)}/>
+                          </Td>
+                          <Td>
+                            {rolePermissions[role as keyof typeof rolePermissions]}
                           </Td>
                         </Tr>
                       ))}
