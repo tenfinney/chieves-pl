@@ -292,9 +292,12 @@ describe('The Token Contract', () => {
 
       expect(await token.balanceOf(creator.address, singleMinter))
       .to.equal(1)
+
       expect(await token['hasRole(uint8,address,uint256)'](
         minterRole, creator.address, createdId
       )).to.be.true
+
+      await token.setMax(createdId, 100)
 
       await transact({
         sender: creator,
@@ -337,7 +340,22 @@ describe('The Token Contract', () => {
         args: [[minterRole], []],
       })
       expect((await token.typeSupply()).toBigInt() - lastIndex).to.equal(2n)
-      const createdId = await token.tokenByIndex(lastIndex +1n)
+      const createdId = await token.tokenByIndex(lastIndex + 1n)
+
+      await token.setMax(createdId, 6)
+      await expect(
+        transact({
+          sender: creator,
+          method: 'mint(address,uint256,uint256,bytes)',
+          args: [creator.address, createdId, 5, []]
+        }),
+        'a user with a Minter role to be able to create new instances',
+      ).to.eventually.be.fulfilled
+
+      expect(
+        await token.balanceOf(creator.address, createdId),
+        'minted tokens to show up in the user’s balance'
+      ).to.equal(5)
 
       await expect(
         transact({
@@ -345,15 +363,14 @@ describe('The Token Contract', () => {
           method: 'mint(address,uint256,uint256,bytes)',
           args: [creator.address, createdId, 5, []]
         }),
-        'a user with a Creator role to be able to create new types',
-      ).to.eventually.be.fulfilled
+        'the max mintable limit to prevent minting beyond it’s allowance',
+      ).to.eventually.be.rejected
 
       expect(
         await token.balanceOf(creator.address, createdId),
-        'a user to have a gating token when granted a role'
+        'minted tokens to remain the same when past the max'
       ).to.equal(5)
     }
-
   )
 
   it(
@@ -387,11 +404,13 @@ describe('The Token Contract', () => {
       expect((await token.typeSupply()).toBigInt() - lastIndex).to.equal(2n)
       const createdId = await token.tokenByIndex(lastIndex +1n)
 
+      await token.setMax(createdId, 20)
+
       await expect(
         transact({
           sender: creator,
           method: 'mint(address,uint256,uint256,bytes)',
-          args: [creator.address,createdId,5,[]]
+          args: [creator.address, createdId, 5, []]
         }),
         'a user with a Creator role to be able to create new types',
       ).to.eventually.be.fulfilled

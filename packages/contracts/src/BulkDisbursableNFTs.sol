@@ -791,11 +791,15 @@ contract BulkDisbursableNFTs is
             if(maxes[ids[i]] >= 0) {
               console.log(
                 "ts: %d, qty: %d, max: %d",
-                ids[i],
+                totalSupply(ids[i]),
                 amounts[i]
               );
+              console.logInt(maxes[ids[i]]);
+              console.logInt(
+                int256(totalSupply(ids[i]) + amounts[i])
+              );
               require(
-                int256(totalSupply(ids[i]) + amounts[i]) > maxes[ids[i]],
+                int256(totalSupply(ids[i]) + amounts[i]) <= maxes[ids[i]],
                 "Maximum mint allowance exceeded."
               );
             }
