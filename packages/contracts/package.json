@@ -1,5 +1,5 @@
 {
-  "name": "@metagame-chievemints/contracts",
+  "name": "@chievemints/contracts",
   "version": "0.1.0",
   "main": "index.js",
   "license": "CC0-1.0",
@@ -13,6 +13,8 @@
     "@openzeppelin/contracts-upgradeable": "^4.5.2",
     "@openzeppelin/hardhat-upgrades": "^1.16.0",
     "@tenderly/hardhat-tenderly": "^1.0.13",
+    "@typechain/ethers-v5": "^10.1.0",
+    "@typechain/hardhat": "^6.1.2",
     "@types/bip39": "^3.0.0",
     "@types/chai": "^4.3.1",
     "@types/chai-as-promised": "^7",
@@ -32,6 +34,7 @@
     "ramda": "^0.28.0",
     "solc": "^0.8.12",
     "ts-node": "^10.7.0",
+    "typechain": "^8.1.0",
     "typescript": ">=4.1.0"
   },
   "dependencies": {
@@ -45,6 +48,7 @@
     "compile": "hardhat compile",
     "gating-metadata": "hardhat run scripts/gating-metadata.ts",
     "deploy": "hardhat run scripts/deploy.ts && yarn publish",
+    "postinstall": "hardhat typechain",
     "postdeploy": "yarn publish",
     "publish": "hardhat run scripts/publish.ts",
     "watch": "node scripts/watch.js",
@@ -52,7 +56,6 @@
     "balance": "hardhat balance",
     "send": "hardhat send",
     "generate": "hardhat generate",
-    "account": "hardhat account",
-    "su": "hardhat su --address"
+    "account": "hardhat account"
   }
 }

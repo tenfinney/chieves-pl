@@ -2,7 +2,8 @@ import { NextPage } from 'next'
 import { OptionsForm } from 'components'
 import {
   Button, Center, Flex, Heading, Spinner, Text, chakra,
-  Stack, Container, useToast, Table, Thead, Th, Tr, Tbody, Td, Checkbox, Input,
+  Stack, Container, useToast, Table, Thead, Th, Tr,
+  Tbody, Td, Checkbox, Input, Tooltip,
 } from '@chakra-ui/react'
 import { useWeb3 } from 'lib/hooks'
 import { useCallback, useEffect, useState } from 'react'
@@ -81,16 +82,12 @@ const Content: React.FC = () => {
       if(!roContract){
         throw new Error('Library not loaded.')
       }
-      if(!ensProvider){
-        throw new Error('ENS provider not defined.')
-      }
       const grants: Array<number> = []
       const disables: Array<number> = []
       await Promise.all(Object.entries(data).map(
         async ([key, value]: [key: string, value: unknown]) => {
           if(typeof value === 'boolean' && value) {
             const [_, type, role] = key.match(/^(grant|disable)\((.+)\)$/) ?? []
-            console.log({type, role})
             const roleId = await rwContract.roleIndexForName(role)
             switch(type) {
               case 'grant': {
@@ -113,7 +110,10 @@ const Content: React.FC = () => {
       if(maintainer === '') {
         maintainer = address
       }
-      if(maintainer.includes('.')){
+      if(maintainer.includes('.')) {
+        if(!ensProvider) {
+          throw new Error('ENS provider not defined.')
+        }
         maintainer = await ensProvider.resolveName(maintainer)
       }
       const tx = await rwContract['create(address,uint8[],uint8[])'](
@@ -216,16 +216,27 @@ const Content: React.FC = () => {
                   as="form"
                   onSubmit={handleSubmit(reserve)}
                 >
-                  <Input
-                    {...register('maintainer')}
-                    placeholder="Maintainer Address (default Creator)"
-                  />
+                  <Flex align="center">
+                    <chakra.label mr={3}>Admin:</chakra.label>
+                    <Input
+                      {...register('maintainer')}
+                      placeholder="Maintainer Address (default Creator)"
+                    />
+                  </Flex>
                   <Table mb={5}>
                     <Thead>
                       <Tr>
                         <Th>Role</Th>
-                        <Th>Grant</Th>
-                        <Th>Disable</Th>
+                        <Th>
+                          <Tooltip label="Give the admin these roles:">
+                            Grant
+                          </Tooltip>
+                        </Th>
+                        <Th>
+                          <Tooltip label="Prevent these permissions from being checked:">
+                            Disable
+                          </Tooltip>
+                        </Th>
                         <Th>Description</Th>
                       </Tr>
                     </Thead>

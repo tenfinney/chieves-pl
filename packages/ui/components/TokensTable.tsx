@@ -2,7 +2,7 @@ import {
   Box, Flex, Spinner, Stack, Table, Tbody, Td, Text, Th, Thead, Tr,
   Link as ChakraLink, Tooltip, chakra,
 } from '@chakra-ui/react'
-import { httpURL } from 'lib/helpers'
+import { httpURL, regexify } from 'lib/helpers'
 import { TokenState } from 'lib/types'
 import Link from 'next/link'
 import NextLink from 'next/link'
@@ -15,7 +15,7 @@ const IdTd:React.FC<IndexedToken> = ({ token, index }) => (
   <Td>
     <Tooltip
       label={token.id != null ? (
-        `0x${BigInt(token.id).toString(16)}`
+        regexify(`0x${BigInt(token.id).toString(16)}`)
       ) : (
         '𝚄𝚗𝚔𝚗𝚘𝚠𝚗'
       )}
@@ -36,7 +36,7 @@ const ErrorTd:React.FC<Token> = ({ token }) => (
 )
 
 const LoadingTd:React.FC<Token> = () => (
-  <Td colSpan={3}>
+  <Td colSpan={4}>
     <Flex justify="center">
       <Spinner thickness="4px"/>
       <Text ml={3}>Loading Metadata…</Text>
@@ -47,7 +47,7 @@ const LoadingTd:React.FC<Token> = () => (
 const ImageTd:React.FC<Token> = ({ token }) => (
   <Td>
     <Stack>
-      <NextLink href={`/view/${token.id}`} passHref>
+      <NextLink href={`/view/${regexify(token.id)}`} passHref>
         <ChakraLink>
           <Box
             bg={
@@ -60,7 +60,7 @@ const ImageTd:React.FC<Token> = ({ token }) => (
           >
             {token.metadata?.image && (
               <chakra.object
-                data={httpURL(token.metadata.image)}
+                data={httpURL(token.metadata.image) ?? undefined}
                 title={token.metadata?.name ?? 'Untitled'}
                 maxW={32}
                 maxH={32}
@@ -111,7 +111,7 @@ const URITd:React.FC<Token> = ({ token }) => (
   <Td>
     {token.uri && (
       <Flex justify="center" fontSize="150%">
-        <ChakraLink href={httpURL(token.uri)} isExternal>
+        <ChakraLink href={httpURL(token.uri) ?? undefined} isExternal>
           <Tooltip label={token.uri} hasArrow>
             🔗
           </Tooltip>
@@ -136,7 +136,11 @@ const URITd:React.FC<Token> = ({ token }) => (
 const TotalTd:React.FC<Token> = ({ token }) => (
   <Td>
     <Link href={`/owners/${token.id}`}>
-      {token.total?.toString() ?? <Spinner/>}
+      {token.total == null ? (
+        <Spinner/>
+      ) : (
+        `${token.total} ⁄ ${token.max}`
+      )}
     </Link>
   </Td>
 )
@@ -144,7 +148,7 @@ const TotalTd:React.FC<Token> = ({ token }) => (
 const ActionsTd:React.FC<Token> = ({ token }) => (
   <Td>
     <Flex justify="center" fontSize="150%">
-      <NextLink href={`/edit/${token.id}`} passHref>
+      <NextLink href={`/edit/${regexify(token.id)}`} passHref>
         <ChakraLink>
           <Tooltip label="Edit Metadata" hasArrow>
             ✏️

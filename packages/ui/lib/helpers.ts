@@ -1,8 +1,10 @@
-import { CodedError, Fileish, FileListish, Maybe, NamedString } from 'lib/types'
+import {
+  CodedError, FileListish, Maybe, MetaMaskError, NamedString, NestedError
+} from '@/lib/types'
 import { CID } from 'multiformats/cid'
 import { IPFS_LINK_PATTERN } from '@/lib/constants'
 import { NETWORKS } from '@/lib/networks'
-import CONFIG from 'config'
+import CONFIG from '@/config'
 import all from 'it-all'
 
 export const httpURL = (uri?: Maybe<string>) => {
@@ -10,7 +12,7 @@ export const httpURL = (uri?: Maybe<string>) => {
     uri?.match(/^(?:ipfs|dweb):(?:\/\/)?([^/]+)(?:\/(.*))?$/) ?? []
   )
 
-  if (origCID) {
+  if(origCID) {
     const cid = CID.parse(origCID)
     const v0CID = cid.toV0().toString()
     const v1CID = cid.toV1().toString()
@@ -25,10 +27,6 @@ export const httpURL = (uri?: Maybe<string>) => {
       )
       .replace(/#/g, '%23')
     )
-  }
-
-  if(!uri) {
-    throw new Error('URI Undefined')
   }
 
   return uri
@@ -143,6 +141,7 @@ export const regexify = (str?: string) => {
     if((new Set([...str, ...next])).size === 1) {
       matches[i] += next
       matches[i + 1] = ''
+      i++
     }
   }
   matches = matches.filter((m) => m !== '')
@@ -153,7 +152,7 @@ export const regexify = (str?: string) => {
       && /\w/.test(char)
       && (new Set(m)).size === 1
     ) {
-      return `${char}{${m.length}}`
+      return `${char}{${m.length - 1}}`
     } else {
       return m
     }
@@ -166,15 +165,20 @@ export const deregexify = (str?: string) => {
   if(!str) return str
 
   const matches = str.split(/(\w\{\d+\})/)
-  console.info({ matches })
   const expanded = matches.map((m: string) => {
     const [_, char, count] = m.match(/^(.)\{(\d+)\}/) ?? []
     if(char && count) {
-      return char.repeat(Number(count) - 1)
+      return char.repeat(Number(count))
     } else {
       return m
     }
   })
-  console.info({ expanded })
   return expanded.join('')
 }
+
+export const extractMessage = (error: unknown) => (
+  (error as NestedError)?.error?.message
+  ?? (error as MetaMaskError)?.data?.message
+  ?? (error as Error)?.message
+  ?? error
+)

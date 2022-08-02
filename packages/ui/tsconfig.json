@@ -28,16 +28,19 @@
     "paths": {
       "@/lib/*": [
         "lib/*"
+      ],
+      "@/config": [
+        "./config"
       ]
     },
     "outDir": "dist",
-    "noEmit": true
+    "noEmit": false,
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx"
-, "pages/api/export.ts"  ],
+  ],
   "exclude": [
     "node_modules/",
     "dist/"

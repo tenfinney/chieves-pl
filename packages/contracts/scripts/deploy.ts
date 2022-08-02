@@ -101,8 +101,9 @@ const deploy = async ({
   const gasPrice = gas ?? '𝕌𝕟𝕕𝕖𝕗𝕚𝕟𝕖𝕕'
 
   console.debug(
-    ` 🍅 ${chalk.hex('#00AA7F')('Deployed in TX:')} `
-    + chalk.hex('#6572AA')(tx)
+    `\n 🍅 ${chalk.hex('#00AA7F')('Deployed in TX:')} `
+    + chalk.hex('#6572AA')(tx) + ' to '
+    + chalk.hex('#8FFFFC')(deployed)
   )
 
   if(proxy) {
@@ -116,8 +117,12 @@ const deploy = async ({
         impl.new = (
           await upgrades.erc1967.getImplementationAddress(deployed)
         )
-      } catch(err) {} // fails if the proxy isn't yet connected
-      done = impl.new != null && impl.old !== impl.new
+      } catch(err) {
+        console.error({ err })
+      } // fails if the proxy isn't yet connected
+      done = (
+        (impl.new != null && impl.old !== impl.new)
+      )
       if(!done) {
         console.info(
           ` ${chalk.hex('#FF0606')(loops.toString())}:`

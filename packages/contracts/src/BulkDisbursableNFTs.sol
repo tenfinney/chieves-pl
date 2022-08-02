@@ -522,9 +522,9 @@ contract BulkDisbursableNFTs is
   {
     uint256 id = roleToken(toDisable, tokens.indices[tokenId]);
     id |= Bits.DISABLING_TYPE;
-    uint256 tokenNum = tokens.entries.length;
+    uint256 index = tokens.entries.length;
     tokens.entries.push(id);
-    tokens.indices[id] = tokenNum;
+    tokens.indices[id] = index;
   }
   /**
    * @return metadata The metadata URI associated with the given token.
@@ -614,8 +614,8 @@ contract BulkDisbursableNFTs is
     virtual
     returns (uint256 id)
   {
-    uint256 tokenNum = tokens.entries.length;
-    id = Bits.VANILLA_TYPE | tokenNum;
+    uint256 index = tokens.entries.length;
+    id = Bits.VANILLA_TYPE | index;
 
     require(
       hasRole(Role.Creator, id) || isSuper(),
@@ -623,12 +623,12 @@ contract BulkDisbursableNFTs is
     );
 
     tokens.entries.push(id);
-    tokens.indices[id] = tokenNum;
-    for (uint256 i = 0; i < grants.length; i++){
-      _grantRole(grants[i], maintainer, tokenNum, true);
+    tokens.indices[id] = index;
+    for(uint256 i = 0; i < grants.length; i++) {
+      _grantRole(grants[i], maintainer, index, true);
     }
-    for (uint256 i = 0; i < disables.length; i++){
-      disableRole(disables[i], tokenNum);
+    for(uint256 i = 0; i < disables.length; i++) {
+      disableRole(disables[i], index);
     }
     emit Created(id, maintainer);
   }

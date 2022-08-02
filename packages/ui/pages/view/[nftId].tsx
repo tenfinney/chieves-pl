@@ -8,10 +8,12 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import type { NextPage } from 'next'
 import ReactMarkdown from 'react-markdown'
-import { httpURL } from 'lib/helpers'
-import type { ERC1155Metadata } from 'lib/types'
+import {
+  regexify, deregexify, httpURL,
+} from '@/lib/helpers'
+import type { ERC1155Metadata } from '@/lib/types'
 import { HomeLink } from 'components'
-import { useWeb3 } from 'lib/hooks'
+import { useWeb3 } from '@/lib/hooks'
 
 const Markdown = chakra(ReactMarkdown)
 
@@ -20,7 +22,9 @@ const View: NextPage = () => {
   const [metadata, setMetadata] = useState<ERC1155Metadata>()
   const [error, setError] = useState<string>()
   const { roContract } = useWeb3()
-  const nftId = Array.isArray(idParam) ? idParam[0] : idParam
+  const nftId = deregexify(
+    Array.isArray(idParam) ? idParam[0] : idParam
+  )
 
   useEffect(
     () => {
@@ -62,20 +66,20 @@ const View: NextPage = () => {
     return (
       <Flex align="center" justify="center" h="100vh">
         <Spinner thickness="4px" speed="1s" mr={2}/>
-        <Text>Loading Metadata For Token #{nftId}</Text>
+        <Text>Loading Metadata For Token #{regexify(nftId)}</Text>
       </Flex>
     )
   }
 
   const {
     name, image, animation_url: animationURL,
-    description,
+    description, background_color: bg,
   } = metadata
 
   return (
     <Stack align="center" position="relative">
       <Head>
-        <title>’𝖈𝖍𝖎𝖊𝖛𝖊: 𝓥ⲓⲉⲱ #{nftId}</title>
+        <title>’𝖈𝖍𝖎𝖊𝖛𝖊: 𝓥ⲓⲉⲱ #{regexify(nftId)}</title>
         <meta
           name="description"
           content="MetaGame’s ’Chievemint NFTs"
@@ -85,16 +89,26 @@ const View: NextPage = () => {
       {name && <Heading>{name}</Heading>}
       {image && (
         <chakra.object
-          data={httpURL(image)}
+          data={httpURL(image) ?? undefined}
           title={name}
           pointerEvents="none"
-          maxW={72}
-          maxH={72}
+          maxW="80vmin" maxH="80vmin"
+          bg={`#${bg}`}
+          borderRadius={15}
+          p={2}
         />
       )}
       {description && (
         <Markdown
-          sx={{ a: { textDecoration: 'underline' } }}
+          maxW="30rem"
+          sx={{
+            a: { textDecoration: 'underline' },
+            p: {
+              textIndent: '1em',
+              my: 3,
+              textAlign: 'justify',
+            },
+          }}
           linkTarget="_blank"
         >
           {description}
@@ -105,17 +119,18 @@ const View: NextPage = () => {
           maxW={96} maxH={96}
           controls autoPlay loop muted
         >
-          <chakra.source src={httpURL(animationURL)}/>
+          <chakra.source
+            src={httpURL(animationURL) ?? undefined}
+          />
         </chakra.video>
       )}
       {animationURL?.endsWith('.webp') && (
         <Image
-          src={httpURL(animationURL)}
+          src={httpURL(animationURL) ?? undefined}
           alt={name}
           maxW={96} maxH={96}
         />
       )}
-
     </Stack>
   )
 }

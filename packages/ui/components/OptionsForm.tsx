@@ -1,88 +1,22 @@
 import {
   Box,
-  Button, ButtonProps, Flex, FormControl,
-  FormLabel, Input, Spinner, Stack, Tab, TabList, TabPanel,
+  Button, ButtonProps, Flex, Spinner, Stack,
+  Tab, TabList, TabPanel,
   TabPanels, Tabs, Text, useToast,
 } from '@chakra-ui/react'
 import { URIForm, JSONForm, NFTForm } from 'components/forms'
 import { capitalize, ipfsify, isSet, switchTo } from 'lib/helpers'
-import { NETWORKS } from 'lib/networks'
-import { useCallback, useMemo, useState } from 'react'
-import { useWeb3 } from 'lib/hooks'
+import { useCallback, useState } from 'react'
+import { useWeb3 } from '@/lib/hooks'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/router'
 import JSON5 from 'json5'
 import {
-  ERC1155Metadata, FormValues, Maybe, OpenSeaAttribute,
-} from 'lib/types'
-import { isEmpty } from 'lib/helpers'
-import { Attribute, MetaMaskError } from '../lib/types'
+  ERC1155Metadata, FormValues, Maybe, OpenSeaAttribute, Attribute,
+} from '@/lib/types'
+import { isEmpty, regexify, extractMessage } from '@/lib/helpers'
 import { MaxForm } from './MaxForm'
-
-const Submit: React.FC<ButtonProps & {
-  purpose: string
-  processing?: boolean
-}> = ({ purpose, processing = false, onClick, ...props }) => {
-  const { chain, isMetaMask, userProvider, connect } = useWeb3()
-  const offChain = useMemo(
-    () => chain !== NETWORKS.contract.chainId,
-    [chain],
-  )
-  const [working, setWorking] = useState(processing)
-  const desiredNetwork = (
-    offChain ? NETWORKS.contract.name : null
-  )
-
-  return (
-    <Button
-      type="submit"
-      variant="solid"
-      colorScheme={
-        (!userProvider || offChain) ? 'blue' : 'green'
-      }
-      isDisabled={
-        ((offChain && !isMetaMask) && !!userProvider)
-        || processing || working
-      }
-      w="full"
-      onClick={async (evt) => {
-        setWorking(true)
-
-        if (!userProvider) {
-          evt.preventDefault()
-          connect()
-        } else if (offChain) {
-          evt.preventDefault()
-          switchTo(NETWORKS.contract.chainId)
-        } else {
-          onClick?.apply(this, [evt])
-        }
-
-        setWorking(false)
-      }}
-      {...props}
-    >
-      {(() => {
-        if (processing || working) {
-          return (
-            <Flex>
-              <Spinner />
-              <Text ml={2}>
-                {capitalize(purpose).slice(0, -1)}ing…
-              </Text>
-            </Flex>
-          )
-        } else if (!userProvider) {
-          return 'Connect To Continue'
-        } else if (offChain) {
-          return `Connect To The ${desiredNetwork} Network`
-        } else {
-          return `${capitalize(purpose)} NFT`
-        }
-      })()}
-    </Button>
-  )
-}
+import { SubmitButton } from './SubmitButton'
 
 export const OptionsForm: React.FC<{
   purpose?: 'create' | 'update'
@@ -106,30 +40,24 @@ export const OptionsForm: React.FC<{
   const toast = useToast()
 
   const configure = useCallback(
-    async ({ metadata, max = null }) => {
+    async ({ metadata }) => {
       if(!rwContract) {
         throw new Error(
           `Cannot connect to contract to ${purpose} metadata.`
         )
       }
       if(tokenId == null) {
-        throw new Error(
-          'invalid token id'
-        )
+        throw new Error('Token id is unset.')
       }
 
-      let tx
-      if(max != null) {
-        tx = await rwContract.configure(
-          BigInt(tokenId), metadata, max
+      if(tokenId != null) {
+        const tx = await rwContract.setURI(
+          BigInt(tokenId), metadata
         )
-      } else if(tokenId != null) {
-        console.log({r: rwContract})
-        tx = await rwContract.setURI(BigInt(tokenId), metadata)
+        await tx.wait()
       }
-      await tx.wait()
           
-      return router.push(`/view/${tokenId}`)
+      return router.push(`/view/${regexify(tokenId)}`)
     },
     [purpose, router, rwContract, tokenId],
   )
@@ -222,26 +150,16 @@ export const OptionsForm: React.FC<{
           }
         }
       })()
-        
-      const max = (
-        isSet(data.maximum) ? data.maximum : null
-      )
-        
+
       if(!metadata) {
-        throw new Error('Metadata is undefined')
+        throw new Error('Metadata is undefined.')
       }
       [metadata] = await ipfsify(metadata)
-
-      await configure({ metadata, max })
+      await configure({ metadata })
     } catch(error) {
-      const msg = (
-        (error as MetaMaskError).data?.message
-        ?? (error as Error).message
-        ?? error
-      )
       toast({
         title: 'Metadata Error',
-        description: msg,
+        description: extractMessage(error),
         status: 'error',
         isClosable: true,
         duration: 10000
@@ -251,13 +169,13 @@ export const OptionsForm: React.FC<{
   }
     
   return (
-    <Stack>
+    <Stack align="center">
       <Box
         as="form" onSubmit={handleSubmit(submit)}
-        mt={10} maxW={['100%', 'min(85vw, 50em)']}
+        mt={10} w={['100%', 'min(85vw, 40em)']}
         sx={{ a: { textDecoration: 'underline' } }}
       >
-        <Submit {...{ purpose, processing }} mb={3} />
+        <SubmitButton {...{ purpose, processing }} mb={3} />
         <Tabs
           mx={[0, 5]}
           isFitted
@@ -283,19 +201,9 @@ export const OptionsForm: React.FC<{
             ))}
           </TabPanels>
         </Tabs>
-        {/* <FormControl>
-        <Flex align="center">
-        <FormLabel _after={{ content: '":"' }}>Max&#xA0;Mintable</FormLabel>
-        <Input
-        type="number"
-        placeholder="¿Maximum number of tokens allowed?"
-        {...register('maximum')}
-        />
-        </Flex>
-      </FormControl> */}
-        <Submit {...{ purpose, processing }} mb={3} />
+        <SubmitButton {...{ purpose, processing }} mb={3} />
       </Box>
-      <MaxForm {...{ tokenId }}/>
+      <MaxForm colorScheme="blue" {...{ tokenId, purpose }}/>
     </Stack>
   )
 }

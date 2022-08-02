@@ -26,11 +26,11 @@ export const Edit: NextPage = () => {
       if(roContract && tokenId) {
         try {
           const meta = await roContract.uri(tokenId)
-          console.info({ tokenId, meta })
           if(!meta) {
             setMetadata(null)
           } else {
-            const response = await fetch(httpURL(meta))
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const response = await fetch(httpURL(meta)!)
             setMetadata(await response.json())
           }
         } catch(err) {

@@ -103,7 +103,7 @@ const Home: NextPage = () => {
               let metadata = null
               try {
                 let uri = await roContract.uri(id)
-                if(uri === '') uri = null
+                if(uri === '') throw new Error('No URI')
                 setToken(index, { uri })
 
                 const url = httpURL(uri)
@@ -128,8 +128,8 @@ const Home: NextPage = () => {
               const total = await roContract['totalSupply(uint256)'](id)
               setToken(index, { total })
 
-              // const max = await contract.getMax(id)
-              // setToken(index, { max })
+              const max = await roContract.getMax(id)
+              setToken(index, { max })
             })
           )
         }
