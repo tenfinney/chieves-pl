@@ -10,7 +10,9 @@ import {
 import Markdown from 'react-markdown'
 import { httpURL } from 'lib/helpers'
 import type { Maybe, ERC1155Metadata, TokenState } from 'lib/types'
-import { Header, Header0, TokensTable } from 'components'
+// import { Header, Header0, TokensTable } from 'components'
+import { TokensTable } from 'components'
+
 import { useWeb3 } from 'lib/hooks'
 import { useRouter } from 'next/router'
 import TokenFilterForm from 'components/TokenFilterForm'
@@ -18,7 +20,7 @@ import TokenFilterForm from 'components/TokenFilterForm'
 const Home: NextPage = () => {
   const [tokens, setTokens] = useState<Array<TokenState>>([])
   const {
-    query: { gating = false, visible: visibleParam, limit: limitParam = 10, offset: offsetParam = 0 }
+    query: { gating = false, visible: visibleParam, limit: limitParam = 100, offset: offsetParam = 0 }
   } = useRouter()
   const [limit, setLimit] = useState(Number(limitParam))
   const [offset, setOffset] = useState(Number(offsetParam))
@@ -150,7 +152,7 @@ const Home: NextPage = () => {
         />
       </Head>
 
-      <chakra.header h="30vh">
+      {/* <chakra.header h="10vh">
         <Flex maxW="40rem" margin="auto">
           <Header0 mt="1vh" h="10vh"/>
         </Flex>
@@ -158,7 +160,7 @@ const Home: NextPage = () => {
           <Header mt="1vh" h="20vh"/>
         </Flex>
 
-      </chakra.header>
+      </chakra.header> */}
 
       <chakra.main>
         <TokenFilterForm

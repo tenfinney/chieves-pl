@@ -1,7 +1,7 @@
 import { NextPage } from 'next'
 import { OptionsForm } from 'components'
 import {
-  Button, Center, Flex, Heading, Spinner, Text, chakra,
+  Box, Button, Center, Flex, Heading, Spinner, Text, chakra,
   Stack, Container, useToast, Table, Thead, Th, Tr, Tbody, Td, Checkbox, Input,
 } from '@chakra-ui/react'
 import { useWeb3 } from 'lib/hooks'
@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { NETWORKS } from '../../lib/networks'
 import { switchTo } from 'lib/helpers'
 import Head from 'next/head'
-import { Header } from 'components'
+import { Header1, Header2, Header3, HeaderLogo } from 'components'
 import { useRouter } from 'next/router'
 import { Event, utils as ethUtils } from 'ethers'
 import { MetaMaskError, NestedError } from '../../lib/types'
@@ -22,8 +22,21 @@ export const New: NextPage = () => (
     </Head>
     <chakra.header>
       <Flex justify="center">
-        <Header my="1vh" maxW="xl"/>
+        <Header1 my="1vh" maxW="xl"/>
+      </Flex>      
+    <Flex justify="center">
+        <HeaderLogo my="1vh" maxW="xl"/>
       </Flex>
+      <Flex justify="center">
+        <Header2 my="1vh" maxW="xl"/>
+      </Flex>
+      <Flex justify="center">
+        <Header3 my="1vh" maxW="xl"/>
+      </Flex>
+      <Flex justify="center">
+        <Header1 my="1vh" maxW="xl"/>
+      </Flex>
+
     </chakra.header>
     <chakra.main>
       <Content/>
@@ -150,7 +163,24 @@ const Content: React.FC = () => {
 
   if(!rwContract || !tokenId || working) {
     return (
+      <Box ml="50px">
+      <Text fontSize="24pt" mt="1rem" fontWeight="bold">
+        ERC-1155 Access and Achievment Token Minting
+      </Text>
+      <Text ml="20px" fontSize="18pt" fontWeight="bold">
+        Digital Tokens on the Polygon EVM Blockchain using IPFS
+      </Text>
+      <Text ml="50px" fontSize="12pt" fontWeight="regular">
+        Each token reservation mints one (1) master token and up to (11) role
+        tokens. Superuser, Minter, Caster, Transferer, Configurer, Maintainer, Creator, Limiter, Burner, Destroyer, and/or Oracle can be automatically minted with
+        the master token and can be assigned to third-parties for
+        administration.
+      </Text>
+      <br/>
+      <hr/>
+      <br/>
       <Center>
+      <br />
         <Stack>
           <Heading textAlign="center">
             Create a new
@@ -158,7 +188,7 @@ const Content: React.FC = () => {
               title="Unique Cred Token"
               ml={2}
             >
-              Cred Token
+              Access Token
             </chakra.span>
           </Heading>
           {(() => {
@@ -254,6 +284,7 @@ const Content: React.FC = () => {
           })()}
         </Stack>
       </Center>
+      </Box>
     )
   }
 
