@@ -1,34 +1,53 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+// import '../styles/globals.css'
+import {Helmet} from 'react-helmet'
+import { ChakraProvider } from '@chakra-ui/react'
+import { Web3ContextProvider } from './lib/hooks'
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+  useQuery,
+  gql
+} from '@apollo/client'
+import { CONFIG } from './config'
+import Home from './pages/home'
+import New from './pages/new'
 
-function App() {
-  const [count, setCount] = useState(0)
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link
+} from "react-router-dom";
 
-  return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
-  )
-}
+const client = new ApolloClient({
+  uri: CONFIG.nftGraph,
+  cache: new InMemoryCache(),
+})
+
+const App: React.FC = () => (
+  <ChakraProvider>
+    <Helmet>
+      <link
+        rel="shortcut icon"
+        href="favicon.png"
+      />
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+      />
+    </Helmet>
+    <ApolloProvider {...{ client }}>
+      <Web3ContextProvider> 
+        <Router>
+          <Routes>
+            <Route path="/new" element={<New/>} />
+            <Route path="/" element={<Home/>} />
+          </Routes>
+        </Router>
+      </Web3ContextProvider>
+    </ApolloProvider>
+  </ChakraProvider>
+)
 
 export default App
