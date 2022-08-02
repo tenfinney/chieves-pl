@@ -26,18 +26,12 @@ module.exports = {
       1,
       { extensions: ['.js', '.jsx', '.ts', '.tsx'] }
     ],
-    indent: [
-      'warn',
-      2,
-    ],
+    indent: 'off',
     'linebreak-style': [
       'error',
       'unix',
     ],
-    quotes: [
-      'error',
-      'single',
-    ],
+    quotes: 'off',
     semi: [
       'error',
       'never',
