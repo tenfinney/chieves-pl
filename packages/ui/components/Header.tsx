@@ -1,28 +1,27 @@
-import { MinusIcon } from '@chakra-ui/icons'
-import { Flex, FlexProps } from '@chakra-ui/react'
+import { Flex, FlexProps, Tooltip } from '@chakra-ui/react'
 import { LinkedSVG } from 'components'
 
 export const Header: React.FC<
   FlexProps & { links?: Record<'cup' | 'sign', string> }
 > = ({ links = { cup: '/new', sign: '/' }, ...props }) => (
   <Flex  grow={1} {...props}>
-    <LinkedSVG
-      w="min(40%, 50vh)" h="auto"
-      mt="30px"
-      ml="-5%"
-      svg="header.png"
-      href={links.cup}
-      title="Create a new Token"
-    />
-    <LinkedSVG
-      w="min(50%, 50vh)" h="auto"
-      maxH="500px"
-      mt="30px"
-      ml="-20%"
-      svg="logo.png"
-      href={links.sign}
-      title="View Existing Tokens"
-    />
+    <Tooltip hasArrow label="Create A New Token Type">
+      <LinkedSVG
+        w="min(40%, 75vh)" h="auto"
+        svg="logo.svg"
+        href={links.cup}
+        title="Create a new Token"
+      />
+    </Tooltip>
+    <Tooltip hasArrow label="List Existing Tokens">
+      <LinkedSVG
+        w="75%" h="auto"
+        ml="-15%"
+        svg="header.svg"
+        href={links.sign}
+        title="View Existing Tokens"
+      />
+    </Tooltip>
   </Flex>
 )
 

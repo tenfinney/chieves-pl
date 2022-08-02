@@ -3,7 +3,7 @@ import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { ReactNode, useEffect, useState } from 'react'
 import { ERC1155Metadata, Maybe } from 'lib/types'
-import { httpURL } from 'lib/helpers'
+import { deregexify, httpURL, regexify } from 'lib/helpers'
 import { HomeLink, OptionsForm } from 'components'
 import { Box } from '@chakra-ui/react'
 import Head from 'next/head'
@@ -16,7 +16,9 @@ export const Edit: NextPage = () => {
   const { roContract } = useWeb3()
 
   useEffect(() => {
-    setTokenId(Array.isArray(nftId) ? nftId[0] : nftId)
+    setTokenId(deregexify(
+      Array.isArray(nftId) ? nftId[0] : nftId
+    ))
   }, [nftId])
 
   useEffect(() => {
@@ -27,7 +29,8 @@ export const Edit: NextPage = () => {
           if(!meta) {
             setMetadata(null)
           } else {
-            const response = await fetch(httpURL(meta))
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const response = await fetch(httpURL(meta)!)
             setMetadata(await response.json())
           }
         } catch(err) {
@@ -40,9 +43,9 @@ export const Edit: NextPage = () => {
   }, [roContract, tokenId])
 
   return (
-    <Box>
+    <Box ml={16}>
       <Head>
-        <title>SmartLaw Cred Token #{tokenId}</title>
+        <title>’𝖈𝖍𝖎𝖊𝖛𝖊: ℰ𝒹𝒾𝓉 #{tokenId && regexify(tokenId)}</title>
       </Head>
       <HomeLink/>
       <OptionsForm

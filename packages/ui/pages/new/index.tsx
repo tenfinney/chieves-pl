@@ -1,19 +1,21 @@
+/* eslint-disable indent */
+
 import { NextPage } from 'next'
-import { OptionsForm } from 'components'
 import {
-  Box, Button, Center, Flex, Heading, Spinner, Text, chakra,
-  Stack, Container, useToast, Table, Thead, Th, Tr, Tbody, Td, Checkbox, Input,
+  Button, Center, Flex, Heading, Spinner, Text, chakra,
+  Stack, Container, useToast, Table, Thead, Th, Tr,
+  Tbody, Td, Checkbox, Input, Tooltip, Box,
 } from '@chakra-ui/react'
-import { useWeb3 } from 'lib/hooks'
+import { useWeb3 } from '@/lib/hooks'
 import { useCallback, useEffect, useState } from 'react'
-import { NETWORKS } from '../../lib/networks'
-import { switchTo } from 'lib/helpers'
+import { NETWORKS } from '@/lib/networks'
 import Head from 'next/head'
-import { Header1, Header2, Header3, HeaderLogo } from 'components'
+import { OptionsForm, Header, Header1, HeaderLogo, Header2, Header3 } from '@/components'
 import { useRouter } from 'next/router'
-import { Event, utils as ethUtils } from 'ethers'
-import { MetaMaskError, NestedError } from '../../lib/types'
+import { Event } from 'ethers'
 import { useForm } from 'react-hook-form'
+import { CONFIG } from '@/config'
+import { switchTo, extractMessage } from '@/lib/helpers'
 
 export const New: NextPage = () => (
   <Container maxW="full">
@@ -56,6 +58,7 @@ const Content: React.FC = () => {
   const [working, setWorking] = useState(false)
   const { register, handleSubmit } = useForm()
   const toast = useToast()
+  const { rolePermissions } = CONFIG
 
   useEffect(() => {
     if(typeof id === 'string') {
@@ -66,9 +69,8 @@ const Content: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       if(roContract) {
-        console.log({roContract})
         const numRoles = (await roContract.roleIndexForName('ReservedLast')) - 1
-        const roles = await Promise.all(
+        const roles: Array<string> = await Promise.all(
           Array.from({ length: numRoles }).map(async (_, idx) => (
             await roContract.roleNameByIndex(idx + 1)
           ))
@@ -92,16 +94,12 @@ const Content: React.FC = () => {
       if(!roContract){
         throw new Error('Library not loaded.')
       }
-      if(!ensProvider){
-        throw new Error('ENS provider not defined.')
-      }
       const grants: Array<number> = []
       const disables: Array<number> = []
       await Promise.all(Object.entries(data).map(
         async ([key, value]: [key: string, value: unknown]) => {
           if(typeof value === 'boolean' && value) {
-            const [_, type, role] = key.match(/^(grant|disable)\((.+)\)$/) ?? []
-            console.log({type, role})
+            const [, type, role] = key.match(/^(grant|disable)\((.+)\)$/) ?? []
             const roleId = await rwContract.roleIndexForName(role)
             switch(type) {
               case 'grant': {
@@ -124,7 +122,10 @@ const Content: React.FC = () => {
       if(maintainer === '') {
         maintainer = address
       }
-      if(maintainer.includes('.')){
+      if(maintainer.includes('.')) {
+        if(!ensProvider) {
+          throw new Error('ENS provider not defined.')
+        }
         maintainer = await ensProvider.resolveName(maintainer)
       }
       const tx = await rwContract['create(address,uint8[],uint8[])'](
@@ -139,27 +140,21 @@ const Content: React.FC = () => {
           'Couldn’t find a token creation event.'
         )
       }
-      const [id, _controller] = event.args
+      const [id] = event.args
       setTokenId(id.toHexString())
     } catch(error) {
-      console.error({error})
-      const msg = (
-        (error as NestedError).error?.message
-        ?? (error as MetaMaskError).data?.message
-        ?? (error as Error).message
-        ?? error
-      )
       toast({
         title: 'Creation Error',
-        description: msg,
+        description: extractMessage(error),
         status: 'error',
         isClosable: true,
         duration: 10000
       })
+      console.error((error as Error).stack)
     } finally {
       setWorking(false)
     }
-  }, [rwContract])
+  }, [address, ensProvider, roContract, rwContract, toast])
 
   if(!rwContract || !tokenId || working) {
     return (
@@ -183,13 +178,7 @@ const Content: React.FC = () => {
       <br />
         <Stack>
           <Heading textAlign="center">
-            Create a new
-            <chakra.span
-              title="Unique Cred Token"
-              ml={2}
-            >
-              Access Token
-            </chakra.span>
+            Create a New Token Type
           </Heading>
           {(() => {
             if(connecting) {
@@ -220,6 +209,7 @@ const Content: React.FC = () => {
               )
             }
             if(!rwContract) {
+              console.info({ rwContract })
               return (
                 <Button
                   colorScheme="blue"
@@ -243,16 +233,28 @@ const Content: React.FC = () => {
                   as="form"
                   onSubmit={handleSubmit(reserve)}
                 >
-                  <Input
-                    {...register('maintainer')}
-                    placeholder="Maintainer Address (default Creator)"
-                  />
+                  <Flex align="center">
+                    <chakra.label mr={3}>Admin:</chakra.label>
+                    <Input
+                      {...register('maintainer')}
+                      placeholder="Maintainer Address (default Creator)"
+                    />
+                  </Flex>
                   <Table mb={5}>
                     <Thead>
                       <Tr>
                         <Th>Role</Th>
-                        <Th>Grant</Th>
-                        <Th>Disable</Th>
+                        <Th>
+                          <Tooltip label="Give the admin these roles:">
+                            Grant
+                          </Tooltip>
+                        </Th>
+                        <Th>
+                          <Tooltip label="Prevent these permissions from being checked:">
+                            Disable
+                          </Tooltip>
+                        </Th>
+                        <Th>Description</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
@@ -263,7 +265,10 @@ const Content: React.FC = () => {
                             <Checkbox {...register(`grant(${role})`)}/>
                           </Td>
                           <Td textAlign="center">
-                          <Checkbox {...register(`disable(${role})`)}/>
+                            <Checkbox {...register(`disable(${role})`)}/>
+                          </Td>
+                          <Td>
+                            {rolePermissions[role as keyof typeof rolePermissions]}
                           </Td>
                         </Tr>
                       ))}

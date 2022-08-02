@@ -2,6 +2,9 @@ import fs from 'fs'
 import path from 'path'
 import chalk from 'chalk'
 import hre from 'hardhat'
+import JSON5 from 'json5'
+
+type PubParams = { name: string, container: string }
 
 const shortDir = (path: string) => {
   const [, start] = process.env.PWD?.match(/^(.*\/packages\/).*$/) ?? []
@@ -17,21 +20,21 @@ let publishDir = path.join(
   hre.network.name,
 )
 let artifactsDir = hre.config.paths.artifacts
+const [, sourceDir = 'contracts'] = (
+  hre.config.paths.sources.match(/^.*\/([^\/]+)\/?$/) ?? []
+)
 
 const graphDir = path.join(process.cwd(), '../subgraph')
 
-const publishContract = (contractName: string) => {
+const publishContract = ({ name, container }: PubParams) => {
   console.log(
-    `\n 💽 Publishing ${chalk.cyan(contractName)}`
+    `\n 💽 Publishing ${chalk.cyan(name)}`
     + ` to ${chalk.gray(shortDir(publishDir))}`
   )
   try {
-    const [, sourceDir = 'contracts'] = (
-      hre.config.paths.sources.match(/^.*\/([^\/]+)\/?$/) ?? []
-    )
     const contractJSON = path.join(
       artifactsDir, sourceDir,
-      `${contractName}.sol/${contractName}.json`,
+      `${container}.sol/${name}.json`,
     )
     console.log(
       `\n 📖 Reading: ${chalk.magentaBright(shortDir(contractJSON))}`
@@ -41,7 +44,7 @@ const publishContract = (contractName: string) => {
     )
 
     const addressJSON = (
-      `${artifactsDir}/${contractName}.address`
+      `${artifactsDir}/${name}.address`
     )
     console.log(
       ` 📖 Reading: ${chalk.greenBright(shortDir(addressJSON))}`
@@ -67,11 +70,11 @@ const publishContract = (contractName: string) => {
     // graphConfig[contractName + 'Address'] = address
 
     const outs = {
-      [`${publishDir}/${contractName}.address.ts`]: (
+      [`${publishDir}/${name}.address.ts`]: (
         `export default '${address}'`
       ),
-      [`${publishDir}/${contractName}.abi.ts`]: (
-        `export default ${JSON.stringify(contract.abi, null, 2)}`
+      [`${publishDir}/${name}.abi.ts`]: (
+        `export default ${JSON5.stringify(contract.abi, null, 2)}`
       ),
       // [`${publishDir}/${contractName}.bytecode.ts`]: (
       //   `export default '${contract.bytecode}'`
@@ -95,7 +98,7 @@ const publishContract = (contractName: string) => {
     })
 
     console.log(
-      `\n 📠 Published ${chalk.green(contractName)} to the frontend.`
+      `\n 📠 Published ${chalk.green(name)} to the frontend.`
     )
 
     return true
@@ -103,7 +106,7 @@ const publishContract = (contractName: string) => {
     console.error(e)
     if(/no such file or directory/i.test((e as Error).message)) {
       console.log(chalk.yellowBright(
-        ` ⚠️  Can't find ${contractName}.json. (Is it deployed?)`
+        ` ⚠️  Can't find ${name}.json. (Is it deployed?)`
       ))
     } else {
       console.error(e)
@@ -116,21 +119,30 @@ async function main() {
   if(!fs.existsSync(publishDir)) {
     fs.mkdirSync(publishDir)
   }
-  const finalContractList: Array<string> = []
-  fs.readdirSync(hre.config.paths.sources).forEach(
+  const finalContractList: Array<PubParams> = []
+  const parent = path.join(artifactsDir, sourceDir)
+  fs.readdirSync(parent).forEach(
     (file) => {
       if(file.endsWith('.sol')) {
-        const contractName = file.replace(/\.sol$/, '')
-        if(publishContract(contractName)) {
-          finalContractList.push(contractName)
-        }
+        const container = file.replace(/\..+?$/, '')
+        fs.readdirSync(`${parent}/${file}`).forEach(
+          (sub) => {
+            if(/^[^.]+.json$/.test(sub)) {
+              const name = sub.replace(/\..+?$/, '')
+              const params = { name, container }
+              if(publishContract(params)) {
+                finalContractList.push(params)
+              }
+            }
+          }
+        )
       }
     }
   )
-  fs.writeFileSync(
-    `${publishDir}/index.ts`,
-    `export default ${JSON.stringify(finalContractList, null, 2)}`
-  )
+  // fs.writeFileSync(
+  //   `${publishDir}/index.ts`,
+  //   `export default ${JSON5.stringify(finalContractList, null, 2)}`
+  // )
 }
 
 main()

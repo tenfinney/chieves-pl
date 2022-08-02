@@ -112,11 +112,11 @@ const Disburse: NextPage = () => {
         if(roContract && tokenId) {
           try {
             const meta = await roContract.uri(tokenId)
-            console.log('LOOK HERE', {meta, tokenId})
             if(!meta) {
               setMetadata(null)
             } else {
-              const response = await fetch(httpURL(meta))
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              const response = await fetch(httpURL(meta)!)
               setMetadata(await response.json())
             }
           } catch(err) {
@@ -168,7 +168,7 @@ const Disburse: NextPage = () => {
         case 'whitelist': {
           console.debug('whitelist', { addrs })
           addrs.map(async (addr) => {
-            const minterRole = await roContract?.roleValueForName('Minter')
+            const minterRole = await roContract?.roleIndexForName('Minter')
             const tx = await rwContract?.['mint(address,uint256,uint256,bytes)'](
               addr, tokenId, 1, []
             )

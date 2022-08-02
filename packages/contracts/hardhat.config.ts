@@ -1,16 +1,20 @@
-import { BigNumber, utils } from 'ethers'
+import { utils } from 'ethers'
 import fs from 'fs'
 import glob from 'glob'
 import chalk from 'chalk'
 import { task } from 'hardhat/config'
-import '@tenderly/hardhat-tenderly'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-etherscan'
 import '@openzeppelin/hardhat-upgrades'
 import 'dotenv/config'
 import { HardhatEthersHelpers } from '@nomiclabs/hardhat-ethers/types'
-import { HardhatUserConfig, HttpNetworkConfig, HttpNetworkUserConfig } from 'hardhat/types'
+import '@typechain/ethers-v5'
+import '@typechain/hardhat'
+import {
+  HardhatUserConfig, HttpNetworkConfig, HttpNetworkUserConfig, NetworkUserConfig
+} from 'hardhat/types'
+import { deregexify } from './lib/helpers'
 
 const { isAddress, getAddress, formatUnits } = utils
 
@@ -34,6 +38,7 @@ if (!mnemonic || mnemonic === '') {
 }
 
 const infuraId = process.env.INFURA_ID
+const alchemyId = process.env.ALCHEMY_ID
 const config: HardhatUserConfig = {
   defaultNetwork,
 
@@ -81,7 +86,7 @@ const config: HardhatUserConfig = {
       accounts: { mnemonic },
     },
     mumbai: {
-      url: 'https://rpc-mumbai.maticvigil.com',
+      url: `https://polygon-mumbai.g.alchemy.com/v2/${alchemyId}`,
       accounts: { mnemonic },
     },
   },
@@ -105,10 +110,10 @@ const config: HardhatUserConfig = {
       xdai: "any value will work here",
     },
   },
-  tenderly: {
-		username: 'dysbulic',
-		project: 'achievements',
-	},
+  typechain: {
+    target: 'ethers-v5',
+    outDir: '../ui/contracts/types/',
+  },
 }
 
 export default config
@@ -163,56 +168,10 @@ task('mint', 'Mint a token for a user')
 
 })
 
-task('su', 'Add a superuser')
-.addParam('address', 'Address of the user to promote')
-.setAction(async (args, { ethers }) => {
-  const [, srcDir] = config?.paths?.sources?.match(/^.*?\/?([^\/]+)\/?$/) ?? []
-  
-  const contractsHome = `${config?.paths?.artifacts}/${srcDir}/`
-  const [contractFile] = (
-    glob
-    .sync(`${contractsHome}/*/*`)
-    .filter((name) => !/\.dbg\.json$/.test(name))
-  )
-  
-  const { abi, contractName } = JSON.parse(
-    fs.readFileSync(contractFile).toString()
-  )
-  console.debug(
-    ` 🦐 Loaded ${chalk.hex('#88C677')(contractName)} From:`
-    + ` ${chalk.hex('#E59AF9')(contractFile)}`
-  )
-  const address = (
-    fs.readFileSync(
-      `${config?.paths?.artifacts}/${contractName}.address`
-    )
-    .toString()
-    .trim()
-  )
-
-
-  const contract = (
-    new ethers.Contract(address , abi, ethers.provider.getSigner())
-  )
-  let { address: user } = args
-  if(user.includes('.')) {
-    const rpc = (
-      (config.networks?.mainnet as HttpNetworkUserConfig)?.url
-    )
-    if(!rpc) throw new Error('No mainnet RPC defined.')
-    const provider = new ethers.providers.JsonRpcProvider(rpc)
-    console.debug(` 🚊 Looking Up: ${chalk.hex('#FCFF13')(user)}`)
-    user = await provider.resolveName(user)
-  }
-  console.log(` 🍏 Setting ${user} as superuser on ${contractName} (${address})`)
-  const suRole = await contract.roleValueForName('Superuser')
-  const tx = await contract['grantRole(uint8,address)'](suRole, user)
-  console.info(` 🕋 Tx: ${tx.hash}`)
-})
-
 task('grant', 'Grant a role')
 .addParam('address', 'Address of the user to promote')
 .addParam('role', 'Role to grant')
+.addOptionalParam('token', 'Token id to grant for')
 .setAction(async (args, { ethers }) => {
   const srcDir = config?.paths?.sources
   // const [, srcDir] = config?.paths?.sources?.match(/^.*\/([^\/]+)\/?$/) ?? []
@@ -220,7 +179,7 @@ task('grant', 'Grant a role')
   const contractsHome = `${config?.paths?.artifacts}/${srcDir}/`
   const [contractFile] = (
     glob
-    .sync(`${contractsHome}/*/*`)
+    .sync(`${contractsHome}/*/Bulk*`)
     .filter((name) => !/\.dbg\.json$/.test(name))
   )
   const { abi, contractName } = JSON.parse(
@@ -238,23 +197,48 @@ task('grant', 'Grant a role')
     .toString()
     .trim()
   )
-  let { address: user, role } = args
+  let { address: user, role, token } = args
+  console.log(
+    ` 🍏 Setting ${chalk.hex('#E1A47B')(user)}`
+    + ` as ${chalk.hex('#5AE1AD')(role)}`
+    + ` on ${chalk.hex('#E16464')(contractName)}`
+    + ` at ${chalk.hex('#DD5FE1')(address)}`
+    + (token ? ` for id:${chalk.hex('#E11F83')(token)}` : '')
+  )
   if(user.includes('.')) {
     const rpc = (
       (config.networks?.mainnet as HttpNetworkUserConfig)?.url
     )
     if(!rpc) throw new Error('No mainnet RPC defined.')
     const provider = new ethers.providers.JsonRpcProvider(rpc)
-    console.debug(` 🚊 Looking Up: ${chalk.hex('#FCFF13')(user)}`)
-    user = await provider.resolveName(user)
+    const derefed = await provider.resolveName(user)
+    console.debug(
+      ` 🚊 Looked Up: ${chalk.hex('#FCFF13')(user)}`
+      + ` → ${chalk.hex('#8B67FF')(derefed)}`
+    )
+    user = derefed
   }
-  const contract = (
-    new ethers.Contract(address , abi, ethers.provider.getSigner())
+  if(token) {
+    const expanded = deregexify(token)
+    if(expanded !== token) {
+      console.debug(
+        ` 🔭 Expanded: ${chalk.hex('#FCFF13')(token)}`
+        + ` → ${chalk.hex('#8B67FF')(expanded)}`
+      )
+      token = expanded
+    }
+  }
+  const contract = new ethers.Contract(
+    address, abi, ethers.provider.getSigner()
   )
-  console.log(` 🍏 Setting ${user} as ${role} on ${contractName} (${address})`)
-  const roleId = await contract.roleValueForName(role)
+  const roleId = await contract.roleIndexForName(role)
   if(roleId === 0) throw new Error(`Can’t find “${role}”`)
-  const tx = await contract['grantRole(uint8,address)'](roleId, user)
+  let tx 
+  if(token) {
+    tx = await contract['grantRole(uint8,address,uint256)'](roleId, user, token)
+  } else {
+    tx = await contract['grantRole(uint8,address)'](roleId, user)
+  }  
   console.info(` 🕋 Tx: ${tx.hash}`)
 })
 
@@ -389,7 +373,8 @@ task('wallet', 'Create a wallet (pk) link', async (_, { ethers }) => {
 //   }
 // })
 
-task('account', 'Get balance information for the deployment account.', async (_, { ethers }) => {
+task('account', 'Get balance information for the deployment account.')
+.setAction(async (_, { ethers }) => {
   const hdkey = await import('ethereumjs-wallet/hdkey')
   const bip39 = await import('bip39')
   let mnemonic = fs.readFileSync('./mnemonic.txt').toString().trim()
@@ -407,17 +392,23 @@ task('account', 'Get balance information for the deployment account.', async (_,
   var qrcode = await import('qrcode-terminal')
   qrcode.generate(address)
   console.log(` ‍📬 Deployer Account is ${address}`)
-  for (let n in config.networks) {
-    try {
-      let provider = new ethers.providers.JsonRpcProvider(
-        (config.networks[n] as HttpNetworkConfig).url
-      )
-      let balance = (await provider.getBalance(address))
-      console.log(` -- ${n} --  -- -- 📡`)
-      console.log(`   balance: ${ethers.utils.formatEther(balance)}`)
-      console.log(`   nonce: ${(await provider.getTransactionCount(address))}`)
-    } catch(error) {
-      if (DEBUG) console.error({ error })
+  for(const [name, net] of Object.entries(config.networks ?? {})) {
+    console.log(`——— ${name} ——  ——  —— 📡`)
+    if(!net) {
+      console.log('  ¡No Network!')
+    } else {
+      try {
+        const provider = new ethers.providers.JsonRpcProvider(
+          (net as HttpNetworkUserConfig).url
+        )
+        const balance = await provider.getBalance(address)
+        console.log(`  ⚖ balance: ${ethers.utils.formatEther(balance)}`)
+        console.log(
+          `  📙 nonce: ${await provider.getTransactionCount(address)}`
+        )
+      } catch(error) {
+        console.error(`  🦖 ${(error as Error).message}`)
+      }
     }
   }
 })
@@ -433,21 +424,25 @@ const addr = async (ethers: HardhatEthersHelpers, addr: string) => {
   throw `Could not normalize address: ${addr}`
 }
 
-task('accounts', 'Prints the list of accounts', async (_, { ethers }) => {
+task('accounts', 'Prints the list of accounts')
+.setAction(async (_, { ethers }) => {
   const accounts = await ethers.provider.listAccounts()
-  accounts.forEach((account) => console.log(account))
+  accounts.forEach((account, idx) => {
+    console.log(`${idx + 1}: ${account}`)
+  })
 })
 
-task('blockNumber', 'Prints the block number', async (_, { ethers }) => {
+task('blockNumber', 'Prints the block number')
+.setAction(async (_, { ethers }) => {
   const blockNumber = await ethers.provider.getBlockNumber()
   console.log({ blockNumber })
 })
 
-task('balance', "Prints an account's balance")
-.addPositionalParam('account', "The account's address")
-.setAction(async (taskArgs, { ethers }) => {
+task('balance', 'Prints an account’s balance')
+.addPositionalParam('account', 'The account’s address')
+.setAction(async (args, { ethers }) => {
   const balance = await ethers.provider.getBalance(
-    await addr(ethers, taskArgs.account)
+    await addr(ethers, args.account)
   )
   console.log(formatUnits(balance, 'ether'), 'ETH')
 })
@@ -513,16 +508,17 @@ task('balance', "Prints an account's balance")
 // })
 
 task('sign', 'Sign the contents of a file')
-.addParam('toSign', 'File whose contents to sign')
-.setAction(async (taskArgs, { ethers }) => {
-  const { toSign: file } = taskArgs
+.addPositionalParam('input', 'File whose contents to sign')
+.setAction(async (args, { ethers }) => {
+  const { input: file } = args
   if(!file || file === '') {
     console.info('Usage: $0 sign file.txt')
   } else if(!fs.existsSync(file)) {
     throw new Error(`File “${file}” doesn't exist.`)
   } else {
     const content = fs.readFileSync(file).toString()
-    const indented = `>   ${content.replace("\n", "\n>   ")}`
+    const prefix = '>   '
+    const indented = `${prefix}${content.replace("\n", `\n${prefix}`)}`
     console.info(`Signing: \n${indented}`)
     const sig = await ethers.provider.getSigner().signMessage(content)
     console.info(`Signature: “${sig}”`)

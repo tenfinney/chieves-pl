@@ -128,7 +128,7 @@ const main = async () => {
 
   for(const file of files) {
     const type = file.name.replace(/\.json$/, '')
-    const typeId = await contract.roleValueForName(capitalize(type))  
+    const typeId = await contract.roleIndexForName(capitalize(type))  
     const tokenId = await contract['roleToken(uint8)'](typeId)
 
     if(!tokenId) {

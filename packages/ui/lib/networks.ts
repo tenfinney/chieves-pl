@@ -45,6 +45,17 @@ export const NETWORKS: NetworkInfo = {
     explorer: 'https://polygonscan.com',
     rpc: 'https://polygon-rpc.com',
   },
+  mumbai: {
+    chainId: '0x13881',
+    name: 'Polygon’s Mumbai Testnet',
+    label: 'Mumbai',
+    symbol: '𝙼𝙰𝚃𝙸𝙲',
+    explorer: 'https://mumbai.polygonscan.com',
+    rpc: (
+      process.env.NEXT_PUBLIC_MUMBAI_RPC
+      ?? 'https://rpc-mumbai.matic.today'
+    ),
+  },
   localhost: {
     chainId: '0x7a69',
     name: 'Ganache',

@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { gql, useQuery } from '@apollo/client'
 import {
-  Box, Heading, ListItem, OrderedList, Link as ChakraLink
+  Box, Heading, ListItem, OrderedList, Link as ChakraLink, Text
 } from '@chakra-ui/react'
 import { useWeb3 } from 'lib/hooks'
 import { useEffect, useState } from 'react'
@@ -69,9 +69,9 @@ export const Owners = () => {
     const lookup = async () => {
       if(nftId) {
         const uri = await roContract?.uri(nftId)
-        const response = await fetch(httpURL(uri))
+        if(!uri) return
+        const response = await fetch(httpURL(uri)!)
         const data = await response.json()
-        console.debug({data})
         setTitle(data.name)
       }
     }
@@ -81,31 +81,33 @@ export const Owners = () => {
   useEffect(() => {
     const process = async () => {
       if(data) {
-        if(data.nfts.length !== 1) {
+        if(data.nfts.length > 1) {
           throw new Error(`Got ${data.nfts.length} Digital Token`)
         }
-        setOwnerships(
-          await Promise.all(
-            data.nfts[0].ownership.map(
-              async (oship: Ownership) => {
-                let { owner } = oship
-                const ens = (
-                  await ensProvider?.lookupAddress(owner)
-                )
-                if (ens) {
-                  owner = ens 
-                }
-                return {
-                  owner, quantity: oship.quantity, id: oship.id,
-                }
-              }  
+        if (data.nfts.length === 1) {
+          setOwnerships(
+            await Promise.all(
+              data.nfts[0].ownership.map(
+                async (oship: Ownership) => {
+                  let { owner } = oship
+                  const ens = (
+                    await ensProvider?.lookupAddress(owner)
+                  )
+                  if (ens) {
+                    owner = ens 
+                  }
+                  return {
+                    owner, quantity: oship.quantity, id: oship.id,
+                  }
+                }  
+              )
             )
           )
-        )
+        }
       }
     }
     process()
-  }, [data])
+  }, [data, ensProvider])
   if (loading) return 'Loading…'
   if (error) return `Error! ${error.message}`
   return (
@@ -118,13 +120,19 @@ export const Owners = () => {
       <Heading mt={10} fontSize={20}>
         {title}
       </Heading>
-      <OrderedList start={Number(offset) + 1}>
-        {ownerships.map((ownership, idx) => (
-          <ListItem key={idx} ml={6}>
-            {`${ownership.owner} (${ownership.quantity})`}
-          </ListItem>
-        ))}
-      </OrderedList>
+      {ownerships.length === 0 ? (
+        <Text>
+          Could not find an NFT with id {nftId}. 
+        </Text>
+      ) : (
+        <OrderedList start={Number(offset) + 1}>
+          {ownerships.map((ownership, idx) => (
+            <ListItem key={idx} ml={6}>
+              {`${ownership.owner} (${ownership.quantity})`}
+            </ListItem>
+          ))}
+        </OrderedList>
+      )}
       {ownerships.length === LIMIT && (
         <Link
           href={{

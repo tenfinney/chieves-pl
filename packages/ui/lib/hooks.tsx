@@ -203,19 +203,22 @@ export const Web3ContextProvider: React.FC = (
     useEffect(() => {
       const libs = async () => {
         const { contractNetwork: chain } = CONFIG
-        import(
-          `../contracts/${chain}/BulkDisbursableNFTs.address`
-        )
-        .then(({ default: addr }) => setContractAddress(addr))
-
-        import (
-          `../contracts/${chain}/BulkDisbursableNFTs.abi`
-        )
-        .then(({ default: abi }) => setABI(abi))
+        if(!contractAddress) {
+          import(
+            `../contracts/${chain}/BulkDisbursableNFTs.address`
+          )
+          .then(({ default: addr }) => setContractAddress(addr))
+        }
+        if(!abi) {
+          import (
+            `../contracts/${chain}/BulkDisbursableNFTs.abi`
+          )
+          .then(({ default: abi }) => setABI(abi))
+        }
       }
 
       libs()
-    }, [])
+    }, [userProvider])
 
     useEffect(() => {
       const libs = async () => {

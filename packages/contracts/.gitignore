@@ -6,3 +6,4 @@ metadata/assets.car
 build-info/
 .openzeppelin/
 artifacts/localhost/
+dist/

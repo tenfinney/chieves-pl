@@ -24,6 +24,19 @@ export const CONFIG = {
     process.env.NEXT_PUBLIC_NFT_GRAPH
     ?? 'https://api.thegraph.com/subgraphs/name/alberthaotan/nft-matic'
   ),
+  rolePermissions: {
+    Superuser: 'Can perform all actions on the token.',
+    Minter: 'Can mint new instances of the token.',
+    Caster: 'Can assign roles for the token.',
+    Transferer: 'Can transfer the token to another account.',
+    Configurer: 'Can change the token’s metadata URI.',
+    Maintainer: 'Can update the token contract.',
+    Creator: 'Can create new token types.',
+    Limiter: 'Can set the maximum mintable allowance for a token.',
+    Burner: 'Can destroy an instance of a token.',
+    Destroyer: 'Can destroy a token type.',
+    Oracle: 'Provides information about the off-chain world.',
+  }
 }
 
 export default CONFIG

@@ -1,6 +1,14 @@
+import { ExternalProvider } from '@ethersproject/providers'
+
 export type Maybe<T> = T | null
 export type Values<T> = T[keyof T]
 export type Optional<T> = T | undefined
+
+declare global {
+  interface Window {
+    ethereum: ExternalProvider
+  }
+}
 
 export type OpenSeaAttribute = {
   trait_type?: string
@@ -34,10 +42,11 @@ export type CodedError = Error & { code: number }
 export type TokenState = {
   id: string
   hide: boolean
-  index: number 
+  index: number
   uri?: string
   metadata?: ERC1155Metadata
   total?: number
+  max?: number
   error?: string
 }
 

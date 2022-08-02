@@ -1,21 +1,16 @@
-import { useState, useEffect, useMemo } from 'react'
-import { ethers } from 'ethers'
+import { useState, useEffect } from 'react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import {
-  Box, Container, Flex, Image, Stack, Tooltip,
-  Table, Thead, Tbody, Tr, Th, Td,
-  Spinner, Text, Link as ChakraLink, chakra,
+  Container, Flex, chakra,
 } from '@chakra-ui/react'
-import Markdown from 'react-markdown'
-import { httpURL } from 'lib/helpers'
-import type { Maybe, ERC1155Metadata, TokenState } from 'lib/types'
-// import { Header, Header0, TokensTable } from 'components'
-import { TokensTable } from 'components'
-
-import { useWeb3 } from 'lib/hooks'
+import { httpURL } from '@/lib/helpers'
+import type { TokenState } from '@/lib/types'
+import {
+  Header, TokensTable, TokenFilterForm,
+} from '@/components'
+import { useWeb3 } from '@/lib/hooks'
 import { useRouter } from 'next/router'
-import TokenFilterForm from 'components/TokenFilterForm'
 
 const Home: NextPage = () => {
   const [tokens, setTokens] = useState<Array<TokenState>>([])
@@ -104,11 +99,12 @@ const Home: NextPage = () => {
               }
               let metadata = null
               try {
-                let uri = await roContract.uri(id)
-                if(uri === '') uri = null
+                const uri = await roContract.uri(id)
+                if(uri === '') throw new Error('No URI')
                 setToken(index, { uri })
 
-                const url = httpURL(uri)
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                const url = httpURL(uri)!
                 const response = await fetch(url)
                 const data = await response.text()
                 if(!data || data === '') {
@@ -130,8 +126,8 @@ const Home: NextPage = () => {
               const total = await roContract['totalSupply(uint256)'](id)
               setToken(index, { total })
 
-              // const max = await contract.getMax(id)
-              // setToken(index, { max })
+              const max = await roContract.getMax(id)
+              setToken(index, { max })
             })
           )
         }
@@ -139,7 +135,7 @@ const Home: NextPage = () => {
 
       load()
     },
-    [roContract, constsContract, gatingVisible, visibleList, limit],
+    [roContract, constsContract, gatingVisible, visibleList, limit, offset],
   )
 
   return (

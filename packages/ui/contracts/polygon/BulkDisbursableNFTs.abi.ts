@@ -321,29 +321,6 @@ export default [
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "newURI",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "max",
-        "type": "uint256"
-      }
-    ],
-    "name": "configure",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "enum BulkDisbursableNFTs.Role[]",
         "name": "grants",
         "type": "uint8[]"
@@ -476,6 +453,25 @@ export default [
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "getMax",
+    "outputs": [
+      {
+        "internalType": "int64",
+        "name": "max",
+        "type": "int64"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "enum BulkDisbursableNFTs.Role",
         "name": "role",
         "type": "uint8"
@@ -505,7 +501,7 @@ export default [
       },
       {
         "internalType": "uint256",
-        "name": "index",
+        "name": "id",
         "type": "uint256"
       }
     ],
@@ -679,6 +675,25 @@ export default [
         "internalType": "bool",
         "name": "superuser",
         "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "maxes",
+    "outputs": [
+      {
+        "internalType": "int64",
+        "name": "",
+        "type": "int64"
       }
     ],
     "stateMutability": "view",
@@ -978,9 +993,9 @@ export default [
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
+        "internalType": "int64",
         "name": "max",
-        "type": "uint256"
+        "type": "int64"
       }
     ],
     "name": "setMax",
