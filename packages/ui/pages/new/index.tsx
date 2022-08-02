@@ -1,21 +1,21 @@
+/* eslint-disable indent */
+
 import { NextPage } from 'next'
-import { OptionsForm } from 'components'
 import {
   Button, Center, Flex, Heading, Spinner, Text, chakra,
   Stack, Container, useToast, Table, Thead, Th, Tr,
   Tbody, Td, Checkbox, Input, Tooltip,
 } from '@chakra-ui/react'
-import { useWeb3 } from 'lib/hooks'
+import { useWeb3 } from '@/lib/hooks'
 import { useCallback, useEffect, useState } from 'react'
-import { NETWORKS } from '../../lib/networks'
-import { switchTo } from 'lib/helpers'
+import { NETWORKS } from '@/lib/networks'
 import Head from 'next/head'
-import { Header } from 'components'
+import { OptionsForm, Header } from '@/components'
 import { useRouter } from 'next/router'
-import { Event, utils as ethUtils } from 'ethers'
-import { MetaMaskError, NestedError } from '../../lib/types'
+import { Event } from 'ethers'
 import { useForm } from 'react-hook-form'
-import { CONFIG } from '../../config'
+import { CONFIG } from '@/config'
+import { switchTo, extractMessage } from '@/lib/helpers'
 
 export const New: NextPage = () => (
   <Container maxW="full">
@@ -56,7 +56,6 @@ const Content: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       if(roContract) {
-        console.log({roContract})
         const numRoles = (await roContract.roleIndexForName('ReservedLast')) - 1
         const roles: Array<string> = await Promise.all(
           Array.from({ length: numRoles }).map(async (_, idx) => (
@@ -87,7 +86,7 @@ const Content: React.FC = () => {
       await Promise.all(Object.entries(data).map(
         async ([key, value]: [key: string, value: unknown]) => {
           if(typeof value === 'boolean' && value) {
-            const [_, type, role] = key.match(/^(grant|disable)\((.+)\)$/) ?? []
+            const [, type, role] = key.match(/^(grant|disable)\((.+)\)$/) ?? []
             const roleId = await rwContract.roleIndexForName(role)
             switch(type) {
               case 'grant': {
@@ -128,40 +127,28 @@ const Content: React.FC = () => {
           'Couldn’t find a creation event.'
         )
       }
-      const [id, _controller] = event.args
+      const [id] = event.args
       setTokenId(id.toHexString())
     } catch(error) {
-      console.error({error})
-      const msg = (
-        (error as NestedError).error?.message
-        ?? (error as MetaMaskError).data?.message
-        ?? (error as Error).message
-        ?? error
-      )
       toast({
         title: 'Creation Error',
-        description: msg,
+        description: extractMessage(error),
         status: 'error',
         isClosable: true,
         duration: 10000
       })
+      console.error((error as Error).stack)
     } finally {
       setWorking(false)
     }
-  }, [rwContract])
+  }, [address, ensProvider, roContract, rwContract, toast])
 
   if(!rwContract || !tokenId || working) {
     return (
       <Center>
         <Stack>
           <Heading textAlign="center">
-            Create a new
-            <chakra.span
-              title="Non-Fungible Token"
-              ml={2}
-            >
-              NFT
-            </chakra.span>
+            Create a New Token Type
           </Heading>
           {(() => {
             if(connecting) {

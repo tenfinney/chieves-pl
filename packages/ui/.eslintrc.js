@@ -41,6 +41,7 @@ module.exports = {
     semi: [
       'error',
       'never',
-    ]
+    ],
+    '@typescript-eslint/no-non-null-assertion': 'off',
   }
 }

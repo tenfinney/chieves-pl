@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import {
   AddIcon, CloseIcon, ExternalLinkIcon
 } from '@chakra-ui/icons'
@@ -9,11 +10,11 @@ import {
   Table, Thead, Th, Tbody, Radio, RadioGroup,
   SimpleGrid, Stack, Center,
 } from '@chakra-ui/react'
-import { NFT_HOMEPAGE_BASE } from 'lib/constants'
-import { httpURL, isEmpty, regexify } from 'lib/helpers'
+import { NFT_HOMEPAGE_BASE } from '@/lib/constants'
+import { httpURL, isEmpty, regexify } from '@/lib/helpers'
 import {
   Attribute, ERC1155Metadata, Maybe, OpenSeaAttribute,
-} from 'lib/types'
+} from '@/lib/types'
 import React, {
   ChangeEvent, useCallback, useEffect, useRef, useState,
 } from 'react'
@@ -55,7 +56,11 @@ const AttrRow: React.FC<{
     <Tr>
       <Td><Input
         value={name}
-        onChange={({ target: { value } }) => setName(value)}
+        onChange={
+          ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
+            setName(value)
+          }
+        }
       /></Td>
       <Td>{(() => {
         switch (type) {
@@ -68,9 +73,11 @@ const AttrRow: React.FC<{
                 ) : (
                   (new Date(value)).toISOString().split('T')[0]
                 )}
-                onChange={({ target: { value } }) => (
-                  setValue((new Date(value)).getTime())
-                )}
+                onChange={
+                  ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
+                    setValue((new Date(value)).getTime())
+                  }
+                }
               />
             )
           }
@@ -78,9 +85,11 @@ const AttrRow: React.FC<{
             return (
               <Input
                 {...{ value }}
-                onChange={({ target: { value } }) => (
-                  setValue(value)
-                )}
+                onChange={
+                  ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
+                    setValue(value)
+                  }
+                }
               />
             )
           }
@@ -89,9 +98,11 @@ const AttrRow: React.FC<{
               <Input
                 type="number"
                 {...{ value }}
-                onChange={({ target: { value } }) => (
-                  setValue(value != null ? Number(value) : '')
-                )}
+                onChange={
+                  ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
+                    setValue(value != null ? Number(value) : '')
+                  }
+                }
               />
             )
           }
@@ -100,7 +111,11 @@ const AttrRow: React.FC<{
       <Td>
         <Select
           value={type}
-          onChange={({ target: { value } }) => setType(value)}
+          onChange={
+            ({ target: { value } }: ChangeEvent<HTMLSelectElement>) => {
+              setType(value)
+            }
+          }
         >
           <chakra.option value="string">String</chakra.option>
           <chakra.option value="date">Date</chakra.option>
@@ -139,7 +154,7 @@ export const NFTForm: React.FC<{
   tokenId?: string
   metadata?: Maybe<ERC1155Metadata>
 }> = ({
-  purpose = 'create',
+  // purpose = 'create',
   register,
   watch,
   setValue,
@@ -153,10 +168,10 @@ export const NFTForm: React.FC<{
   const {
     homepage, description, color, images, attributes, animation,
   } = watch()
-  const [wearables, setWearables] = useState({})
+  // const [wearables, setWearables] = useState({})
 
   const setImage = useCallback(
-    (file) => setValue('images', [file]), []
+    (file) => setValue('images', [file]), [setValue]
   )
 
   useEffect(() => {
@@ -188,7 +203,7 @@ export const NFTForm: React.FC<{
         )
       }
 
-      setWearables(metadata.properties?.wearables ?? {})
+      // setWearables(metadata.properties?.wearables ?? {})
 
       const bg = metadata.background_color
       if(bg && !isEmpty(bg)) {
@@ -291,7 +306,7 @@ export const NFTForm: React.FC<{
           {images?.length && (
             <RadioGroup
               value={primaryImageIdx}
-              onChange={(value) => {
+              onChange={(value: string) => {
                 setPrimaryImageIdx(Number(value))
               }}
             >
@@ -321,7 +336,7 @@ export const NFTForm: React.FC<{
                               (image instanceof File) ? (
                                 URL.createObjectURL(image)
                               ) : (
-                                httpURL(image)
+                                httpURL(image) ?? undefined
                               )
                             }
                             maxH={60} mt={0}
@@ -427,7 +442,8 @@ export const NFTForm: React.FC<{
                     /^ipfs:\/\/[^/]+\//, ''
                   ))}
                 </Text>
-                <Link href={httpURL(animation)} ml={3} mb={5} isExternal>
+                {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+                <Link href={httpURL(animation)!} ml={3} mb={5} isExternal>
                   <ExternalLinkIcon />
                 </Link>
               </Flex>

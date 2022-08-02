@@ -67,9 +67,9 @@ export const Owners = () => {
     const lookup = async () => {
       if(nftId) {
         const uri = await roContract?.uri(nftId)
-        const response = await fetch(httpURL(uri))
+        if(!uri) return
+        const response = await fetch(httpURL(uri)!)
         const data = await response.json()
-        console.debug({data})
         setTitle(data.name)
       }
     }
@@ -105,7 +105,7 @@ export const Owners = () => {
       }
     }
     process()
-  }, [data])
+  }, [data, ensProvider])
   if (loading) return 'Loading…'
   if (error) return `Error! ${error.message}`
   return (

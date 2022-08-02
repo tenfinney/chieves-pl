@@ -1,11 +1,14 @@
+/* eslint-disable indent */
 import {
-  Box,
-  Button, ButtonProps, Flex, Spinner, Stack,
-  Tab, TabList, TabPanel,
-  TabPanels, Tabs, Text, useToast,
+  Box, Stack, Tab, TabList, TabPanel,
+  TabPanels, Tabs, useToast,
 } from '@chakra-ui/react'
-import { URIForm, JSONForm, NFTForm } from 'components/forms'
-import { capitalize, ipfsify, isSet, switchTo } from 'lib/helpers'
+import {
+  URIForm, JSONForm, NFTForm, MaxForm, SubmitButton,
+} from '@/components'
+import {
+  ipfsify, isSet, isEmpty, regexify, extractMessage,
+} from '@/lib/helpers'
 import { useCallback, useState } from 'react'
 import { useWeb3 } from '@/lib/hooks'
 import { useForm } from 'react-hook-form'
@@ -14,9 +17,6 @@ import JSON5 from 'json5'
 import {
   ERC1155Metadata, FormValues, Maybe, OpenSeaAttribute, Attribute,
 } from '@/lib/types'
-import { isEmpty, regexify, extractMessage } from '@/lib/helpers'
-import { MaxForm } from './MaxForm'
-import { SubmitButton } from './SubmitButton'
 
 export const OptionsForm: React.FC<{
   purpose?: 'create' | 'update'
@@ -180,7 +180,7 @@ export const OptionsForm: React.FC<{
           mx={[0, 5]}
           isFitted
           variant="enclosed"
-          onChange={(idx) => setTab(idx)}
+          onChange={(idx: number) => setTab(idx)}
         >
           <TabList mb="1em">
             <Tab>Fields</Tab>

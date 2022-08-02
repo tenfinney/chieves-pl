@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import chalk from 'chalk'
 import {
-  config, ethers, tenderly, run, upgrades, network,
+  config, ethers, run, upgrades, network,
 } from 'hardhat'
 import { utils, Contract } from 'ethers'
 import R from 'ramda'
