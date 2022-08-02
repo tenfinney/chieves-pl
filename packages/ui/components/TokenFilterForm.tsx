@@ -1,7 +1,23 @@
 import { FormValues } from '@/lib/types'
-import { Box, Button, Checkbox, Flex, FormControl, FormLabel, Input } from '@chakra-ui/react'
+import { Link } from '@chakra-ui/core'
+import {
+  Box,
+  Button,
+  Checkbox,
+  Flex,
+  FormControl,
+  FormLabel,
+  Input,
+  Text,
+} from '@chakra-ui/react'
 import { Dispatch, SetStateAction, useEffect, useRef } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+// import { Header } from 'components'
+// import { Header0 } from 'components'
+import { Header1 } from 'components'
+import { Header2 } from 'components'
+import { Header3 } from 'components'
+import { HeaderLogo } from 'components'
 
 export type FilterValues = {
   limit: number
@@ -21,9 +37,14 @@ export const TokenFilterForm: React.FC<{
   visibleList: Array<string>
   setVisibleList: (visibleList: SetStateAction<Array<string>>) => void 
 }> = ({
-  limit = 10, setLimit, offset = 0, setOffset,
-  gatingVisible = false, setGatingVisible,
-  visibleList = [], setVisibleList
+  limit = 100,
+  setLimit,
+  offset = 0,
+  setOffset,
+  gatingVisible = false,
+  setGatingVisible,
+  visibleList = [],
+  setVisibleList,
 }) => {
   const {
     register, handleSubmit, control, setValue,
@@ -54,6 +75,26 @@ export const TokenFilterForm: React.FC<{
       mt={10} mb="1rem" maxW={['100%', 'min(85vw, 50em)']}
       sx={{ a: { textDecoration: 'underline' } }}
     >
+      <Header1/>
+      <HeaderLogo/>
+      <Header2/>
+      <Header3/>
+      <Header1/>
+      <Text fontSize="24pt" mt="1rem" fontWeight="bold">
+        ERC-1155 Access and Achievment Token Minting
+      </Text>
+      <Text ml="20px" fontSize="18pt" fontWeight="bold">
+        Digital Tokens on the Polygon EVM Blockchain using IPFS
+      </Text>
+      <Text ml="50px" fontSize="12pt" fontWeight="regular">
+        Each token reservation mints one (1) master token and up to (11) role
+        tokens. Superuser, Minter, Caster, Transferer, Configurer, Maintainer, Creator, Limiter, Burner, Destroyer, and/or Oracle can be automatically minted with
+        the master token and can be assigned to third-parties for
+        administration.
+      </Text>
+      <br />
+      <hr/>
+      <br />
       <FormControl>
         <Flex align="center" my={1}>
           <Controller
@@ -102,10 +143,8 @@ export const TokenFilterForm: React.FC<{
         </Flex>
       </FormControl>
 
-
-      <Button type="submit">
-        View
-      </Button>
+      <Button type="submit" size="lg" colorScheme='green' ml='0px' mt='20px'>View</Button>
+      <Header1/>
     </Box>
   )
 }
