@@ -1,30 +1,24 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# dependencies
-/.pnp
-.pnp.js
+node_modules
+dist
+dist-ssr
+*.local
 
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
 .DS_Store
-*.pem
-
-# debug
-.pnpm-debug.log*
-
-# vercel
-.vercel
-
-# local contract deployment
-contracts/local/
-contracts/BulkDisbursableNFTs.bytecode.ts
-dist/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

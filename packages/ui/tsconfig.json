@@ -1,45 +1,27 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext",
-      "ES2022"
-    ],
-    "types": [
-      "node"
-    ],
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": false,
     "skipLibCheck": true,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "esModuleInterop": true,
-    "module": "esnext",
+    "module": "ESNext",
     "moduleResolution": "Node",
-    "preserveConstEnums": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
-    "sourceMap": true,
-    "incremental": true,
-    "baseUrl": ".",
-    "composite": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "baseUrl": "src/",
     "paths": {
-      "@/lib/*": [ "lib/*" ],
-      "@/config": [ "config" ],
-      "@/components": [ "components/index" ],
+      "@/lib/*": ["./lib/*"],
+      "@/config": ["./config"],
+      "@/components": ["./components/index"],
     },
-    "outDir": "dist",
-    "noEmit": false,
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules/",
-    "dist/"
-  ]
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }
