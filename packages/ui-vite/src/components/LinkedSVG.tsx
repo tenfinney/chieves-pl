@@ -6,22 +6,28 @@ import React from 'react'
 export const LinkedSVG = React.forwardRef<
   HTMLObjectElement,
   LinkProps & { href: string, svg: string }
-> = ({ href, svg: data, ...props }) => (
-  <ChakraLink
-    position="relative"
-    zIndex={1}
-    {...props}
-    {...{ href }}
-  >
-    <Box display="inline-block" w="full" h="full">
-      <chakra.object
-        maxH="100%"
-        {...{ data }}
+>(
+  (
+    { href = '#', svg: data, ...props },
+    ref
+  ) => (
+    <NextLink {...{ href }} passHref>
+      <ChakraLink
         position="relative"
-        zIndex={-1}
-      />
-    </Box>
-  </ChakraLink>
+        zIndex={1}
+        {...props}
+      >
+        <Box display="inline-block" w="full" h="full">
+          <chakra.object
+            maxH="100%"
+            {...{ data, ref }}
+            position="relative"
+            zIndex={-1}
+          />
+        </Box>
+      </ChakraLink>
+    </NextLink>
+  )
 )
 
 LinkedSVG.displayName = 'LinkedSVG'

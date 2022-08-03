@@ -1,15 +1,5 @@
 import { FormValues } from '@/lib/types'
-import { Link } from '@chakra-ui/core'
-import {
-  Box,
-  Button,
-  Checkbox,
-  Flex,
-  FormControl,
-  FormLabel,
-  Input,
-  Text,
-} from '@chakra-ui/react'
+import { Box, Button, Checkbox, Flex, FormControl, FormLabel, Input } from '@chakra-ui/react'
 import { Dispatch, SetStateAction, useEffect, useRef } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 // import { Header } from 'components'

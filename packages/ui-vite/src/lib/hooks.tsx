@@ -1,18 +1,21 @@
 import {
-  ExternalProvider, Web3Provider, JsonRpcProvider,
-  StaticJsonRpcProvider,
+  ExternalProvider, Web3Provider, JsonRpcProvider, StaticJsonRpcProvider,
 } from '@ethersproject/providers'
 import { Contract } from '@ethersproject/contracts'
 import type { Maybe } from '@/lib/types'
-import {
-  createContext, useCallback, useContext, useEffect,
-  useMemo, useState,
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
 } from 'react'
 import Web3Modal from 'web3modal'
-import providerOptions from './walletConnect'
+import providerOptions from '@/lib/walletConnect'
 import { NETWORKS } from '@/lib/networks'
 import CONFIG from '@/config'
-import { ReactNode } from 'react';
 
 export type Web3ContextType = {
   userProvider?: Web3Provider
@@ -56,8 +59,9 @@ export const useWeb3 = (): Web3ContextType => (
   useContext(Web3Context)
 )
 
-export const Web3ContextProvider = (
-  ({ children }: { children: ReactNode }) => {
+export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
+  ({ children }) => {
+    const [wallet, setWallet] = useState<Web3Modal>()
     const [userProvider, setUserProvider] = (
       useState<Web3Provider>()
     )
@@ -140,6 +144,7 @@ export const Web3ContextProvider = (
     const disconnect = useCallback(() => {
       web3Modal?.clearCachedProvider()
       // clearWalletConnect()
+      setWallet(undefined)
       setAddress(undefined)
       setChain(undefined)
       setUserProvider(undefined)
@@ -218,12 +223,12 @@ export const Web3ContextProvider = (
       const libs = async () => {
         const { contractNetwork: chain } = CONFIG
         import(
-          `../contracts/${chain}/Bits.address.ts`
+          `../contracts/${chain}/Bits.address`
         )
         .then(({ default: addr }) => setConstsContractAddress(addr))
 
         import (
-          `../contracts/${chain}/Bits.abi.ts`
+          `../contracts/${chain}/Bits.abi`
         )
         .then(({ default: abi }) => setConstsABI(abi))
       }

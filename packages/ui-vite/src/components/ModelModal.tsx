@@ -3,7 +3,6 @@ import {
   ModalContent, ModalHeader, ModalOverlay, Select, chakra,
   Input, ModalFooter, Button,
 } from '@chakra-ui/react'
-import { ChangeEvent } from 'react'
 import { FormEvent, useState } from 'react'
 
 export type ModelModalProps = {
@@ -54,11 +53,7 @@ export const ModelModal: React.FC<ModelModalProps> = ({
             <Select
               ml={5} w="calc(100% - 2rem)"
               value={type}
-              onChange={
-                ({ target: { value } }: ChangeEvent<HTMLSelectElement>) => {
-                  setType(value)
-                }
-              }
+              onChange={({ target: { value } }) => setType(value)}
             >
               <chakra.optgroup style={{ padding: 0 }}>
                 <chakra.option value="model/gltf-binary">Binary glTF</chakra.option>
@@ -78,11 +73,9 @@ export const ModelModal: React.FC<ModelModalProps> = ({
               <Input
                 ml={5} mt={3} w="calc(100% - 2rem)" placeholder="Mime Type"
                 required={true} value={specifiedType}
-                onChange={
-                  ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
-                    setSpecifiedType(value)
-                  }
-                }
+                onChange={({ target: { value } }) => (
+                  setSpecifiedType(value)
+                )}
               />
             )}
           </FormControl>

@@ -1,23 +1,25 @@
-import { useState, useEffect, useMemo } from 'react'
-import { ethers } from 'ethers'
-import { Helmet } from 'react-helmet'
+import { useState, useEffect } from 'react'
+import type { NextPage } from 'next'
+import Head from 'next/head'
 import {
-  Box, Container, Flex, Image, Stack, Tooltip,
-  Table, Thead, Tbody, Tr, Th, Td,
-  Spinner, Text, Link as ChakraLink, chakra,
+  Container, Flex, chakra,
 } from '@chakra-ui/react'
-import Markdown from 'react-markdown'
-import { httpURL } from '../lib/helpers'
-import type { Maybe, ERC1155Metadata, TokenState } from '../lib/types'
-import { Header, TokensTable } from '../components'
-import { useWeb3 } from '../lib/hooks'
-import TokenFilterForm from '../components/TokenFilterForm'
+import { httpURL } from '@/lib/helpers'
+import type { TokenState } from '@/lib/types'
+import {
+  Header, TokensTable, TokenFilterForm,
+} from '@/components'
+import { useWeb3 } from '@/lib/hooks'
+import { useRouter } from 'next/router'
 
-const Home = () => {
+
+
+
+const Home: NextPage = () => {
   const [tokens, setTokens] = useState<Array<TokenState>>([])
   const {
-    query: { gating = false, visible = "", limit: limitParam = 10, offset: offsetParam = 0 }
-  } = {query: {}} //useRouter()
+    query: { gating = false, visible, limit: limitParam = 10, offset: offsetParam = 0 }
+  } = useRouter()
   const [limit, setLimit] = useState(Number(limitParam))
   const [offset, setOffset] = useState(Number(offsetParam))
   const [gatingVisible, setGatingVisible] = useState(!!gating)
@@ -44,13 +46,13 @@ const Home = () => {
   }, [limitParam])
 
   useEffect(() => {
-    // if (visible) {
-      // let visibleParam = visible
-      // if (Array.isArray(visibleParam)) {
-      //   ([visibleParam] = visibleParam)
-      // }
-      setVisibleList(visible.split(/\s*,\s*/).filter((str) => str !== ''))
-    // }
+    if (visible) {
+      let visibleParam = visible
+      if (Array.isArray(visibleParam)) {
+        ([visibleParam] = visibleParam)
+      }
+      setVisibleList(visibleParam.split(/\s*,\s*/).filter((str) => str !== ''))
+    }
   }, [visible])
 
   useEffect(
@@ -100,11 +102,12 @@ const Home = () => {
               }
               let metadata = null
               try {
-                let uri = await roContract.uri(id)
-                if(uri === '') uri = null
+                const uri = await roContract.uri(id)
+                if(uri === '') throw new Error('No URI')
                 setToken(index, { uri })
 
-                const url = httpURL(uri)
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                const url = httpURL(uri)!
                 const response = await fetch(url)
                 const data = await response.text()
                 if(!data || data === '') {
@@ -126,8 +129,8 @@ const Home = () => {
               const total = await roContract['totalSupply(uint256)'](id)
               setToken(index, { total })
 
-              // const max = await contract.getMax(id)
-              // setToken(index, { max })
+              const max = await roContract.getMax(id)
+              setToken(index, { max })
             })
           )
         }
@@ -135,18 +138,18 @@ const Home = () => {
 
       load()
     },
-    [roContract, constsContract, gatingVisible, visibleList, limit],
+    [roContract, constsContract, gatingVisible, visibleList, limit, offset],
   )
 
   return (
     <Container maxW="full">
-      <Helmet>
+      <Head>
         <title>𝔐𝔢𝔱𝔞𝔊𝔞𝔪𝔢’𝔰 ’𝓒𝓱𝓲𝓮𝓿𝓮𝓶𝓲𝓷𝓽𝓼</title>
         <meta
           name="description"
           content="MetaGame’s ’Chievemint NFTs"
         />
-      </Helmet>
+      </Head>
 
       <chakra.header h="45vh">
         <Flex maxW="40rem" margin="auto">

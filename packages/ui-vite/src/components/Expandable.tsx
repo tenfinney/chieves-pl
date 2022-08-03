@@ -1,7 +1,6 @@
+import { Maybe } from '@/lib/types'
 import { ReactNode, useCallback, useRef, useState } from 'react'
-import {
-  Box, chakra, Flex, FormLabel, Link, Text,
-} from '@chakra-ui/react'
+import { Box, chakra, Flex, FormLabel, Link, Text } from '@chakra-ui/react'
 
 export const Anchor = ({ name }: { name: string }) => {
   const anchor = name.toLowerCase().replace(/\s+/g, '-')
@@ -26,9 +25,9 @@ const Label = ({ name }: { name: string }) => (
   </Flex>
 )
 
-export const Expandable = (
-  { name, button = null, children }:
-  { name: string, button: ReactNode, children: ReactNode }) => {
+export const Expandable: React.FC<{
+  name: string, button?: Maybe<ReactNode>, children: ReactNode
+}> = ({ name, button = null, children }) => {
   const [hide, setHide] = useState<Record<string, boolean>>({})
   const toggle = useCallback((prop: string) => {
     setHide(h => ({ ...h, [prop]: !h[prop] }))

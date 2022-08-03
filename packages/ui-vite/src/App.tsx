@@ -16,6 +16,7 @@ import {
   Routes,
   Route,
 } from "react-router-dom";
+import View from './pages/view'
 
 const client = new ApolloClient({
   uri: CONFIG.nftGraph,
@@ -39,7 +40,7 @@ const App: React.FC = () => (
         <Router>
           <Routes>
             <Route path="/new" element={<New/>} />
-            <Route path="/view" element={<Home/>} />
+            <Route path="/view/:nftId" element={<View/>} />
             <Route path="/" element={<Home/>} />
           </Routes>
         </Router>
