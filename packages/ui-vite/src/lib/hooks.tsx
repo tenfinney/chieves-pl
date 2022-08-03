@@ -1,20 +1,18 @@
 import {
-  Web3Provider, JsonRpcProvider, StaticJsonRpcProvider,
+  ExternalProvider, Web3Provider, JsonRpcProvider,
+  StaticJsonRpcProvider,
 } from '@ethersproject/providers'
 import { Contract } from '@ethersproject/contracts'
-import type { Maybe } from './types'
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
+import type { Maybe } from '@/lib/types'
+import {
+  createContext, useCallback, useContext, useEffect,
+  useMemo, useState,
 } from 'react'
 import Web3Modal from 'web3modal'
 import providerOptions from './walletConnect'
-import { NETWORKS } from './networks'
-import CONFIG from '../config'
+import { NETWORKS } from '@/lib/networks'
+import CONFIG from '@/config'
+import { ReactNode } from 'react';
 
 export type Web3ContextType = {
   userProvider?: Web3Provider
@@ -59,8 +57,7 @@ export const useWeb3 = (): Web3ContextType => (
 )
 
 export const Web3ContextProvider = (
-  ({ children }) => {
-    const [wallet, setWallet] = useState<Web3Modal>()
+  ({ children }: { children: ReactNode }) => {
     const [userProvider, setUserProvider] = (
       useState<Web3Provider>()
     )
@@ -143,7 +140,6 @@ export const Web3ContextProvider = (
     const disconnect = useCallback(() => {
       web3Modal?.clearCachedProvider()
       // clearWalletConnect()
-      setWallet(undefined)
       setAddress(undefined)
       setChain(undefined)
       setUserProvider(undefined)
@@ -154,9 +150,7 @@ export const Web3ContextProvider = (
     }, [web3Modal])
 
     const update = useCallback(
-      async (vider) => {
-        setWallet(vider)
-
+      async (vider: ExternalProvider) => {
         const web3Provider = new Web3Provider(vider)
         setUserProvider(web3Provider)
 
@@ -164,7 +158,7 @@ export const Web3ContextProvider = (
           web3Provider.getSigner().getAddress()
         ))
 
-        setChain(vider.chainId)
+        setChain((vider as { chainId: string }).chainId)
       },
       [],
     )

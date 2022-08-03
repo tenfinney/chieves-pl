@@ -210,7 +210,7 @@ export const NFTForm: React.FC<{
         setValue('color', `#${bg}`)
       }
     }
-  }, [metadata, setImage, setValue])
+  }, [metadata, setValue])
 
   useEffect(() => {
     if(!homepage || isEmpty(homepage) || homepage.endsWith('𝘜𝘯𝘬𝘯𝘰𝘸𝘯')) {

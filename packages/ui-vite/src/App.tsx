@@ -1,13 +1,11 @@
 // import '../styles/globals.css'
-import {Helmet} from 'react-helmet'
+import { Helmet } from 'react-helmet'
 import { ChakraProvider } from '@chakra-ui/react'
 import { Web3ContextProvider } from './lib/hooks'
 import {
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
-  useQuery,
-  gql
 } from '@apollo/client'
 import { CONFIG } from './config'
 import Home from './pages/home'
@@ -17,7 +15,6 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Link
 } from "react-router-dom";
 
 const client = new ApolloClient({

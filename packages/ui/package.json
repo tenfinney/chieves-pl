@@ -17,9 +17,8 @@
     "vercel": "vercel"
   },
   "dependencies": {
-    "@apollo/client": "^3.6.6",
-    "@chakra-ui/icons": "^1.1.7",
-    "@chakra-ui/react": "^1.8.6",
+    "@chakra-ui/icons": "^2.0.4",
+    "@chakra-ui/react": "^2.2.4",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
     "@ethersproject/contracts": "^5.5.0",
@@ -40,8 +39,8 @@
     "next": "12.1.0",
     "nft.storage": "^6.0.2",
     "pluralize": "^8.0.0",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-hook-form": "^7.28.1",
     "react-markdown": "^8.0.1",
     "tslib": "^2.3.1",

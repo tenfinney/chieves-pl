@@ -12,8 +12,8 @@
     "@react-three/drei": "^8.20.2",
     "@react-three/fiber": "^7.0.26",
     "next": "12.1.2",
-    "react": "18.0.0",
-    "react-dom": "18.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "three": "^0.139.0"
   },
   "devDependencies": {
