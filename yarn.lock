@@ -7024,6 +7024,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/rollup-plugin-node-globals@npm:^1":
+  version: 1.4.1
+  resolution: "@types/rollup-plugin-node-globals@npm:1.4.1"
+  dependencies:
+    "@types/node": "*"
+    rollup: ^0.63.4
+  checksum: 099c001c5a5dbb3c69f139591611508e3e12c90abde96af144ce573f1880ea6ec4d9b5c6e01406f2cb199c647417eea88e5576cf4a3372b4df2cd0eb2895d661
+  languageName: node
+  linkType: hard
+
 "@types/scheduler@npm:*":
   version: 0.16.2
   resolution: "@types/scheduler@npm:0.16.2"
@@ -7703,6 +7713,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"Base64@npm:~0.2.0":
+  version: 0.2.1
+  resolution: "Base64@npm:0.2.1"
+  checksum: 7c47e801b52cb9c963ee2cfb9284fbef8a6a34d3bbc5f7503b186ab5fb3a77e3f4a321f14ef20a6b2270d6cc3c89a2a349a538c4690abd2077bbe7caef10272d
+  languageName: node
+  linkType: hard
+
 "abab@npm:^2.0.5, abab@npm:^2.0.6":
   version: 2.0.6
   resolution: "abab@npm:2.0.6"
@@ -7817,6 +7834,15 @@ __metadata:
   version: 8.2.0
   resolution: "acorn-walk@npm:8.2.0"
   checksum: 1715e76c01dd7b2d4ca472f9c58968516a4899378a63ad5b6c2d668bba8da21a71976c14ec5f5b75f887b6317c4ae0b897ab141c831d741dc76024d8745f1ad1
+  languageName: node
+  linkType: hard
+
+"acorn@npm:^5.7.3":
+  version: 5.7.4
+  resolution: "acorn@npm:5.7.4"
+  bin:
+    acorn: bin/acorn
+  checksum: f51392a4d25c7705fadb890f784c59cde4ac1c5452ccd569fa59bd2191b7951b4a6398348ab7ea08a54f0bc0a56c13776710f4e1bae9de441e4d33e2015ad1e0
   languageName: node
   linkType: hard
 
@@ -9709,6 +9735,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"buffer-es6@npm:^4.9.3":
+  version: 4.9.3
+  resolution: "buffer-es6@npm:4.9.3"
+  checksum: dfc8ebb3c5c00166e6f81e6ec7ea876693ea6197a8d0b07b1a17482ffab0e5d3307bfb539f84862b1ae35cd70ad03835db0f3c7dc4e337cbd16c50bb4c7e5df7
+  languageName: node
+  linkType: hard
+
 "buffer-fill@npm:^1.0.0":
   version: 1.0.0
   resolution: "buffer-fill@npm:1.0.0"
@@ -11293,11 +11326,11 @@ __metadata:
   linkType: hard
 
 "detect-gpu@npm:^4.0.14":
-  version: 4.0.40
-  resolution: "detect-gpu@npm:4.0.40"
+  version: 4.0.33
+  resolution: "detect-gpu@npm:4.0.33"
   dependencies:
     webgl-constants: ^1.1.1
-  checksum: 35f99b48db122428b63a1f5f3cd095cc3e5fd030b57dfcce0aa9daf647566b1eff1a2c05e054c3be6fef391b3c730c6cb70160b5477550f81f224ec1a073117d
+  checksum: c8f583573253ae398a846dc255bd9f48dce03d2ef1b3e9537190a8dfd8321cb42ffbdeb5483d36e61dd4884a47745d720a0b78633741093d749a58aacbc10452
   languageName: node
   linkType: hard
 
@@ -12713,6 +12746,13 @@ __metadata:
   version: 5.3.0
   resolution: "estraverse@npm:5.3.0"
   checksum: 072780882dc8416ad144f8fe199628d2b3e7bbc9989d9ed43795d2c90309a2047e6bc5979d7e2322a341163d22cfad9e21f4110597fe487519697389497e4e2b
+  languageName: node
+  linkType: hard
+
+"estree-walker@npm:^0.5.2":
+  version: 0.5.2
+  resolution: "estree-walker@npm:0.5.2"
+  checksum: c0beb0a6c016c888337437204d0d0a2677aab623abd1da2d18bf4257fceb9ec38f9772b58b53d7144937e2a5324fd26bfe7a822c18b23f45061f74c5296ec96a
   languageName: node
   linkType: hard
 
@@ -14923,6 +14963,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"http-browserify@npm:^1.7.0":
+  version: 1.7.0
+  resolution: "http-browserify@npm:1.7.0"
+  dependencies:
+    Base64: ~0.2.0
+    inherits: ~2.0.1
+  checksum: 7891aee4a55a0182bcdd8cd59f1d154a8f9b284e006bced7fbf5e9ae2e6762ec6c7ade7742952c509503f23b2b9b94c791a14a77fc85881aa2c51b3b010d029b
+  languageName: node
+  linkType: hard
+
 "http-cache-semantics@npm:^4.0.0, http-cache-semantics@npm:^4.1.0":
   version: 4.1.0
   resolution: "http-cache-semantics@npm:4.1.0"
@@ -14979,6 +15029,13 @@ __metadata:
     quick-lru: ^5.1.1
     resolve-alpn: ^1.0.0
   checksum: 74160b862ec699e3f859739101ff592d52ce1cb207b7950295bf7962e4aa1597ef709b4292c673bece9c9b300efad0559fc86c71b1409c7a1e02b7229456003e
+  languageName: node
+  linkType: hard
+
+"https-browserify@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "https-browserify@npm:1.0.0"
+  checksum: 09b35353e42069fde2435760d13f8a3fb7dd9105e358270e2e225b8a94f811b461edd17cb57594e5f36ec1218f121c160ddceeec6e8be2d55e01dcbbbed8cbae
   languageName: node
   linkType: hard
 
@@ -17806,6 +17863,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"magic-string@npm:^0.22.5":
+  version: 0.22.5
+  resolution: "magic-string@npm:0.22.5"
+  dependencies:
+    vlq: ^0.2.2
+  checksum: e4d8b2083ed81f139ca471c19f5d0505c0f9083e06b71f48835057b3295a9494a15aac6a111d335573b986a67d3932e41c726d2eb6c76af30d0391b5e254ced3
+  languageName: node
+  linkType: hard
+
 "magic-string@npm:^0.25.3, magic-string@npm:^0.25.7":
   version: 0.25.9
   resolution: "magic-string@npm:0.25.9"
@@ -20210,6 +20276,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"process-es6@npm:^0.11.6":
+  version: 0.11.6
+  resolution: "process-es6@npm:0.11.6"
+  checksum: 8849ea1a799a20a8e863fd3a5558d4085357ee59cae16b76f61327e3b3a27697b4e49c880742a6cc0f0c37eb0bd78fb0d4e382bd2e5318bb699b404b55a9b91e
+  languageName: node
+  linkType: hard
+
 "process-nextick-args@npm:~2.0.0":
   version: 2.0.1
   resolution: "process-nextick-args@npm:2.0.1"
@@ -21058,7 +21131,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:^3.0.6, readable-stream@npm:^3.4.0, readable-stream@npm:^3.6.0":
+"readable-stream@npm:^3.0.6, readable-stream@npm:^3.4.0, readable-stream@npm:^3.5.0, readable-stream@npm:^3.6.0":
   version: 3.6.0
   resolution: "readable-stream@npm:3.6.0"
   dependencies:
@@ -21622,6 +21695,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rollup-plugin-node-globals@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "rollup-plugin-node-globals@npm:1.4.0"
+  dependencies:
+    acorn: ^5.7.3
+    buffer-es6: ^4.9.3
+    estree-walker: ^0.5.2
+    magic-string: ^0.22.5
+    process-es6: ^0.11.6
+    rollup-pluginutils: ^2.3.1
+  checksum: da3cd85ad2f3824a767dd242e484d5cd530eae9fa809c87aba1ff66d64b7a08c84ed76592694c91ee39cf7d5efe487b62e60d402d579001560f6e6de99105576
+  languageName: node
+  linkType: hard
+
 "rollup-plugin-node-polyfills@npm:^0.2.1":
   version: 0.2.1
   resolution: "rollup-plugin-node-polyfills@npm:0.2.1"
@@ -21642,12 +21729,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup-pluginutils@npm:^2.8.1":
+"rollup-pluginutils@npm:^2.3.1, rollup-pluginutils@npm:^2.8.1":
   version: 2.8.2
   resolution: "rollup-pluginutils@npm:2.8.2"
   dependencies:
     estree-walker: ^0.6.1
   checksum: 339fdf866d8f4ff6e408fa274c0525412f7edb01dc46b5ccda51f575b7e0d20ad72965773376fb5db95a77a7fcfcab97bf841ec08dbadf5d6b08af02b7a2cf5e
+  languageName: node
+  linkType: hard
+
+"rollup@npm:^0.63.4":
+  version: 0.63.5
+  resolution: "rollup@npm:0.63.5"
+  dependencies:
+    "@types/estree": 0.0.39
+    "@types/node": "*"
+  bin:
+    rollup: ./bin/rollup
+  checksum: a8af189d03e402b1ea70788c4c8bffc3af7db612e8c1effbea63f411b1d683378b9e8d10c9b2fae81aaf6f12c8a0aad6802ab7e1a7dee006229398b03e92e5e5
   languageName: node
   linkType: hard
 
@@ -22484,6 +22583,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"stream-browserify@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "stream-browserify@npm:3.0.0"
+  dependencies:
+    inherits: ~2.0.4
+    readable-stream: ^3.5.0
+  checksum: 4c47ef64d6f03815a9ca3874e2319805e8e8a85f3550776c47ce523b6f4c6cd57f40e46ec6a9ab8ad260fde61863c2718f250d3bedb3fe9052444eb9abfd9921
+  languageName: node
+  linkType: hard
+
 "stream-to-it@npm:^0.2.2, stream-to-it@npm:^0.2.3":
   version: 0.2.4
   resolution: "stream-to-it@npm:0.2.4"
@@ -23089,17 +23198,17 @@ __metadata:
   linkType: hard
 
 "three-mesh-bvh@npm:^0.5.7":
-  version: 0.5.16
-  resolution: "three-mesh-bvh@npm:0.5.16"
+  version: 0.5.15
+  resolution: "three-mesh-bvh@npm:0.5.15"
   peerDependencies:
     three: ">= 0.123.0"
-  checksum: d38331b9ecaa49eb7480afacf7838f81ccc012839e8f8ac18391f1acb632bcff17c741694b1f2ccd5aafc31fc5ca1ae875b3e52049f4abbf933192d9cf2bbf95
+  checksum: 33e882af867dbfcc767c944be9633e182009ed6548e9d5f7c4f7a0a4e20aa8f427e05420e3ee9f8b446d9ae85acab830e7eaa43bbeecfe83fb00289a8fad4ab4
   languageName: node
   linkType: hard
 
 "three-stdlib@npm:^2.8.9":
-  version: 2.16.1
-  resolution: "three-stdlib@npm:2.16.1"
+  version: 2.13.0
+  resolution: "three-stdlib@npm:2.13.0"
   dependencies:
     "@babel/runtime": ^7.16.7
     "@types/offscreencanvas": ^2019.6.4
@@ -23114,7 +23223,7 @@ __metadata:
     zstddec: ^0.0.2
   peerDependencies:
     three: ">=0.122.0"
-  checksum: 7f27a69d9eeceb9ecd0ddc91f472ccefbdbb39f41b87cd457ff00b34a2f560a7a3bb9b42e639f5917d04c6e803cba0f2ac928934972c428336cbc54e72c147fd
+  checksum: a6c6461dfa812a1ff3ef284bb3288c8c75cda8279d5772ca97435f43ff0bdc4466e66ac0c22afe30fd81db54ecf7434d4fb7d3f0b1ac6632b3ebc11cec165b09
   languageName: node
   linkType: hard
 
@@ -23905,15 +24014,19 @@ __metadata:
     "@chakra-ui/react": ^1.8.8
     "@emotion/react": ^11.10.0
     "@emotion/styled": ^11.10.0
+    "@esbuild-plugins/node-globals-polyfill": ^0.1.1
     "@types/react": ^18.0.15
     "@types/react-dom": ^18.0.6
     "@types/react-helmet": ^6.1.5
+    "@types/rollup-plugin-node-globals": ^1
     "@vitejs/plugin-react": ^2.0.0
     "@walletconnect/web3-provider": ^1.8.0
     esbuild: ^0.14.53
     ethers: ^5.6.9
     framer-motion: ^6.5.1
     graphql: ^16.5.0
+    http-browserify: ^1.7.0
+    https-browserify: ^1.0.0
     ipfs-http-client: ^57.0.3
     it-all: ^1.0.6
     multiformats: ^9.7.1
@@ -23925,8 +24038,11 @@ __metadata:
     react-markdown: ^8.0.3
     react-router-dom: ^6.3.0
     rollup: ^2.77.2
+    rollup-plugin-node-globals: ^1.4.0
     rollup-plugin-tsconfig-paths: ^1.3.0
+    stream-browserify: ^3.0.0
     typescript: ^4.7.4
+    util: ^0.12.4
     vite: ^3.0.0
     web3modal: ^1.9.8
   languageName: unknown
@@ -24343,7 +24459,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"util@npm:^0.12.3":
+"util@npm:^0.12.3, util@npm:^0.12.4":
   version: 0.12.4
   resolution: "util@npm:0.12.4"
   dependencies:
@@ -24530,6 +24646,13 @@ __metadata:
   bin:
     vite: bin/vite.js
   checksum: af13c9820c292792f02d0a25fd46d8557e627b93f95bc05b5f7f1261e9565e9e69fda2df0c0898f248edb811ebcac5400a85a81625ef29749f50b18273439d91
+  languageName: node
+  linkType: hard
+
+"vlq@npm:^0.2.2":
+  version: 0.2.3
+  resolution: "vlq@npm:0.2.3"
+  checksum: 2231d8caeb5b2c1a438677ab029e9a94aa6fb61ab05819c72691b792aea0456dab29576aff5ae29309ee45bad0a309e832dc45173119bca1393f3b87709d8f8d
   languageName: node
   linkType: hard
 

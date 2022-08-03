@@ -47,32 +47,30 @@ const LoadingTd:React.FC<Token> = () => (
 const ImageTd:React.FC<Token> = ({ token }) => (
   <Td>
     <Stack>
-      <NextLink href={`/view/${regexify(token.id)}`} passHref>
-        <ChakraLink>
-          <Box
-            bg={
-              token.metadata?.background_color ? (
-                `#${token.metadata.background_color}`
-              ) : (
-                'transparent'
-              )
-            }
-          >
-            {token.metadata?.image && (
-              <chakra.object
-                data={httpURL(token.metadata.image) ?? undefined}
-                title={token.metadata?.name ?? 'Untitled'}
-                maxW={32}
-                maxH={32}
-                objectFit="contain"
-                margin="auto"
-              />
-            )}
-          </Box>
-          <Text>{token.metadata?.name ?? (
-            <Text as="em">Untitled</Text>
-          )}</Text>
-        </ChakraLink>
+      <ChakraLink href={`/view/${token.id}`} >
+        <Box
+          bg={
+            token.metadata?.background_color ? (
+              `#${token.metadata.background_color}`
+            ) : (
+              'transparent'
+            )
+          }
+        >
+          {token.metadata?.image && (
+            <chakra.object
+              data={httpURL(token.metadata.image)}
+              title={token.metadata?.name ?? 'Untitled'}
+              maxW={32}
+              maxH={32}
+              objectFit="contain"
+              margin="auto"
+            />
+          )}
+        </Box>
+        <Text>{token.metadata?.name ?? (
+          <Text as="em">Untitled</Text>
+        )}</Text>
       </ChakraLink>
     </Stack>
   </Td>
@@ -148,26 +146,20 @@ const TotalTd:React.FC<Token> = ({ token }) => (
 const ActionsTd:React.FC<Token> = ({ token }) => (
   <Td>
     <Flex justify="center" fontSize="150%">
-      <NextLink href={`/edit/${regexify(token.id)}`} passHref>
-        <ChakraLink>
-          <Tooltip label="Edit Token Metadata" hasArrow>
-            ✏️
-          </Tooltip>
-        </ChakraLink>
+      <ChakraLink href={`/edit/${token.id}`} >
+        <Tooltip label="Edit Metadata" hasArrow>
+          ✏️
+        </Tooltip>
       </ChakraLink>
-      <ChakraLink href={`/view/${token.id}`} >
-        <ChakraLink ml={2}>
-          <Tooltip label="View this NFT" hasArrow>
-          🔆
-          </Tooltip>
-        </ChakraLink>
+      <ChakraLink ml={2} href={`/view/${token.id}`} >
+        <Tooltip label="View This NFT" hasArrow>
+          👁
+        </Tooltip>
       </ChakraLink>
-      <ChakraLink href={`/disburse/${token.id}`} >
-        <ChakraLink ml={2}>
-          <Tooltip label="Disburse this NFT" hasArrow>
-          🌀
-          </Tooltip>
-        </ChakraLink>
+      <ChakraLink ml={2} href={`/disburse/${token.id}`} >
+        <Tooltip label="Disburse This NFT" hasArrow>
+          💸
+        </Tooltip>
       </ChakraLink>
     </Flex>
   </Td>

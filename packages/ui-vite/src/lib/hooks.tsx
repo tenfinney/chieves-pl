@@ -218,12 +218,12 @@ export const Web3ContextProvider = (
       const libs = async () => {
         const { contractNetwork: chain } = CONFIG
         import(
-          `../contracts/${chain}/Bits.address`
+          `../contracts/${chain}/Bits.address.ts`
         )
         .then(({ default: addr }) => setConstsContractAddress(addr))
 
         import (
-          `../contracts/${chain}/Bits.abi`
+          `../contracts/${chain}/Bits.abi.ts`
         )
         .then(({ default: abi }) => setConstsABI(abi))
       }

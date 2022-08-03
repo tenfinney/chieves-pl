@@ -35,10 +35,11 @@ const App: React.FC = () => (
       />
     </Helmet>
     <ApolloProvider {...{ client }}>
-      <Web3ContextProvider> 
+      <Web3ContextProvider>
         <Router>
           <Routes>
             <Route path="/new" element={<New/>} />
+            <Route path="/view" element={<Home/>} />
             <Route path="/" element={<Home/>} />
           </Routes>
         </Router>
