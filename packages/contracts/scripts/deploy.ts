@@ -67,6 +67,7 @@ const deploy = async ({
         args,
         { kind: 'uups', timeout: 10 * 60 * 1000 },
       )
+      console.log('deployed!!!')
     } else {
       const existing = (
         fs.readFileSync(files.address).toString().trim()

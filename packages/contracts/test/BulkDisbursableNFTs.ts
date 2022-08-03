@@ -37,7 +37,7 @@ beforeEach(async () => {
   )
   token = await upgrades.deployProxy(
     Token,
-    ['SmartLaw Cred'],
+    ['SmartLaw Cred', 'SLC'],
     { kind: 'uups', timeout: 10 * 60 * 1000 },
   )
   bits = await Bits.deploy()

@@ -42,48 +42,28 @@ const publishContract = ({ name, container }: PubParams) => {
     let contract = (
       JSON.parse(fs.readFileSync(contractJSON).toString())
     )
-
-    const addressJSON = (
-      `${artifactsDir}/${name}.address`
-    )
-    console.log(
-      ` 📖 Reading: ${chalk.greenBright(shortDir(addressJSON))}`
-    )  
-    const address = (
-      fs.readFileSync(addressJSON).toString().trim()
-    )
-
-    // let graphConfigPath = `${graphDir}/config/config.json`
-    // let graphConfig
-    // try {
-    //   if (fs.existsSync(graphConfigPath)) {
-    //     graphConfig = (
-    //       fs.readFileSync(graphConfigPath).toString()
-    //     )
-    //   } else {
-    //     graphConfig = '{}'
-    //   }
-    // } catch (e) {
-    //   console.error(e)
-    // }
-    // graphConfig = JSON.parse(graphConfig)
-    // graphConfig[contractName + 'Address'] = address
-
+    
+    let address
+    if(container === name) {
+      const addressJSON = (
+        `${artifactsDir}/${name}.address`
+      )
+      console.log(
+        ` 📖 Reading: ${chalk.greenBright(shortDir(addressJSON))}`
+      )  
+      address = (
+        fs.readFileSync(addressJSON).toString().trim()
+      )
+    }
     const outs = {
-      [`${publishDir}/${name}.address.ts`]: (
-        `export default '${address}'`
-      ),
       [`${publishDir}/${name}.abi.ts`]: (
         `export default ${JSON5.stringify(contract.abi, null, 2)}`
       ),
-      // [`${publishDir}/${contractName}.bytecode.ts`]: (
-      //   `export default '${contract.bytecode}'`
-      // ),
-      
-      // [graphConfigPath]: JSON.stringify(graphConfig, null, 2),
-      // [`${graphDir}/abis/${contractName}.json`]: (
-      //   JSON.stringify(contract.abi, null, 2)
-      // ),
+    }
+    if(address) {
+      outs[`${publishDir}/${name}.address.ts`] = (
+        `export default '${address}'`
+      )
     }
     Object.entries(outs).forEach(([file, content]) => {
       const dir = path.dirname(file)

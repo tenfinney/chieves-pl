@@ -95,7 +95,8 @@ const config: HardhatUserConfig = {
       accounts: { mnemonic },
     },
     gnosis: {
-      url: 'https://rpc.gnosischain.com/',
+      url: 'https://rpc.gnosischain.com',
+      // gasPrice: 1000000000,
       accounts: { mnemonic },
       gasMultiplier,
     },
