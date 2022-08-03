@@ -410,7 +410,7 @@ contract BulkDisbursableNFTs is
     uint256 disabledIndex = (
       tokens.indices[gate | Bits.DISABLING_TYPE | index]
     );
-    if (disabledIndex != 0){
+    if(disabledIndex != 0) {
       return tokens.entries[disabledIndex];
     }
 
@@ -631,8 +631,13 @@ contract BulkDisbursableNFTs is
       disableRole(disables[i], index);
     }
     emit Created(id, maintainer);
+    uint256 gate = gateToken(
+      Role.Creator, _msgSender(), 0
+    );
+    if(gate & Bits.USE_ONCE == Bits.USE_ONCE) {
+      _burn(_msgSender(), gate, 1);
+    }
   }
-
 
   /**
    * @notice Create new tokens instances.

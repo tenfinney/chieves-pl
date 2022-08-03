@@ -442,4 +442,32 @@ describe('The Token Contract', () => {
       }
     }
   )
+
+  it(
+    'destroys a single-use creation token.',
+    async () => {
+      const creatorRole = await token.roleIndexForName('Creator')
+      let creatorToken = await token['roleToken(uint8)'](creatorRole)
+      creatorToken = creatorToken.toBigInt()
+      const USE_ONCE = (await bits.USE_ONCE()).toBigInt()
+      creatorToken |= USE_ONCE
+      await token['mint(address,uint256,uint256,bytes)'](
+        creator.address, creatorToken, 1, []
+      )
+      const receipt = await transact({
+        sender: creator,
+        method: 'create()',
+        args: [],
+      })
+      let event = receipt.events.find(
+        (evt: Ethers.Event) => evt.event === 'Created'
+      )
+
+      const [createdId, _controller] = event.args
+      const balance = (
+        await token.balanceOf(creator.address, creatorToken)
+      )
+      expect(balance).to.be.equal(0)
+    }
+  )
 })
