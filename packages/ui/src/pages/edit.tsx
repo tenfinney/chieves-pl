@@ -1,14 +1,13 @@
 import { useWeb3 } from '@/lib/hooks'
-import { NextPage } from 'next'
 import { ReactNode, useEffect, useState } from 'react'
 import { ERC1155Metadata, Maybe } from '@/lib/types'
 import { httpURL, regexify } from '@/lib/helpers'
 import { HomeLink, OptionsForm } from '@/components'
 import { Box } from '@chakra-ui/react'
-import Head from 'next/head'
 import { useParams } from 'react-router-dom'
+import { Helmet } from 'react-helmet'
 
-export const Edit: NextPage = () => {
+export const Edit = () => {
   let { nftId: tokenId } = useParams() 
   const [metadata, setMetadata] = useState<Maybe<ERC1155Metadata>>()
   const [error, setError] = useState<ReactNode>()
@@ -37,9 +36,9 @@ export const Edit: NextPage = () => {
 
   return (
     <Box ml={16}>
-      <Head>
+      <Helmet>
         <title>’𝖈𝖍𝖎𝖊𝖛𝖊: ℰ𝒹𝒾𝓉 #{tokenId && regexify(tokenId)}</title>
-      </Head>
+      </Helmet>
       <HomeLink/>
       <OptionsForm
         purpose="update"

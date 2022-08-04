@@ -4,7 +4,6 @@ import {
 } from '@chakra-ui/react'
 import { httpURL, regexify } from '@/lib/helpers'
 import { TokenState } from '@/lib/types'
-import Link from 'next/link'
 import Markdown from 'react-markdown'
 
 type IndexedToken = { token: TokenState, index: number }
@@ -132,13 +131,13 @@ const URITd:React.FC<Token> = ({ token }) => (
 
 const TotalTd:React.FC<Token> = ({ token }) => (
   <Td>
-    <Link href={`/owners/${token.id}`}>
+    <ChakraLink href={`/owners/${token.id}`}>
       {token.total == null ? (
         <Spinner/>
       ) : (
         `${token.total} ⁄ ${token.max}`
       )}
-    </Link>
+    </ChakraLink>
   </Td>
 )
 

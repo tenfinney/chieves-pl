@@ -4,8 +4,6 @@ import {
   Image, chakra, Heading, Stack, Flex, Spinner, Text,
 } from '@chakra-ui/react'
 import { ethers } from 'ethers'
-import Head from 'next/head'
-import type { NextPage } from 'next'
 import ReactMarkdown from 'react-markdown'
 import {
   regexify, deregexify, httpURL,
@@ -14,10 +12,11 @@ import type { ERC1155Metadata } from '@/lib/types'
 import { HomeLink } from '@/components'
 import { useWeb3 } from '@/lib/hooks'
 import { useParams } from 'react-router-dom'
+import { Helmet } from 'react-helmet'
 
 const Markdown = chakra(ReactMarkdown)
 
-const View: NextPage = () => {
+const View = () => {
   const { nftId: idParam } = useParams() 
   const [metadata, setMetadata] = useState<ERC1155Metadata>()
   const [error, setError] = useState<string>()
@@ -84,7 +83,7 @@ const View: NextPage = () => {
           name="description"
           content="SmartLaw Cred Tokens"
         />
-      </Head>
+      </Helmet>
       <HomeLink/>
       {name && <Heading>{name}</Heading>}
       {image && (

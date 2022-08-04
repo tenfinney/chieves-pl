@@ -1,17 +1,16 @@
-import { FormEvent, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { ChangeEvent, FormEvent, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Alert, AlertDescription, AlertIcon, AlertTitle, Box,
   Button, Container, Tabs, TabList, Tab,
   TabPanels, TabPanel, FormControl, FormLabel, Textarea,
   OrderedList, ListItem, Stack, Text, Flex, Spinner, Checkbox, RadioGroup, Radio, useToast,
 } from '@chakra-ui/react'
-import Head from 'next/head'
-import type { NextPage } from 'next'
 import { capitalize, httpURL } from '@/lib/helpers'
 import { Maybe, ERC1155Metadata, Optional } from '@/lib/types'
 import { useWeb3 } from '@/lib/hooks'
 import { HomeLink } from '@/components'
 import { useParams } from 'react-router-dom'
+import { Helmet } from 'react-helmet'
 
 const Address: React.FC<{ name: string }> = ({ name }) => {
   const { ensProvider } = useWeb3()
@@ -53,7 +52,7 @@ const split = (raw: string) => (
   .filter((str: string) => str && str !== '')
 )
 
-const Disburse: NextPage = () => {
+const Disburse = () => {
   let { nftId: tokenId } = useParams() 
   
   if (Array.isArray(tokenId)) {
@@ -199,10 +198,10 @@ const Disburse: NextPage = () => {
 
   return (
     <Container maxW="40rem">
-      <Head>
+      <Helmet>
         <title>Disburse NFT #{tokenId}</title>
         <meta name="description" content="Distribute A ’Chievemint NFT" />
-      </Head>
+      </Helmet>
 
       <HomeLink/>
 
@@ -240,7 +239,11 @@ const Disburse: NextPage = () => {
                   height={64}
                   placeholder="Enter space, semicolon, or comma separated eth addresses."
                   value={raw}
-                  onChange={({ target: { value } }) => setRaw(value)}
+                  onChange={
+                    ({ target: { value } }: ChangeEvent<HTMLTextAreaElement>) => {
+                      setRaw(value)
+                    }
+                  }
                 />
               </FormControl>
             </TabPanel>

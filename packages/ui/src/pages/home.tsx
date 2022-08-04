@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import type { NextPage } from 'next'
 import {
   Container, Flex, chakra,
 } from '@chakra-ui/react'
@@ -12,7 +11,7 @@ import { useWeb3 } from '@/lib/hooks'
 import { Helmet } from 'react-helmet'
 import { useSearchParams } from 'react-router-dom'
 
-const Home: NextPage = () => {
+const Home = () => {
   const [tokens, setTokens] = useState<Array<TokenState>>([])
   const [query] = useSearchParams()
   const visible = query.get('visible') ?? ''

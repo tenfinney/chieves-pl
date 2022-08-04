@@ -8,17 +8,18 @@ import {
   ApolloProvider,
 } from '@apollo/client'
 import { CONFIG } from './config'
-import Home from './pages/home'
-import New from './pages/new'
-
 import {
   BrowserRouter as Router,
   Routes,
   Route,
 } from "react-router-dom";
-import View from './pages/view'
-import Edit from './pages/edit'
-import Disburse from './pages/disburse'
+import React from 'react'
+
+const Home = React.lazy(() => import('./pages/home'))
+const New = React.lazy(() => import('./pages/new'))
+const View = React.lazy(() => import('./pages/view'))
+const Edit = React.lazy(() => import('./pages/edit'))
+const Disburse = React.lazy(() => import('./pages/disburse'))
 
 const client = new ApolloClient({
   uri: CONFIG.nftGraph,
