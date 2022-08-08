@@ -27,7 +27,7 @@ const Disburse = React.lazy(() => import('./pages/disburse'))
 
 const themeConfig: ThemeConfig = {
   initialColorMode: 'dark',
-  // useSystemColorMode: true,
+  useSystemColorMode: true,
 }
 const theme = extendTheme({ config: themeConfig })
 
@@ -39,7 +39,7 @@ const client = new ApolloClient({
 const App: React.FC = () => (
   <>
     <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-    <ChakraProvider>
+    <ChakraProvider {...{ theme }}>
       <Helmet>
         <link
           rel="shortcut icon"
