@@ -1,4 +1,4 @@
-// import '../styles/globals.css'
+
 import { Helmet } from 'react-helmet'
 import { ChakraProvider } from '@chakra-ui/react'
 import { Web3ContextProvider } from './lib/hooks'
@@ -16,10 +16,10 @@ import {
 import React from 'react'
 
 const Home = React.lazy(() => import('./pages/home'))
-const New = React.lazy(() => import('./pages/new'))
-const View = React.lazy(() => import('./pages/view'))
-const Edit = React.lazy(() => import('./pages/edit'))
-const Disburse = React.lazy(() => import('./pages/disburse'))
+// const New = React.lazy(() => import('./pages/new'))
+// const View = React.lazy(() => import('./pages/view'))
+// const Edit = React.lazy(() => import('./pages/edit'))
+// const Disburse = React.lazy(() => import('./pages/disburse'))
 
 const client = new ApolloClient({
   uri: CONFIG.nftGraph,
@@ -42,10 +42,12 @@ const App: React.FC = () => (
       <Web3ContextProvider>
         <Router>
           <Routes>
+{/*
             <Route path="/new" element={<New/>} />
             <Route path="/view/:nftId" element={<View/>} />
             <Route path="/disburse/:nftId" element={<Disburse/>} />
             <Route path="/edit/:nftId" element={<Edit/>} />
+*/}
             <Route path="/" element={<Home/>} />
           </Routes>
         </Router>

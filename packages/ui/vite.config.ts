@@ -1,27 +1,29 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import tsConfigPaths from 'rollup-plugin-tsconfig-paths'
+import {
+  NodeGlobalsPolyfillPlugin as ESBuildGlobalsPolyfillsPlugin
+} from '@esbuild-plugins/node-globals-polyfill'
+import TSConfigPathsPlugin  from 'rollup-plugin-tsconfig-paths'
 import ResolvePlugin from '@rollup/plugin-node-resolve'
-import {  NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill'
-// import { build } from 'esbuild'
 import NodePolyfillsPlugin from 'rollup-plugin-polyfill-node'
-// import NodePolyfillsPlugin from 'rollup-plugin-node-polyfills'
-// import { viteCommonjs as ViteCommonJSPlugin } from '@originjs/vite-plugin-commonjs'
 import CommonJSPlugin from '@rollup/plugin-commonjs'
+// import NodePolyfillsPlugin from 'rollup-plugin-node-polyfills'
 import InjectPlugin from '@rollup/plugin-inject'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    ResolvePlugin({
-      browser: true,
-      preferBuiltins: true,
-      mainFields: ['browser'],
+    // ResolvePlugin({
+    //   browser: true,
+    //   preferBuiltins: true,
+    //   mainFields: ['browser'],
+    // }),
+    TSConfigPathsPlugin(),
+    NodePolyfillsPlugin({
+      // include: null,
     }),
-    tsConfigPaths(),
-    NodePolyfillsPlugin(),
     react(),
-    ],
+  ],
   build: {
     minify: false,
     sourcemap: true,
@@ -33,7 +35,8 @@ export default defineConfig({
       ignoreGlobal: false,
       requireReturnsDefault: false,
       // defaultIsModuleExports: true,
-      esmExternals: []
+      dynamicRequireTargets: ['**/react/**'],
+      esmExternals: ['react-helmet']
     },
     rollupOptions: {
       // external: ["react", "react-dom"],
@@ -45,10 +48,7 @@ export default defineConfig({
       // },
       plugins: [
         InjectPlugin({ Buffer: ['buffer', 'Buffer'] }),
-        CommonJSPlugin({
-          exclude: [/./],
-          include: [/\breact\b/],
-        }),
+        CommonJSPlugin({}),
       ],
     },
   },
@@ -59,7 +59,7 @@ export default defineConfig({
         global: 'globalThis',
       },
       plugins: [
-        NodeGlobalsPolyfillPlugin({
+        ESBuildGlobalsPolyfillsPlugin({
           process: true,
           buffer: true
         }),
