@@ -1,5 +1,5 @@
 import { Input, Stack } from '@chakra-ui/react'
-import ReactNode from 'react'
+import React from 'react'
 import { FieldValues, UseFormRegister } from 'react-hook-form'
 
 export const URIForm: React.FC<{

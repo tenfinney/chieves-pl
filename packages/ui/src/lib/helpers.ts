@@ -120,7 +120,7 @@ export const ipfsify = async (filesOrURL: FileListish) => {
     list.map((entry) => ({
       path: entry.name,
       content: (entry as NamedString).content ?? entry 
-    })),
+    })) as Array<{ path: string; content: string }>,
     { pin: true, wrapWithDirectory: true }
   ))
   const [{ cid }] = result.slice(-1)
@@ -176,9 +176,11 @@ export const deregexify = (str?: string) => {
   return expanded.join('')
 }
 
-export const extractMessage = (error: unknown) => (
-  (error as NestedError)?.error?.message
-  ?? (error as MetaMaskError)?.data?.message
-  ?? (error as Error)?.message
-  ?? error
+export const extractMessage = (error: unknown): string => (
+  (
+    (error as NestedError)?.error?.message
+    ?? (error as MetaMaskError)?.data?.message
+    ?? (error as Error)?.message
+    ?? error
+  ) as string
 )

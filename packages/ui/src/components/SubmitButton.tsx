@@ -3,7 +3,7 @@ import { NETWORKS } from '@/lib/networks'
 import {
   Button, ButtonProps, Flex, Spinner, Text,
 } from '@chakra-ui/react'
-import { useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useWeb3 } from '@/lib/hooks'
 
 export const SubmitButton: React.FC<ButtonProps & {

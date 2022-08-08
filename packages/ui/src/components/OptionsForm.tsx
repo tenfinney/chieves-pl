@@ -9,7 +9,7 @@ import {
 import {
   ipfsify, isSet, isEmpty, regexify, extractMessage,
 } from '@/lib/helpers'
-import { useCallback, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useWeb3 } from '@/lib/hooks'
 import { useForm } from 'react-hook-form'
 import JSON5 from 'json5'

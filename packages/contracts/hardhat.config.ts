@@ -37,6 +37,20 @@ if (!mnemonic || mnemonic === '') {
   throw new Error('Mnemonic Not Defined')
 }
 
+const apiKey = Object.fromEntries(
+  Object.entries({
+    mainnet: 'ETHERSCAN_API_KEY',
+    rinkeby: 'ETHERSCAN_API_KEY',
+    polygon: 'POLYGONSCAN_API_KEY',
+    polygonMumbai: 'POLYGONSCAN_API_KEY',
+  }).map(([net, key]) => {
+    const value = process.env[key]
+    if(!value) throw new Error(`Missing \`$${key}\`.`)
+    return [net, value]
+  })
+)
+apiKey.gnosis = 'any value will work here'
+
 const infuraId = process.env.INFURA_ID
 const alchemyId = process.env.ALCHEMY_ID
 const config: HardhatUserConfig = {
@@ -101,15 +115,7 @@ const config: HardhatUserConfig = {
       },
     }],
   },
-  etherscan: {
-    apiKey: {
-      mainnet: process.env.ETHERSCAN_API_KEY,
-      rinkeby: process.env.ETHERSCAN_API_KEY,
-      polygon: process.env.POLYGONSCAN_API_KEY,
-      polygonMumbai: process.env.POLYGONSCAN_API_KEY,
-      xdai: "any value will work here",
-    },
-  },
+  etherscan: { apiKey },
   typechain: {
     target: 'ethers-v5',
     outDir: '../ui/contracts/types/',

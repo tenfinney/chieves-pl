@@ -4,7 +4,7 @@ import {
   Flex, FormControl, FormLabel, Input,
   Spinner, Text, useToast
 } from '@chakra-ui/react'
-import {
+import React, {
   ChangeEvent, FormEvent, useCallback, useEffect, useState
 } from 'react'
 import { SubmitButton } from './SubmitButton'

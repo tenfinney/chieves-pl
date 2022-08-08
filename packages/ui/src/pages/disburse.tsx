@@ -1,9 +1,13 @@
-import { ChangeEvent, FormEvent, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import React, {
+  ChangeEvent, FormEvent, ReactNode, useCallback,
+  useEffect, useMemo, useState,
+} from 'react'
 import {
   Alert, AlertDescription, AlertIcon, AlertTitle, Box,
   Button, Container, Tabs, TabList, Tab,
   TabPanels, TabPanel, FormControl, FormLabel, Textarea,
-  OrderedList, ListItem, Stack, Text, Flex, Spinner, Checkbox, RadioGroup, Radio, useToast,
+  OrderedList, ListItem, Stack, Text, Flex, Spinner,
+  Checkbox, RadioGroup, Radio, useToast,
 } from '@chakra-ui/react'
 import { capitalize, httpURL } from '@/lib/helpers'
 import { Maybe, ERC1155Metadata, Optional } from '@/lib/types'

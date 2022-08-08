@@ -5,6 +5,10 @@ import {
 import { httpURL, regexify } from '@/lib/helpers'
 import { TokenState } from '@/lib/types'
 import Markdown from 'react-markdown'
+import React from 'react'
+import { Link as ReactRouterLink } from 'react-router-dom'
+
+const RouterLink = chakra(ReactRouterLink)
 
 type IndexedToken = { token: TokenState, index: number }
 type Token = { token: TokenState }
@@ -45,7 +49,7 @@ const LoadingTd:React.FC<Token> = () => (
 const ImageTd:React.FC<Token> = ({ token }) => (
   <Td>
     <Stack>
-      <ChakraLink href={`/view/${regexify(token.id)}`}>
+      <RouterLink to={`/view/${regexify(token.id)}`}>
         <Box
           bg={
             token.metadata?.background_color ? (
@@ -69,7 +73,7 @@ const ImageTd:React.FC<Token> = ({ token }) => (
         <Text>{token.metadata?.name ?? (
           <Text as="em">Untitled</Text>
         )}</Text>
-      </ChakraLink>
+      </RouterLink>
     </Stack>
   </Td>
 )
@@ -131,37 +135,41 @@ const URITd:React.FC<Token> = ({ token }) => (
 
 const TotalTd:React.FC<Token> = ({ token }) => (
   <Td>
-    <ChakraLink href={`/owners/${token.id}`}>
+    <RouterLink to={`/owners/${token.id}`}>
       {token.total == null ? (
         <Spinner/>
       ) : (
         `${token.total} ⁄ ${token.max}`
       )}
-    </ChakraLink>
+    </RouterLink>
   </Td>
 )
 
-const ActionsTd:React.FC<Token> = ({ token }) => (
-  <Td>
-    <Flex justify="center" fontSize="150%">
-      <ChakraLink href={`/edit/${regexify(token.id)}`}>
-        <Tooltip label="Edit Metadata" hasArrow>
-          ✏️
-        </Tooltip>
-      </ChakraLink>
-      <ChakraLink ml={2} href={`/view/${token.id}`}>
-        <Tooltip label="View This NFT" hasArrow>
-          👁
-        </Tooltip>
-      </ChakraLink>
-      <ChakraLink ml={2} href={`/disburse/${token.id}`}>
-        <Tooltip label="Disburse This NFT" hasArrow>
-          💸
-        </Tooltip>
-      </ChakraLink>
-    </Flex>
-  </Td>
-)
+const ActionsTd:React.FC<Token> = ({ token }) => {
+  const id = regexify(token.id)
+
+  return (
+    <Td>
+      <Flex justify="center" fontSize="150%">
+        <RouterLink to={`/edit/${id}`}>
+          <Tooltip label="Edit Metadata" hasArrow>
+            ✏️
+          </Tooltip>
+        </RouterLink>
+        <RouterLink ml={2} to={`/view/${id}`}>
+          <Tooltip label="View This NFT" hasArrow>
+            👁
+          </Tooltip>
+        </RouterLink>
+        <RouterLink ml={2} to={`/disburse/${id}`}>
+          <Tooltip label="Disburse This NFT" hasArrow>
+            💸
+          </Tooltip>
+        </RouterLink>
+      </Flex>
+    </Td>
+  )
+}
 
 export const TokensTable: React.FC<{
   tokens: Array<TokenState>

@@ -78,7 +78,10 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
         if(typeof window !== 'undefined') {
           return (
             new Web3Modal({
-              network: CONFIG.contractNetwork,
+              network: (
+                CONFIG.contractNetwork === 'polygon'
+                ? 'matic' : CONFIG.contractNetwork
+              ),
               cacheProvider: true,
               providerOptions,
             })

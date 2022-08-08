@@ -1,4 +1,5 @@
 import { Textarea } from '@chakra-ui/react'
+import React from 'react'
 import { FieldValues, UseFormRegister } from 'react-hook-form'
 
 export const JSONForm: React.FC<{

@@ -1,14 +1,18 @@
 import { useWeb3 } from '@/lib/hooks'
-import { ReactNode, useEffect, useState } from 'react'
+import React, {
+  ReactNode, useEffect, useMemo, useState,
+} from 'react'
 import { ERC1155Metadata, Maybe } from '@/lib/types'
 import { httpURL, regexify } from '@/lib/helpers'
 import { HomeLink, OptionsForm } from '@/components'
 import { Box } from '@chakra-ui/react'
 import { useParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
+import { deregexify } from '../lib/helpers';
 
 export const Edit = () => {
-  let { nftId: tokenId } = useParams() 
+  const { nftId } = useParams()
+  const tokenId = useMemo(() => deregexify(nftId), [nftId])
   const [metadata, setMetadata] = useState<Maybe<ERC1155Metadata>>()
   const [error, setError] = useState<ReactNode>()
   const { roContract } = useWeb3()

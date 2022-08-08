@@ -68,7 +68,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      http: 'http-browserify',
+      http: 'stream-http',
       https: 'https-browserify',
       stream: 'stream-browserify',
       util: 'util',

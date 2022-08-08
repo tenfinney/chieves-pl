@@ -1,6 +1,10 @@
 import { Maybe } from '@/lib/types'
-import { ReactNode, useCallback, useRef, useState } from 'react'
-import { Box, chakra, Flex, FormLabel, Link, Text } from '@chakra-ui/react'
+import React, {
+  ReactNode, useCallback, useRef, useState,
+} from 'react'
+import {
+  Box, chakra, Flex, FormLabel, Link, Text,
+} from '@chakra-ui/react'
 
 export const Anchor = ({ name }: { name: string }) => {
   const anchor = name.toLowerCase().replace(/\s+/g, '-')

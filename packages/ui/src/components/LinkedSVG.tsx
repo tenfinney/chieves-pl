@@ -1,7 +1,10 @@
 import {
   Box, Link as ChakraLink, LinkProps, chakra
 } from '@chakra-ui/react'
-import React, { Ref } from 'react'
+import React from 'react'
+import { Link as ReactRouterLink } from 'react-router-dom'
+
+const RouterLink = chakra(ReactRouterLink)
 
 export const LinkedSVG = React.forwardRef<
   HTMLObjectElement,
@@ -11,10 +14,10 @@ export const LinkedSVG = React.forwardRef<
     { href = '#', svg: data, ...props },
     ref
   ) => (
-  <ChakraLink
+  <RouterLink
     position="relative"
     zIndex={1}
-    {...{ href }}
+    to={href}
     {...props}
   >
     <Box display="inline-block" w="full" h="full">
@@ -25,7 +28,7 @@ export const LinkedSVG = React.forwardRef<
         zIndex={-1}
       />
     </Box>
-  </ChakraLink>
+  </RouterLink>
   )
 )
 

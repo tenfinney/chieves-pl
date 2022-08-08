@@ -1,4 +1,5 @@
 import { LinkedSVG } from '@/components'
+import React from 'react'
 
 export const HomeLink: React.FC = () => (
   <LinkedSVG

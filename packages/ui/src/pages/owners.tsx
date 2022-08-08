@@ -4,7 +4,7 @@ import {
   Box, Heading, ListItem, OrderedList, Link as ChakraLink, Text
 } from '@chakra-ui/react'
 import { useWeb3 } from 'lib/hooks'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { httpURL } from 'lib/helpers'
 import { HomeLink } from 'components'
 import contractAddress from 'contracts/polygon/BulkDisbursableNFTs.address'

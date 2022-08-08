@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Alert, AlertDescription, AlertIcon, AlertTitle,
   Image, chakra, Heading, Stack, Flex, Spinner, Text,
 } from '@chakra-ui/react'
-import { ethers } from 'ethers'
+import { BigNumber } from '@ethersproject/bignumber'
 import ReactMarkdown from 'react-markdown'
 import {
   regexify, deregexify, httpURL,
@@ -17,21 +17,21 @@ import { Helmet } from 'react-helmet'
 const Markdown = chakra(ReactMarkdown)
 
 const View = () => {
-  const { nftId: idParam } = useParams() 
+  const { nftId } = useParams() 
   const [metadata, setMetadata] = useState<ERC1155Metadata>()
   const [error, setError] = useState<string>()
   const { roContract } = useWeb3()
-  const nftId = deregexify(
-    Array.isArray(idParam) ? idParam[0] : idParam
+  const tokenId = deregexify(
+    Array.isArray(nftId) ? nftId[0] : nftId
   )
 
   useEffect(
     () => {
       const getMetadata = async () => {
-        if(roContract && nftId) {
+        if(roContract && tokenId) {
           try {
             const metadataURI = await roContract.uri(
-              ethers.BigNumber.from(BigInt(nftId))
+              BigNumber.from(BigInt(tokenId))
             )
             const metadataURL = httpURL(metadataURI)
             if(!metadataURL) {
@@ -48,7 +48,7 @@ const View = () => {
 
       getMetadata()
     },
-    [roContract, nftId],
+    [roContract, tokenId],
   )
 
   if(error) {
@@ -65,7 +65,7 @@ const View = () => {
     return (
       <Flex align="center" justify="center" h="100vh">
         <Spinner thickness="4px" speed="1s" mr={2}/>
-        <Text>Loading Metadata For Token #{regexify(nftId)}</Text>
+        <Text>Loading Metadata For Token #{regexify(tokenId)}</Text>
       </Flex>
     )
   }

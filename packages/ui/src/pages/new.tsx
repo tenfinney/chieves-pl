@@ -4,7 +4,7 @@ import {
   Tbody, Td, Checkbox, Input, Tooltip, Box,
 } from '@chakra-ui/react'
 import { useWeb3 } from '@/lib/hooks'
-import { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { NETWORKS } from '@/lib/networks'
 import { Helmet } from 'react-helmet'
 import { Header, OptionsForm } from '@/components'

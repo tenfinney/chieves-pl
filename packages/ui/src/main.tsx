@@ -8,8 +8,6 @@ const container = document.getElementById('root')
 
 if(!container) throw new Error('Missing `root`.')
 
-console.info("¡I live!")
-
 createRoot(container).render(
   <React.StrictMode>
     <App />
