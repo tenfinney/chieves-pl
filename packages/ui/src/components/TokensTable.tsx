@@ -198,7 +198,7 @@ export const TokensTable: React.FC<{
       </Thead>
       <Tbody>
         {tokens.map((token: TokenState, index) => {
-          if(token.hide) {
+          if(token.is.hidden) {
             return null
           }
           return (

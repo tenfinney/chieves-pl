@@ -21,9 +21,5 @@
     { "path": "packages/ui" },
   ],
   "include": [],
-  "exclude": [
-    "packages/**/tests/**",
-    "packages/ui/out/**",
-    "packages/ui/.next/**"
-  ],
+  "exclude": [],
 }

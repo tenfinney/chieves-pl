@@ -3,12 +3,12 @@ import { Maybe } from './types'
 
 export type NetworkInfo = {
   [chainName: string]: {
-    chainId: string
-    name: string
-    label: string
-    symbol: string
-    explorer: Maybe<string>
-    rpc: string
+    chainId: string;
+    name: string;
+    label: string;
+    symbol: string;
+    explorer: Maybe<string>;
+    rpc: string;
   }
 }
 

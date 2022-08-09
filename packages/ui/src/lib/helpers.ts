@@ -61,7 +61,7 @@ export const isEmpty = (
 )
 
 export const isSet = (
-  (val: unknown): val is string | number | Array<string> => {
+  (val: unknown) => {
     if(val === '' || val == null) {
       return false
     }
@@ -123,7 +123,7 @@ export const ipfsify = async (filesOrURL: FileListish) => {
     })) as Array<{ path: string; content: string }>,
     { pin: true, wrapWithDirectory: true }
   ))
-  const [{ cid }] = result.slice(-1)
+  const [{ cid }] = result.slice(-1) as unknown as [{ cid: CID }]
   const out = list.map((entry) => (
     `ipfs://${cid.toString()}/`
     + (entry as File).name
