@@ -131,6 +131,7 @@ const AttrRow: React.FC<{
       <Td><Tooltip label="Remove" hasArrow>
         <Button
           size="sm" ml={2}
+          colorScheme="red"
           onClick={() => setFormValue(
             'attributes',
             [
@@ -490,7 +491,10 @@ export const NFTForm: React.FC<{
             </Flex>
             {attributes?.length > 0 && (
               <Table
-                sx={{ 'th, td': { textAlign: 'center' } }}
+                sx={{ 'th, td': {
+                  textAlign: 'center',
+                  px: 2,
+                } }}
               >
                 <Thead>
                   <Tr>

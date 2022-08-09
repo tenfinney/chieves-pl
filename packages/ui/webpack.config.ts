@@ -43,9 +43,13 @@ const config: webpack.Configuration = {
       stream: require.resolve('stream-browserify'),
     }
   },
+  optimization: {
+    usedExports: true,
+  },
   output: {
+    clean: true,
     path: path.resolve(__dirname, 'dist'),
-    filename: 'main.js',
+    filename: '[name].bundle.js',
   },
 }
 

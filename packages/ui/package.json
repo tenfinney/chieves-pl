@@ -14,7 +14,8 @@
     "build:prod": "webpack --mode=production --node-env=production",
     "watch": "webpack --watch",
     "serve": "webpack serve",
-    "gh:publish": "gh-pages -d dist/"
+    "gh:publish": "gh-pages -d dist/",
+    "analyze": "yarn webpack --profile --json > bundle-stats.json && yarn webpack-bundle-analyzer --port 9898 bundle-stats.json dist/"
   },
   "dependencies": {
     "@chakra-ui/icons": "1.1",
@@ -49,6 +50,7 @@
     "@types/react-helmet": "^6.1.5",
     "@types/rollup-plugin-node-globals": "^1",
     "@types/webpack": "^5.28.0",
+    "@types/webpack-bundle-analyzer": "^4",
     "@vitejs/plugin-react": "^2.0.0",
     "@webpack-cli/generators": "^2.5.0",
     "assert": "^2.0.0",
@@ -73,6 +75,7 @@
     "typescript": "^4.7.4",
     "vite": "^3.0.0",
     "webpack": "^5.74.0",
+    "webpack-bundle-analyzer": "^4.5.0",
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.9.3",
     "workbox-webpack-plugin": "^6.5.4"

@@ -6,8 +6,7 @@ import {
 import { useWeb3 } from '@/lib/hooks'
 import React, { useCallback, useEffect, useState } from 'react'
 import { NETWORKS } from '@/lib/networks'
-import { Helmet } from 'react-helmet'
-import { Header, OptionsForm } from '@/components'
+import { OptionsForm, Header, SubmitButton } from '@/components'
 import { Event } from 'ethers'
 import { useForm } from 'react-hook-form'
 import { CONFIG } from '@/config'
@@ -189,36 +188,6 @@ const Content: React.FC = () => {
                 </Flex>
               )
             }
-            if(chain && chain !== NETWORKS.contract.chainId) {
-              return (
-                <Button
-                  colorScheme="blue"
-                  onClick={() => {
-                    switchTo(NETWORKS.contract.chainId)
-                  }}
-                >
-                  Switch to the
-                  <chakra.span
-                    mx={1.5}
-                    title={`${chain} ≠ ${NETWORKS.contract.chainId}`}
-                  >
-                    {NETWORKS.contract.name}
-                  </chakra.span>
-                  chain
-                </Button>
-              )
-            }
-            if(!rwContract) {
-              console.info({ rwContract })
-              return (
-                <Button
-                  colorScheme="blue"
-                  onClick={connect}
-                >
-                  Connect
-                </Button>
-              )
-            }
             if(working) {
               return (
                 <Flex justify="center" mt={7}>
@@ -274,12 +243,10 @@ const Content: React.FC = () => {
                       ))}
                     </Tbody>
                   </Table>
-                  <Button
-                    colorScheme="green"
-                    type="submit"
-                  >
-                    Reserve an ID
-                  </Button>
+                  <SubmitButton
+                    purpose="create"
+                    label="Reserve an ID"
+                  />
                 </Stack>
               )
             }

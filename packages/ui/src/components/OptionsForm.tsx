@@ -50,14 +50,24 @@ export const OptionsForm: React.FC<{
         throw new Error('Token id is unset.')
       }
 
-      if(tokenId != null) {
-        const tx = await rwContract.setURI(
-          BigInt(tokenId), metadata
-        )
-        await tx.wait()
+      try {
+        if(tokenId != null) {
+          const tx = await rwContract.setURI(
+            BigInt(tokenId), metadata
+          )
+          await tx.wait()
+        }
+
+        navigate(`/view/${regexify(tokenId)}`)
+      } catch(error) {
+        toast({
+          title: 'Contract Error',
+          description: extractMessage(error),
+          status: 'error',
+          isClosable: true,
+          duration: 10000
+        })
       }
-          
-      navigate(`/view/${regexify(tokenId)}`)
     },
     [purpose, navigate, rwContract, tokenId],
   )

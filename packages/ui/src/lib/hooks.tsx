@@ -12,7 +12,6 @@ import React, {
   useMemo,
   useState,
 } from 'react'
-import Web3Modal from 'web3modal'
 import providerOptions from '@/lib/walletConnect'
 import { NETWORKS } from '@/lib/networks'
 import CONFIG from '@/config'
@@ -30,7 +29,6 @@ export type Web3ContextType = {
   disconnect: () => void
   connecting: boolean
   connected: boolean
-  isMetaMask: Maybe<boolean>
   contract: {
     address: Maybe<string>
     abi: Maybe<Record<string, unknown>>
@@ -47,7 +45,6 @@ export const Web3Context = (
     },
     connecting: false,
     connected: false,
-    isMetaMask: null,
     contract: {
       address: null,
       abi: null,
@@ -61,7 +58,9 @@ export const useWeb3 = (): Web3ContextType => (
 
 export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
   ({ children }) => {
-    const [wallet, setWallet] = useState<Web3Modal>()
+    const [web3Modal, setWeb3Modal] = (
+      useState(null)
+    )
     const [userProvider, setUserProvider] = (
       useState<Web3Provider>()
     )
@@ -73,24 +72,24 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
     const [constsContractAddress, setConstsContractAddress] = useState(null)
     const [constsABI, setConstsABI] = useState(null)
 
-    const web3Modal = useMemo(
-      () => {
+    useEffect(() => {
+      const lib = async () => {
         if(typeof window !== 'undefined') {
-          return (
-            new Web3Modal({
-              network: (
-                CONFIG.contractNetwork === 'polygon'
-                ? 'matic' : CONFIG.contractNetwork
-              ),
-              cacheProvider: true,
-              providerOptions,
-            })
-          )
+          const { default: Web3Modal } = await import('web3modal')
+          setWeb3Modal(new Web3Modal({
+            network: (
+              CONFIG.contractNetwork === 'polygon'
+              ? 'matic' : CONFIG.contractNetwork
+            ),
+            cacheProvider: true,
+            providerOptions,
+          }))
         }
-      },
-      [],
-    )
-    
+      }
+      
+      lib()
+    }, [])
+
     const [connecting, setConnecting] = (
       useState(!!web3Modal?.cachedProvider)
     )
@@ -147,7 +146,6 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
     const disconnect = useCallback(() => {
       web3Modal?.clearCachedProvider()
       // clearWalletConnect()
-      setWallet(undefined)
       setAddress(undefined)
       setChain(undefined)
       setUserProvider(undefined)
@@ -238,16 +236,6 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
 
       libs()
     }, [])
-        
-
-    const isMetaMask = useMemo(
-      () => (
-        typeof window !== 'undefined'
-        && window.ethereum?.isMetaMask === true
-        && userProvider?.connection?.url === 'metamask'
-      ),
-      [userProvider],
-    )
 
     return (
       <Web3Context.Provider
@@ -264,7 +252,6 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
           connected,
           address,
           chain,
-          isMetaMask,
           contract: {
             address: contractAddress,
             abi,

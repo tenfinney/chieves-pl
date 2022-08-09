@@ -3,7 +3,7 @@ import { NETWORKS } from '@/lib/networks'
 import {
   Button, ButtonProps, Flex, Spinner, Text,
 } from '@chakra-ui/react'
-import React, { useMemo, useState } from 'react'
+import React, { MouseEvent, useMemo, useState } from 'react'
 import { useWeb3 } from '@/lib/hooks'
 
 export const SubmitButton: React.FC<ButtonProps & {
@@ -18,7 +18,7 @@ export const SubmitButton: React.FC<ButtonProps & {
   ...props
 }) => {
   const {
-    chain, isMetaMask, userProvider, connect, rwContract,
+    chain, userProvider, connect, rwContract,
   } = useWeb3()
   const offChain = useMemo(
     () => chain !== NETWORKS.contract.chainId,
@@ -37,11 +37,10 @@ export const SubmitButton: React.FC<ButtonProps & {
         (!rwContract || offChain) ? 'blue' : 'green'
       }
       isDisabled={
-        ((offChain && !isMetaMask) && !!rwContract)
-        || processing || working
+        (offChain && !!rwContract) || processing || working
       }
       w="full"
-      onClick={async (evt) => {
+      onClick={async (evt: MouseEvent<HTMLButtonElement>) => {
         setWorking(true)
 
         if(!userProvider) {
