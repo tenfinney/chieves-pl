@@ -97,9 +97,8 @@ const config: HardhatUserConfig = {
       url: `https://goerli.infura.io/v3/${infuraId}`,
       accounts: { mnemonic },
     },
-    xdai: {
-      url: 'https://rpc.xdaichain.com/',
-      gasPrice: 1000000000,
+    gnosis: {
+      url: 'https://rpc.gnosischain.com/',
       accounts: { mnemonic },
     },
     polygon: {
