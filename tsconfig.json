@@ -15,7 +15,6 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "paths": { "@/lib/*": ["lib/*"] },
   },
   "references": [
     { "path": "packages/contracts/" },

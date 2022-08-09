@@ -171,10 +171,6 @@ export const NFTForm: React.FC<{
   } = watch()
   // const [wearables, setWearables] = useState({})
 
-  const setImage = useCallback(
-    (file) => setValue('images', [file]), [setValue]
-  )
-
   useEffect(() => {
     if (metadata) {
       Object.entries({
