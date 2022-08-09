@@ -14,7 +14,7 @@ import '@typechain/hardhat'
 import {
   HardhatUserConfig, HttpNetworkUserConfig, HttpNetworkHDAccountsConfig,
 } from 'hardhat/types'
-import bip39 from 'bip39'
+import * as bip39 from 'bip39'
 import { deregexify } from './lib/helpers'
 
 const { isAddress, getAddress, formatUnits } = utils
