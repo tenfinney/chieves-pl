@@ -33,9 +33,9 @@ const mnemonic = (() => {
   }
 })()
 
-if (!mnemonic || mnemonic === '') {
-  throw new Error('Mnemonic Not Defined')
-}
+// if (!mnemonic || mnemonic === '') {
+//   throw new Error('Mnemonic Not Defined')
+// }
 
 const apiKey = Object.fromEntries(
   Object.entries({
