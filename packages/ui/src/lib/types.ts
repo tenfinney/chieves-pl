@@ -41,7 +41,7 @@ export type CodedError = Error & { code: number }
 
 export type TokenState = {
   id: string
-  hide: boolean
+  is?: Record<string, unknown>
   index: number
   uri?: string
   metadata?: ERC1155Metadata
@@ -86,4 +86,9 @@ export type FormValues = {
   uri?: string
   json5?: string
   maximum?: number
+}
+
+export type Limits = {
+  high?: number
+  low?: number
 }

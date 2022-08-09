@@ -184,3 +184,30 @@ export const extractMessage = (error: unknown): string => (
     ?? error
   ) as string
 )
+
+export const toNumList = (str: string) => {
+  if(str == null) return []
+
+  const visibles = (
+    str.split(/\s*(\s|,)\s*/)
+    .filter((str) => str !== '')
+  )
+  console.info({ str, visibles })
+  return (
+    visibles.map((entry) => {
+      const parts = entry.split(/-/)
+      if(parts.length > 0) {
+        const [[low], [high]] = (
+          [parts, parts.slice(-1)]
+        )
+        console.info({ parts, low, high })
+        return Object.fromEntries(
+          Object.entries({ low, high }).map(
+            ([key, val]) => [key, Number(val)]
+          )
+        )
+      }
+      return entry
+    })
+  )
+}

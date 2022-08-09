@@ -52,7 +52,7 @@ export const Owners = () => {
     useState<Array<Ownership>>([])
   )
 
-  const decId = tokenId ? BigInt(tokenId).toString() : null
+  const decId = tokenId ? BigInt(tokenId).toString(10) : null
   const { loading, error, data } = useQuery(
     NFT_OWNERS,
     { variables: {
