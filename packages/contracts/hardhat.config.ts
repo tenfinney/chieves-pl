@@ -12,8 +12,9 @@ import { HardhatEthersHelpers } from '@nomiclabs/hardhat-ethers/types'
 import '@typechain/ethers-v5'
 import '@typechain/hardhat'
 import {
-  HardhatUserConfig, HttpNetworkConfig, HttpNetworkUserConfig, NetworkUserConfig
+  HardhatUserConfig, HttpNetworkUserConfig, HttpNetworkHDAccountsConfig,
 } from 'hardhat/types'
+import bip39 from 'bip39'
 import { deregexify } from './lib/helpers'
 
 const { isAddress, getAddress, formatUnits } = utils
@@ -23,7 +24,7 @@ const { isAddress, getAddress, formatUnits } = utils
 //
 const defaultNetwork = process.env.CHAIN_NAME ?? 'polygon'
 
-const mnemonic = (() => {
+let mnemonic = (() => {
   try {
     return fs.readFileSync('./mnemonic.txt').toString().trim()
   } catch (e) {
@@ -33,9 +34,15 @@ const mnemonic = (() => {
   }
 })()
 
-// if (!mnemonic || mnemonic === '') {
-//   throw new Error('Mnemonic Not Defined')
-// }
+if (!mnemonic || mnemonic === '') {
+  mnemonic = process.env.MNEMONIC
+
+  if(!mnemonic) {
+    console.warn('Generating and saving mnemonic to `mnemonic.txt`.')
+    mnemonic = bip39.generateMnemonic()
+    fs.writeFileSync('./mnemonic.txt', mnemonic.toString())
+  }
+}
 
 const apiKey = Object.fromEntries(
   Object.entries({
