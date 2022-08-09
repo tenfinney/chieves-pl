@@ -41,19 +41,21 @@ export const SubmitButton: React.FC<ButtonProps & {
       }
       w="full"
       onClick={async (evt: MouseEvent<HTMLButtonElement>) => {
-        setWorking(true)
+        try {
+          setWorking(true)
 
-        if(!userProvider) {
-          evt.preventDefault()
-          connect()
-        } else if(offChain) {
-          evt.preventDefault()
-          switchTo(NETWORKS.contract.chainId)
-        } else {
-          onClick?.apply(null, [evt])
+          if(!userProvider) {
+            evt.preventDefault()
+            connect()
+          } else if(offChain) {
+            evt.preventDefault()
+            switchTo(NETWORKS.contract.chainId)
+          } else {
+            onClick?.apply(null, [evt])
+          }
+        } finally {
+          setWorking(false)
         }
-
-        setWorking(false)
       }}
       {...props}
     >

@@ -3,12 +3,13 @@ import React, {
   ReactNode, useEffect, useMemo, useState,
 } from 'react'
 import { ERC1155Metadata, Maybe } from '@/lib/types'
-import { httpURL, regexify } from '@/lib/helpers'
+import {
+  httpURL, regexify, deregexify,
+} from '@/lib/helpers'
 import { HomeLink, OptionsForm } from '@/components'
-import { Box } from '@chakra-ui/react'
+import { Alert, AlertDescription, AlertIcon, AlertTitle, Box } from '@chakra-ui/react'
 import { useParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
-import { deregexify } from '../lib/helpers';
 
 export const Edit = () => {
   const { nftId } = useParams()
@@ -44,6 +45,13 @@ export const Edit = () => {
         <title>’𝖈𝖍𝖎𝖊𝖛𝖊: ℰ𝒹𝒾𝓉 #{tokenId && regexify(tokenId)}</title>
       </Helmet>
       <HomeLink/>
+      {error && (
+        <Alert status="error">
+          <AlertIcon/>
+          <AlertTitle>`setMetadata` Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
       <OptionsForm
         purpose="update"
         {...{ tokenId, metadata }}

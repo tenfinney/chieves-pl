@@ -69,7 +69,7 @@ export const OptionsForm: React.FC<{
         })
       }
     },
-    [purpose, navigate, rwContract, tokenId],
+    [rwContract, tokenId, purpose, navigate, toast],
   )
 
   const buildMeta = async (data: FormValues) => {

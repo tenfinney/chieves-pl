@@ -3,7 +3,6 @@ import {
   Alert, AlertDescription, AlertIcon, AlertTitle,
   Image, chakra, Heading, Stack, Flex, Spinner, Text,
 } from '@chakra-ui/react'
-import { BigNumber } from '@ethersproject/bignumber'
 import ReactMarkdown from 'react-markdown'
 import {
   regexify, deregexify, httpURL,
@@ -31,7 +30,7 @@ const View = () => {
         if(roContract && tokenId) {
           try {
             const metadataURI = await roContract.uri(
-              BigNumber.from(BigInt(tokenId))
+              BigInt(tokenId)
             )
             const metadataURL = httpURL(metadataURI)
             if(!metadataURL) {
@@ -48,7 +47,7 @@ const View = () => {
 
       getMetadata()
     },
-    [roContract, tokenId],
+    [nftId, roContract, tokenId],
   )
 
   if(error) {

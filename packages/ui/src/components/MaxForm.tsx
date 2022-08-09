@@ -44,7 +44,7 @@ export const MaxForm = (
       await tx.wait()
     } catch(error) {
       toast({
-        title: 'Metadata Error',
+        title: 'Contract Error',
         description: extractMessage(error),
         status: 'error',
         isClosable: true,
@@ -78,7 +78,6 @@ export const MaxForm = (
             textAlign="center"
             value={max}
             onChange={({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
-              console.log({value, n: Number(value)})
               setMax(Number(value))
             }}
           />

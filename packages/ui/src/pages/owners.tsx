@@ -1,14 +1,16 @@
-import Link from 'next/link'
 import { gql, useQuery } from '@apollo/client'
 import {
-  Box, Heading, ListItem, OrderedList, Link as ChakraLink, Text
+  chakra, Box, Heading, ListItem, OrderedList, Text,
 } from '@chakra-ui/react'
-import { useWeb3 } from 'lib/hooks'
-import React, { useEffect, useState } from 'react'
-import { httpURL } from 'lib/helpers'
-import { HomeLink } from 'components'
+import { useWeb3 } from '@/lib/hooks'
+import React, { useEffect, useMemo, useState } from 'react'
+import { httpURL, deregexify } from '@/lib/helpers'
+import { HomeLink } from '@/components'
 import contractAddress from 'contracts/polygon/BulkDisbursableNFTs.address'
 import { useParams, useSearchParams } from 'react-router-dom'
+import { Link as ReactRouterLink } from 'react-router-dom'
+
+const RouterLink = chakra(ReactRouterLink)
 
 const LIMIT = 100
 const NFT_OWNERS = gql`
@@ -39,19 +41,18 @@ export type Ownership = {
 }
 
 export const Owners = () => {
-  let { nftId } = useParams() 
+  const { nftId } = useParams() 
   const [query] = useSearchParams()
   const startAfter = query.get('start_after') ?? ''
   const offset = query.get('offset') ?? 0
-
+  const tokenId = useMemo(() => (
+    deregexify(Array.isArray(nftId) ? nftId[0] : nftId)
+  ), [nftId])
   const [ownerships, setOwnerships] = (
     useState<Array<Ownership>>([])
   )
-  console.debug({nftId, startAfter })
-  if(Array.isArray(nftId)) {
-    nftId = nftId[0]
-  }
-  const decId = nftId ? BigInt(nftId).toString() : null
+
+  const decId = tokenId ? BigInt(tokenId).toString() : null
   const { loading, error, data } = useQuery(
     NFT_OWNERS,
     { variables: {
@@ -63,12 +64,11 @@ export const Owners = () => {
   console.log({data})
   const [title, setTitle] = useState('𝘜𝘯𝘬𝘯𝘰𝘸𝘯')
   const { ensProvider, roContract } = useWeb3()
-  console.debug({loading, error, data})
   
   useEffect(() => {
     const lookup = async () => {
-      if(nftId) {
-        const uri = await roContract?.uri(nftId)
+      if(tokenId) {
+        const uri = await roContract?.uri(tokenId)
         if(!uri) return
         const response = await fetch(httpURL(uri)!)
         const data = await response.json()
@@ -76,7 +76,7 @@ export const Owners = () => {
       }
     }
     lookup()
-  }, [nftId, roContract])
+  }, [tokenId, roContract])
 
   useEffect(() => {
     const process = async () => {
@@ -93,12 +93,11 @@ export const Owners = () => {
                   const ens = (
                     await ensProvider?.lookupAddress(owner)
                   )
-                  if (ens) {
+                  if(ens) {
                     owner = ens 
                   }
-                  return {
-                    owner, quantity: oship.quantity, id: oship.id,
-                  }
+                  const { quantity, id } = oship
+                  return { owner, quantity, id }
                 }  
               )
             )
@@ -108,8 +107,11 @@ export const Owners = () => {
     }
     process()
   }, [data, ensProvider])
+
   if (loading) return 'Loading…'
+
   if (error) return `Error! ${error.message}`
+
   return (
     <Box ml={8}>
       <Head>
@@ -126,27 +128,25 @@ export const Owners = () => {
         </Text>
       ) : (
         <OrderedList start={Number(offset) + 1}>
-          {ownerships.map((ownership, idx) => (
+          {ownerships.map(({ owner, quantity }, idx) => (
             <ListItem key={idx} ml={6}>
-              {`${ownership.owner} (${ownership.quantity})`}
+              {`${owner} (${quantity})`}
             </ListItem>
           ))}
         </OrderedList>
       )}
       {ownerships.length === LIMIT && (
-        <Link
-          href={{
-            pathname: '/owners',
-            query: {
+        <RouterLink
+          to={{
+            pathname: `/owners?${new URLSearchParams({
               nftId,
               start_after: ownerships.slice(-1)[0].id,
-              offset: Number(offset) + LIMIT,
-            },
+              offset: (Number(offset) + LIMIT).toString(),
+            })}`
           }}
-          passHref
         >
-          <ChakraLink>Next</ChakraLink>
-        </Link>
+          Next
+        </RouterLink>
       )}
     </Box>
   )
