@@ -6,7 +6,7 @@ import { useWeb3 } from '@/lib/hooks'
 import React, { useEffect, useMemo, useState } from 'react'
 import { httpURL, deregexify } from '@/lib/helpers'
 import { HomeLink } from '@/components'
-import contractAddress from 'contracts/polygon/BulkDisbursableNFTs.address'
+import contractAddress from '../contracts/polygon/BulkDisbursableNFTs.address'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { Link as ReactRouterLink } from 'react-router-dom'
 
@@ -108,9 +108,9 @@ export const Owners = () => {
     process()
   }, [data, ensProvider])
 
-  if (loading) return 'Loading…'
+  if (loading) return <>Loading…</>
 
-  if (error) return `Error! ${error.message}`
+  if (error) return <>{`Error! ${error.message}`}</>
 
   return (
     <Box ml={8}>

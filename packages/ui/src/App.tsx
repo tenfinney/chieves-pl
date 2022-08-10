@@ -24,6 +24,7 @@ const New = React.lazy(() => import('./pages/new'))
 const View = React.lazy(() => import('./pages/view'))
 const Edit = React.lazy(() => import('./pages/edit'))
 const Disburse = React.lazy(() => import('./pages/disburse'))
+const Owners = React.lazy(() => import('./pages/owners'))
 
 const themeConfig: ThemeConfig = {
   initialColorMode: 'dark',
@@ -58,6 +59,7 @@ const App: React.FC = () => (
                 <Route path="/new" element={<New/>} />
                 <Route path="/view/:nftId" element={<View/>} />
                 <Route path="/disburse/:nftId" element={<Disburse/>} />
+                <Route path="/owners/:nftId" element={<Owners/>} />
                 <Route path="/edit/:nftId" element={<Edit/>} />
                 <Route path="/" element={<Home/>} />
               </Routes>
