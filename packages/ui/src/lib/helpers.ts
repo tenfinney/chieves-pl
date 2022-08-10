@@ -199,7 +199,6 @@ export const toNumList = (str: string): Array<number | Limits> => {
         const [[low], [high]] = (
           [parts, parts.slice(-1)]
         )
-        console.info({ parts, low, high })
         return Object.fromEntries(
           Object.entries({ low, high }).map(
             ([key, val]) => [key, Number(val)]

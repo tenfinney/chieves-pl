@@ -44,7 +44,6 @@ export const TokenFilterForm: React.FC<{
     register, handleSubmit, control, setValue,
   } = useForm<FilterValues>()
   const submit = async (data: FilterValues) => {
-    console.log({ data })
     setLimit(Number(data.limit))
     setOffset(Number(data.offset))
     setGatingVisible(data.gatingVisible)

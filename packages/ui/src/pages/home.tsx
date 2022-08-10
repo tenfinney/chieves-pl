@@ -21,7 +21,6 @@ const Home = () => {
     useState(!!query.get('gating') ?? false)
   )
   const visible = query.get('visible') ?? ''
-  console.log({h: 'HELP'})
   const [visibleList, setVisibleList] = (
     useState<Array<number | Limits>>(toNumList(visible))
   )
@@ -41,7 +40,6 @@ const Home = () => {
   )
 
   useEffect(() => {
-    console.info({q: visible })
     if(roContract && constsContract) {
       roContract.typeSupply()
       .then((supply: {
@@ -59,7 +57,6 @@ const Home = () => {
   }, [roContract, constsContract])
 
   useEffect(() => {
-    console.info({ visible })
     setVisibleList(toNumList(visible))
   }, [visible])
 
@@ -87,20 +84,19 @@ const Home = () => {
   }
 
   useEffect(() => {
-    console.log({t: (visible)})
     const load = async () => {
       if(roContract && constsContract) {
         const generators: Array<Promise<Array<TokenState | Error>>> = []
-        console.log({visibleList, v: visibleList.some(() => true)})
         if(visibleList.some(() => true)) {
           generators.push(...(visibleList.map(
             async (elem) => {
               let { high, low } = elem as Limits
-              const sorted = [high, low] = [high, low].sort() 
+              const sorted = [high, low]
+              sorted.sort()
+              ;[low, high] = sorted 
               if(!sorted.some((elem) => elem != null)) {
                 [high, low] = [elem as number, elem as number]
               }
-              console.log({h: high - low})
               return (
                 await Promise.all(
                   Array.from({ length: high - low + 1 })
