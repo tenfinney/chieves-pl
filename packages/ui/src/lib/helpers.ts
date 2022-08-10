@@ -1,5 +1,5 @@
 import {
-  CodedError, FileListish, Maybe, MetaMaskError, NamedString, NestedError
+  CodedError, FileListish, Limits, Maybe, MetaMaskError, NamedString, NestedError
 } from '@/lib/types'
 import { CID } from 'multiformats/cid'
 import { IPFS_LINK_PATTERN } from '@/lib/constants'
@@ -185,18 +185,17 @@ export const extractMessage = (error: unknown): string => (
   ) as string
 )
 
-export const toNumList = (str: string) => {
+export const toNumList = (str: string): Array<number | Limits> => {
   if(str == null) return []
 
   const visibles = (
     str.split(/\s*(\s|,)\s*/)
-    .filter((str) => str !== '')
+    .filter((str) => !['', ','].includes(str.trim()))
   )
-  console.info({ str, visibles })
   return (
     visibles.map((entry) => {
       const parts = entry.split(/-/)
-      if(parts.length > 0) {
+      if(parts.length > 1) {
         const [[low], [high]] = (
           [parts, parts.slice(-1)]
         )
@@ -207,7 +206,7 @@ export const toNumList = (str: string) => {
           )
         )
       }
-      return entry
+      return Number(entry)
     })
   )
 }

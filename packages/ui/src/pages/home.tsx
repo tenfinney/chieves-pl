@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
   Container, Flex, chakra,
 } from '@chakra-ui/react'
@@ -13,7 +13,7 @@ import { useSearchParams } from 'react-router-dom'
 import JSON5 from 'json5'
 
 const Home = () => {
-  const [tokens, setTokens] = useState<Array<TokenState>>([])
+  const [tokens, setTokens] = useState<Array<TokenState | Error>>([])
   const [query] = useSearchParams()
   const [limit, setLimit] = useState(Number(query.get('limit') ?? 10))
   const [offset, setOffset] = useState(Number(query.get('offset') ?? 0))
@@ -21,9 +21,9 @@ const Home = () => {
     useState(!!query.get('gating') ?? false)
   )
   const visible = query.get('visible') ?? ''
-  console.info({ visible, nl: toNumList(visible) })
+  console.log({h: 'HELP'})
   const [visibleList, setVisibleList] = (
-    useState<Array<string | Limits>>(toNumList(visible))
+    useState<Array<number | Limits>>(toNumList(visible))
   )
   const { roContract, constsContract } = useWeb3()
   const setToken = (index: number, info: Record<string, unknown>) => {
@@ -41,6 +41,7 @@ const Home = () => {
   )
 
   useEffect(() => {
+    console.info({q: visible })
     if(roContract && constsContract) {
       roContract.typeSupply()
       .then((supply: {
@@ -62,15 +63,15 @@ const Home = () => {
     setVisibleList(toNumList(visible))
   }, [visible])
 
-  const tokenForIndex = async (index: number) => {
+  const tokenForIndex = async (index: number, hideable: boolean = true) => {
     try {
-      const id: bigint = await (
-        roContract.tokenByIndex(index).toBigInt()
+      const id: bigint = (
+        (await roContract.tokenByIndex(index)).toBigInt()
       )
       const is: { [key: string]: unknown } = {}
       is.gating = (
         (
-          BigInt(Number(id))
+          id
           & (
             2n**BigInt(TYPE_WIDTH) - 1n
             << BigInt(TYPE_BOUNDARY)
@@ -78,100 +79,97 @@ const Home = () => {
         )
         === GATING_TYPE
       )
-      is.hidden = is.gating && !gatingVisible
-      return { id: id.toString(16), is, index }
+      is.hidden = hideable && is.gating && !gatingVisible
+      return { id: `0x${id.toString(16)}`, is, index }
     } catch(error) {
       return error
     }
   }
 
-  useEffect(
-    () => {
-      const load = async () => {
-        if(roContract && constsContract) {
-          const generators: Array<Promise<Array<TokenState | Error>>> = []
-          console.info({ generators })
-          if(visibleList.some(() => true)) {
-            generators.push(...(visibleList.map(
-              async (elem) => {
-                let { high, low } = elem as Limits
-                const sorted = [low, high] = [high, low].sort() 
-                console.info({ high, low })
-                if(sorted.some((elem) => elem != null)) {
-                  return (
-                    await Promise.all(
-                      Array.from({ length: high - low })
-                      .map(async (_, idx) => (
-                        await tokenForIndex(low + idx)
-                      ))
-                    )
-                  )
-                }
-                return []
+  useEffect(() => {
+    console.log({t: (visible)})
+    const load = async () => {
+      if(roContract && constsContract) {
+        const generators: Array<Promise<Array<TokenState | Error>>> = []
+        console.log({visibleList, v: visibleList.some(() => true)})
+        if(visibleList.some(() => true)) {
+          generators.push(...(visibleList.map(
+            async (elem) => {
+              let { high, low } = elem as Limits
+              const sorted = [high, low] = [high, low].sort() 
+              if(!sorted.some((elem) => elem != null)) {
+                [high, low] = [elem as number, elem as number]
               }
-            )) as Array<Promise<Array<TokenState | Error>>>)
-          } else {
-            // const count = Math.min(limit, typeCount - offset)
-            // const start = offset < 0 ? typeCount + offset : offset
-
-            // generators.push(
-            //   ...Array.from({ length: count })
-            //   .map(async (_, idx) => (
-            //     await tokenForIndex(start + idx + 1)
-            //   ))
-            // )
-          }
-        }
-      }
-      load()
-    }, [])
-
-    useEffect(() => {
-      const load = async () => {
-        await Promise.all(
-          tokens.map(async ({ id, is }, index) => {
-            if(is.hidden) {
-              return null
+              console.log({h: high - low})
+              return (
+                await Promise.all(
+                  Array.from({ length: high - low + 1 })
+                  .map(async (_, idx) => (
+                    await tokenForIndex(low + idx, false)
+                  ))
+                )
+              )
             }
-            let metadata = null
-            try {
-              const uri = await roContract.uri(id)
-              if(uri === '') throw new Error('No URI')
-              setToken(index, { uri })
-              const url = httpURL(uri)!
-              const response = await fetch(url)
-              const data = await response.text()
-              if(!data || data === '') {
-                throw new Error('No Data')
-              }
-              try {
-                metadata = JSON5.parse(data)
-              } catch(error) {
-                console.error('JSON Error', { error, data })
-              }
-            } catch(error) {
-                setToken(index, {
-                  error: extractMessage(error),
-                })
-              } finally {
-                setToken(index, { metadata })
-              }
+          )) as Array<Promise<Array<TokenState | Error>>>)
+        } else {
+          const count = Math.min(limit, Number(typeCount) - offset)
+          const start = offset < 0 ? typeCount + offset : offset
 
-              const total = await roContract.totalSupply(id)
-              setToken(index, { total })
-
-              const max = await roContract.getMax(id)
-              setToken(index, { max })
-          })
-        )
+          generators.push(
+            ...(Array.from({ length: count })
+            .map(async (_, idx) => (
+              await tokenForIndex(start + idx + 1)
+            )))
+          )
+        }
+        const tokens = (await Promise.all(generators)).flat()
+        retrieve(tokens) 
+        setTokens((await Promise.all(generators)).flat())
       }
-      load()
-    }, [
-      roContract, constsContract,
-      gatingVisible, visibleList,
-      limit, offset, tokens,
-    ],
-  )
+    }
+    load()
+  }, [visibleList])
+    
+  const retrieve = useCallback(async (tokens: Array<TokenState | Error>) => {
+    await Promise.all(
+      tokens.map(async (token, index) => {
+        if(!(token instanceof Error)) {
+          if(token.is?.hidden) {
+            return null
+          }
+          let metadata = null
+          try {
+            const uri = await roContract.uri(token.id)
+            if(uri === '') throw new Error('No URI')
+            setToken(index, { uri })
+            const url = httpURL(uri)!
+            const response = await fetch(url)
+            const data = await response.text()
+            if(!data || data === '') {
+              throw new Error('No Data')
+            }
+            try {
+              metadata = JSON5.parse(data)
+            } catch(error) {
+              console.error('JSON Error', { error, data })
+            }
+          } catch(error) {
+            setToken(index, {
+              error: extractMessage(error),
+              })
+            } finally {
+              setToken(index, { metadata })
+            }
+
+            const total = await roContract.totalSupply(token.id)
+            setToken(index, { total })
+
+            const max = await roContract.getMax(token.id)
+            setToken(index, { max })
+        }
+      })
+    )
+  }, [])
 
   return (
     <Container maxW="full">

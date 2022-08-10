@@ -172,7 +172,7 @@ const ActionsTd:React.FC<Token> = ({ token }) => {
 }
 
 export const TokensTable: React.FC<{
-  tokens: Array<TokenState>
+  tokens: Array<TokenState | Error>
 }> = ({ tokens }) => {
   return (
     <Table
@@ -198,7 +198,7 @@ export const TokensTable: React.FC<{
       </Thead>
       <Tbody>
         {tokens.map((token: TokenState, index) => {
-          if(token.is.hidden) {
+          if(token.is?.hidden) {
             return null
           }
           return (

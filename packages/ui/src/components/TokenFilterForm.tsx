@@ -25,8 +25,8 @@ export const TokenFilterForm: React.FC<{
   setOffset: (offset: SetStateAction<number>) => void
   gatingVisible: boolean
   setGatingVisible: (gatingVisible: SetStateAction<boolean>) => void
-  visibleList: Array<string | Limits>
-  setVisibleList: (visible: SetStateAction<Array<string | Limits>>) => (
+  visibleList: Array<number | Limits>
+  setVisibleList: (visible: SetStateAction<Array<number | Limits>>) => (
     void
   ) 
 }> = ({

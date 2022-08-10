@@ -22,7 +22,7 @@
   "references": [{ "path": "./tsconfig.node.json" }],
   "ts-node": {
     "compilerOptions": {
-      "module": "ESNext",
+      "module": "CommonJS",
     },
   },
 }
