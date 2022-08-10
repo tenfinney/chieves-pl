@@ -470,4 +470,33 @@ describe('The Token Contract', () => {
       expect(balance).to.be.equal(0)
     }
   )
+
+  it.only(
+    'can set and get a maximum allowance.',
+    async () => {
+      
+      const receipt = await transact({
+        sender: owner,
+        method: 'create()',
+        args: [],
+      })
+      let event = receipt.events.find(
+        (evt: Ethers.Event) => evt.event === 'Created'
+        )
+        
+        const [createdId] = event.args
+        
+      await token['mint(address,uint256,uint256,bytes)'](
+        creator.address, createdId, 1, []
+      )
+      
+      const max = 15
+      await token['setMax(uint256,int64)'](createdId, max)
+      const ret = await token.getMax(createdId)
+      
+      expect(ret).to.equal(max)
+
+    }
+  )
+
 })

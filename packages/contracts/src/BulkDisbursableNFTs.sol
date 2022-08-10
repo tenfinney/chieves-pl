@@ -141,6 +141,10 @@ contract BulkDisbursableNFTs is
 
   mapping (uint256 => int64) public maxes;
 
+  mapping (uint256 => uint256) public uintValues;
+  mapping (uint256 => int256) public intValues;
+
+
   enum Role {
     // The first value is zero and all tokens should
     // have a positive value.
@@ -562,23 +566,6 @@ contract BulkDisbursableNFTs is
     emit URI(newURI, id);
   }
 
-  /**
-    * @notice ¡Unimplmemented! Set the maximum number of tokens
-    * allowed to be minted. Trumps the Minter role.
-   */
-  function setMax(
-    uint256 id,
-    uint256 max
-  )
-    public
-    virtual
-  {
-    require(
-      hasRole(Role.Limiter, id) || isSuper(),
-      "You must have a Limiter token to change quantity."
-    );
-    max;
-  }
 
   /**
    * @notice Event fired when a new token type is created.
@@ -701,16 +688,24 @@ contract BulkDisbursableNFTs is
   }
 
   function getMax(uint256 id) public view returns (int64 max) {
-    max = maxes[id];
+    uint256 key = uint256(keccak256(abi.encodePacked("max", id)));
+    max = int64(intValues[key]);
   }
 
+  /**
+    * @notice ¡Unimplmemented! Set the maximum number of tokens
+    * allowed to be minted. Trumps the Minter role.
+   */
   function setMax(uint256 id, int64 max) public {
     require(
       hasRole(Role.Limiter, id) || isSuper(),
       "You must have a Limiter token to change quantity."
     );
-    maxes[id] = max;
+    uint256 key = uint256(keccak256(abi.encodePacked("max", id)));
+    intValues[key] = max;
   }
+
+
 
   function burn(
     address owner,
