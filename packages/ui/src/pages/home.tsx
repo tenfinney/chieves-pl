@@ -136,7 +136,7 @@ const Home = () => {
           let metadata = null
           try {
             const uri = await roContract.uri(token.id)
-            if(uri === '') throw new Error('No URI')
+            if(uri === '') throw new Error('No URI… Waiting for data…')
             setToken(index, { uri })
             const url = httpURL(uri)!
             const response = await fetch(url)

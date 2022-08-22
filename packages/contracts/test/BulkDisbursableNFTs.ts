@@ -471,7 +471,7 @@ describe('The Token Contract', () => {
     }
   )
 
-  it.only(
+  it(
     'can set and get a maximum allowance.',
     async () => {
       

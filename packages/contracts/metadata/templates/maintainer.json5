@@ -1,0 +1,15 @@
+{
+  name: '’Chievemints Maintainer',
+  description: 'Holders of this token can update the token contract.',
+  decimals: 0,
+  external_url: 'https://chiev.es',
+  image: 'ipfs://{assets-cid}/wrench & screwdriver.svg',
+  background_color: '01525B',
+  properties: {},
+  attributes: [
+    {
+      trait_type: 'Token Type',
+      value: 'Permission Gating',
+    },
+  ],
+}

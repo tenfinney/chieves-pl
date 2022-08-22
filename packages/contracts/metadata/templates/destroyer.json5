@@ -1,0 +1,15 @@
+{
+  name: '’Chievemints Destroyer',
+  description: 'Holders of this token can remove token types.',
+  decimals: 0,
+  external_url: 'https://chiev.es/',
+  image: 'ipfs://{assets-cid}/reaper.svg',
+  background_color: '1d2c47',
+  properties: {},
+  attributes: [
+    {
+      trait_type: 'Token Type',
+      value: 'Permission Gating',
+    },
+  ],
+}

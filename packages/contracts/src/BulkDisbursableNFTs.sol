@@ -472,7 +472,22 @@ contract BulkDisbursableNFTs is
     public
     virtual
   {
-     grantRole(role, user, 0);
+     grantRole(role, user, 0, false);
+  }
+
+  /**
+   * @notice Create an all-token gating token for the listed
+   * role given to the specified user.
+   */
+  function grantRole(
+    Role role,
+    address user,
+    bool singleUse
+  )
+    public
+    virtual
+  {
+     grantRole(role, user, 0, singleUse);
   }
 
   /**
@@ -487,13 +502,31 @@ contract BulkDisbursableNFTs is
     public
     virtual
   {
-    _grantRole(role, user, id == 0 ? 0 : tokenIndex(id), false);
+    grantRole(role, user, id, false);
   }
+
+  /**
+   * @notice Create an gating token for the given listed
+   * role given to the specified user.
+   */
+  function grantRole(
+    Role role,
+    address user,
+    uint256 id,
+    bool singleUse
+  )
+    public
+    virtual
+  {
+    _grantRole(role, user, id == 0 ? 0 : tokenIndex(id), singleUse, false);
+  }
+
 
   function _grantRole(
     Role role,
     address user,
     uint256 index,
+    bool singleUse,
     bool local
   )
     internal
@@ -503,7 +536,7 @@ contract BulkDisbursableNFTs is
       if(role == Role.Superuser) {
         require(
           isSuper(),
-          "You must be a superuser to create new ones."
+          "You must be a Superuser to create other Superusers."
         );
       } else {
         require(
@@ -512,12 +545,13 @@ contract BulkDisbursableNFTs is
         );
       }
     }
-    _mint(
-      user,
-      roleToken(role, index) | (local ? Bits.INTERNAL_MASK : 0),
-      1,
-      ""
+    uint256 id = (
+      roleToken(role, index)
+      | (local ? Bits.INTERNAL_MASK : 0)
+      | (singleUse ? Bits.USE_ONCE : 0)
     );
+    _setMax(id, getMax(id) + 1, true);
+    _mint(user, id, 1, "");
   }
 
   function disableRole(Role toDisable, uint256 tokenId)
@@ -629,7 +663,7 @@ contract BulkDisbursableNFTs is
     tokens.entries.push(id);
     tokens.indices[id] = index;
     for(uint256 i = 0; i < grants.length; i++) {
-      _grantRole(grants[i], maintainer, index, true);
+      _grantRole(grants[i], maintainer, index, false, true);
     }
     for(uint256 i = 0; i < disables.length; i++) {
       disableRole(disables[i], index);
@@ -697,15 +731,23 @@ contract BulkDisbursableNFTs is
     * allowed to be minted. Trumps the Minter role.
    */
   function setMax(uint256 id, int64 max) public {
-    require(
-      hasRole(Role.Limiter, id) || isSuper(),
-      "You must have a Limiter token to change quantity."
-    );
+    _setMax(id, max, false);
+  }
+
+  /**
+    * @notice ¡Unimplmemented! Set the maximum number of tokens
+    * allowed to be minted. Trumps the Minter role.
+   */
+  function _setMax(uint256 id, int64 max, bool local) internal virtual {
+    if(!local) {
+      require(
+        hasRole(Role.Limiter, id) || isSuper(),
+        "You must have a Limiter token to change quantity."
+      );
+    }
     uint256 key = uint256(keccak256(abi.encodePacked("max", id)));
     intValues[key] = max;
   }
-
-
 
   function burn(
     address owner,
@@ -805,9 +847,9 @@ contract BulkDisbursableNFTs is
             )
           );
           if(needed == Role.Minter) {
-            if(maxes[ids[i]] >= 0) {
+            if(getMax(ids[i]) >= 0) {
               require(
-                int256(totalSupply(ids[i]) + amounts[i]) <= maxes[ids[i]],
+                int256(totalSupply(ids[i]) + amounts[i]) <= getMax(ids[i]),
                 "Maximum mint allowance exceeded."
               );
             }

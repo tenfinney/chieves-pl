@@ -30,7 +30,7 @@ const IdTd:React.FC<IndexedToken> = ({ token, index }) => (
 const ErrorTd:React.FC<Token> = ({ token }) => (
   <Td colSpan={4}>
     <Flex justify="center">
-      <Text color="red" fontStyle="italic">
+      <Text color="cyan" fontStyle="italic">
         {token.error}
       </Text>
     </Flex>

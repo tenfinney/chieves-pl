@@ -1,0 +1,15 @@
+{
+  name: '’Chievemints Caster',
+  description: 'Holders of this token can assign permission roles.',
+  decimals: 0,
+  external_url: 'https://chiev.es/',
+  image: 'ipfs://{assets-cid}/fairy.svg',
+  background_color: 'd19226',
+  properties: {},
+  attributes: [
+    {
+      trait_type: 'Token Type',
+      value: 'Permission Gating',
+    },
+  ],
+}

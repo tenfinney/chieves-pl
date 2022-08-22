@@ -170,7 +170,7 @@ task('mint', 'Mint a token for a user')
   console.debug(`Found contract at address: ${address}`)
   
   const contract = (
-    new ethers.Contract(address , abi, ethers.provider.getSigner())
+    new ethers.Contract(address, abi, ethers.provider.getSigner())
   )
   const tx = await contract['mint(address,uint256,uint256,bytes)'](
     args.address, args.tokenId, 1, [],
@@ -180,9 +180,48 @@ task('mint', 'Mint a token for a user')
 
 })
 
+task('setMax', 'Set maximum mintable allowance.')
+.addParam('token', 'Id of the token to alter')
+.addParam('max', 'Maximum allowed to mint (negative value for no limit)')
+.setAction(async (args, { ethers }) => {
+  const [, srcDir] = config?.paths?.sources?.match(/^.*?\/?([^\/]+)\/?$/) ?? []
+  if (!srcDir) throw new Error('ERROR - could not find source directory')
+  const contractsHome = `${config?.paths?.artifacts}/${srcDir}/`
+  const [contractFile] = (
+    glob
+    .sync(`${contractsHome}/*/Bulk*`)
+    .filter((name) => !/\.dbg\.json$/.test(name))
+  )
+
+  const { abi, contractName } = JSON.parse(
+    fs.readFileSync(contractFile).toString()
+  )
+  console.debug(
+    ` 🦐 Loaded ${chalk.hex('#88C677')(contractName)} From:`
+    + ` ${chalk.hex('#E59AF9')(contractFile)}`
+  )
+
+  const address = (
+    fs.readFileSync(
+      `${config?.paths?.artifacts}/${contractName}.address`
+    )
+    .toString()
+    .trim()
+  )
+
+  const contract = (
+    new ethers.Contract(address, abi, ethers.provider.getSigner())
+  )
+  const tx = await contract.setMax(deregexify(args.token), args.max)
+  await tx.wait()
+
+  console.info(`Set max to ${chalk.hex('#ff0000')(args.max)} for ${chalk.hex('00ff00')(args.token)}`) 
+})
+
 task('grant', 'Grant a role')
 .addParam('address', 'Address of the user to promote')
 .addParam('role', 'Role to grant')
+.addFlag('singleUse', 'Token may be used only once.')
 .addOptionalParam('token', 'Token id to grant for')
 .setAction(async (args, { ethers }) => {
   const srcDir = config?.paths?.sources
@@ -209,10 +248,10 @@ task('grant', 'Grant a role')
     .toString()
     .trim()
   )
-  let { address: user, role, token } = args
+  let { address: user, role, token, singleUse } = args
   console.log(
     ` 🍏 Setting ${chalk.hex('#E1A47B')(user)}`
-    + ` as ${chalk.hex('#5AE1AD')(role)}`
+    + ` as ${singleUse ? '(single use) ' : ''}${chalk.hex('#5AE1AD')(role)}`
     + ` on ${chalk.hex('#E16464')(contractName)}`
     + ` at ${chalk.hex('#DD5FE1')(address)}`
     + (token ? ` for id:${chalk.hex('#E11F83')(token)}` : '')
@@ -247,9 +286,9 @@ task('grant', 'Grant a role')
   if(roleId === 0) throw new Error(`Can’t find “${role}”`)
   let tx 
   if(token) {
-    tx = await contract['grantRole(uint8,address,uint256)'](roleId, user, token)
+    tx = await contract['grantRole(uint8,address,uint256,bool)'](roleId, user, token, !!args.singleUse)
   } else {
-    tx = await contract['grantRole(uint8,address)'](roleId, user)
+    tx = await contract['grantRole(uint8,address,bool)'](roleId, user, !!args.singleUse)
   }  
   console.info(` 🕋 Tx: ${tx.hash}`)
 })
