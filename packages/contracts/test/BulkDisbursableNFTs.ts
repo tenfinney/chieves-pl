@@ -438,7 +438,6 @@ describe('The Token Contract', () => {
       const numRoles = await token.roleIndexForName('ReservedLast')
       for (let i = 1; i <= numRoles; i++) {
         const role = await token.roleNameByIndex(i)
-        console.log(role)
       }
     }
   )
@@ -482,21 +481,19 @@ describe('The Token Contract', () => {
       })
       let event = receipt.events.find(
         (evt: Ethers.Event) => evt.event === 'Created'
-        )
-        
-        const [createdId] = event.args
-        
+      )
+
+      const [createdId] = event.args
+
       await token['mint(address,uint256,uint256,bytes)'](
         creator.address, createdId, 1, []
       )
-      
+
       const max = 15
       await token['setMax(uint256,int64)'](createdId, max)
       const ret = await token.getMax(createdId)
-      
-      expect(ret).to.equal(max)
 
+      expect(ret).to.equal(max)
     }
   )
-
 })

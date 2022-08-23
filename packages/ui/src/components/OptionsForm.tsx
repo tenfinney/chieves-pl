@@ -173,7 +173,6 @@ export const OptionsForm: React.FC<{
         isClosable: true,
         duration: 10000
       })
-      console.debug((error as Error).stack)
     }
   }
     

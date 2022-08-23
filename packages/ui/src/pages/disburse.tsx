@@ -131,7 +131,6 @@ const Disburse = () => {
     },
     [roContract, tokenId],
   )
-  console.debug({rwContract, userProvider})
 
   const submit = useCallback(async (evt: FormEvent) => {
     evt.preventDefault()
@@ -160,7 +159,6 @@ const Disburse = () => {
       )
       switch(action) {
         case 'mint': {
-          console.debug('minting', { addrs })
           const tx = await rwContract?.['mint(address[],uint256,bytes)'](
             addrs, tokenId, []
           )

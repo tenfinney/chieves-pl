@@ -22,10 +22,7 @@ const IdTd:React.FC<IndexedToken> = ({ token }) => (
         '𝚄𝚗𝚔𝚗𝚘𝚠𝚗'
       )}
     >
-      <>
-      {console.log({ token })}
       <Text>{token.index}</Text>
-      </>
     </Tooltip>
   </Td>
 )
@@ -34,10 +31,7 @@ const ErrorTd:React.FC<Token> = ({ token }) => (
   <Td colSpan={4}>
     <Flex justify="center">
       <Text color="cyan" fontStyle="italic">
-        <>
-        {console.info({ err: token.error, ext: extractMessage(token.error) })}
         {extractMessage(token.error)}
-        </>
       </Text>
     </Flex>
   </Td>

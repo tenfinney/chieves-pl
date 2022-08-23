@@ -21,21 +21,21 @@ const Home = () => {
   const [gatingVisible, setGatingVisible] = (
     useState(query.get('gating') === 'true')
   )
-  const visibleListParam = query.get('visible') ?? defaults.visible
+  const visible = query.get('visible') ?? defaults.visible
   const [visibleList, setVisibleList] = (
-    useState<Array<number | Limits>>(toSpanList(visibleListParam))
+    useState<Array<number | Limits>>(toSpanList(visible))
   )
   const navigate = useNavigate()
   const { roContract, constsContract } = useWeb3()
   const setToken = useCallback(
-    (index: number, info: Record<string, unknown>) => {
+    (idx: number, info: Record<string, unknown>) => {
       let token
       setTokens((tkns: Array<TokenState>) => {
-        token = { ...tkns[index], ...info }
+        token = { ...tkns[idx], ...info }
         return ([
-          ...tkns.slice(0, index),
+          ...tkns.slice(0, idx),
           token,
-          ...tkns.slice(index + 1),
+          ...tkns.slice(idx + 1),
         ])
       })
       return token
@@ -64,7 +64,7 @@ const Home = () => {
         }
       )
     }
-    console.debug({ params })
+
     const options = { search: `?${createSearchParams(params)}` }
     navigate(options, { replace: true })
   }, [visibleList, limit, offset, gatingVisible, navigate])
@@ -87,12 +87,12 @@ const Home = () => {
   }, [roContract, constsContract])
 
   useEffect(() => {
-    setVisibleList(toSpanList(visibleListParam))
-  }, [visibleListParam])
+    setVisibleList(toSpanList(visible))
+  }, [visible])
 
   const tokenForIndex = useCallback(
     async (index: number, hideable = true) => {
-      const position = index - offset
+      const position = offset + (index - 1)
       try {
         const id: bigint = (
           (await roContract.tokenByIndex(index)).toBigInt()
@@ -111,6 +111,7 @@ const Home = () => {
           gating,
           hidden: hideable && gating && !gatingVisible,
         }
+
         return setToken(
           position,
           { id: `0x${id.toString(16)}`, is, index }
@@ -126,7 +127,7 @@ const Home = () => {
     async (tokens: Array<TokenState | Error>) => {
       return (
         await Promise.allSettled(
-          tokens.map(async (token, index) => {
+          tokens.map(async (token, idx) => {
             if(!(token instanceof Error)) {
               if(token.is?.hidden) {
                 throw new Error('Token is hidden.')
@@ -135,11 +136,11 @@ const Home = () => {
               try {
                 const uri = await roContract.uri(token.id)
                 if(uri === '') throw new Error('No URI… Waiting for configuration…')
-                setToken(index, { uri })
+                setToken(idx, { uri })
                 const response = await fetch(httpURL(uri)!)
                 const data = await response.text()
                 if(!data || data.trim() === '') {
-                  throw new Error('No Data')
+                  throw new Error('Aww, No Data. 😾')
                 }
                 try {
                   const [metadata, total, max] = await Promise.all([
@@ -148,13 +149,14 @@ const Home = () => {
                     roContract.getMax(token.id),
                   ])
 
-                  return setToken(index, { metadata, total, max })
+                  return setToken(idx, { metadata, total, max })
                 } catch(error) {
-                  console.error('JSON Error', { error, data })
+                  console.error({ message: extractMessage(error), error, data })
                   throw error
                 }
               } catch(error) {
-                return setToken(index, {
+                console.error({ stack: (error as Error).stack })
+                return setToken(idx, {
                   error: extractMessage(error),
                 })
               }
@@ -176,7 +178,7 @@ const Home = () => {
               let { high, low } = elem as Limits
               const sorted = [high, low]
               sorted.sort()
-              ;[low, high] = sorted 
+              ;[low, high] = sorted
               if(!sorted.some((elem) => elem != null)) {
                 [high, low] = [elem as number, elem as number]
               }
@@ -191,9 +193,8 @@ const Home = () => {
             }
           )) as Array<Promise<Array<TokenState | Error>>>)
         } else {
-          const count = Math.min(limit, Number(typeCount) - offset)
           const start = offset < 0 ? typeCount + offset : offset
-
+          const count = Math.min(limit, Number(typeCount) - start)
           generators.push(
             ...(Array.from({ length: count })
             .map(async (_, idx) => (
@@ -202,7 +203,7 @@ const Home = () => {
           )
         }
         const tokens = (await Promise.all(generators)).flat()
-        console.info({ tkns: await retrieve(tokens) })
+        await retrieve(tokens)
       }
     }
     load()
@@ -226,44 +227,41 @@ const Home = () => {
 
       <chakra.main>
         <Stack align="center">
-        <>
-        <TokenFilterForm
-          flexGrow={1}
-          {...{
-            limit, setLimit,
-            offset, setOffset,
-            gatingVisible, setGatingVisible,
-            visibleList, setVisibleList,
-          }}
-        />
-        {console.debug({ toks: tokens })}
-        <TokensTable {...{ tokens }}/>
-        <Flex justify="center">
-          <Button
-            onClick={() => {
-              if(visibleList.length > 0) {
-                const potentials = visibleList.map(
-                  (entry) => ((entry as Limits)?.high ?? entry) as number
-                )
-                const max = Math.max(...potentials)
-                setVisibleList((vis) => ([
-                  ...vis, { low: max, high: max + 10 }
-                ]))
-              } else {
-                setLimit((lim) => lim + 10)
-              }
+          <TokenFilterForm
+            flexGrow={1}
+            {...{
+              limit, setLimit,
+              offset, setOffset,
+              gatingVisible, setGatingVisible,
+              visibleList, setVisibleList,
             }}
-          >
-            <Text as="span" mr={1} mt={-0.5} fontSize="150%" fontWeight="bold">+</Text>10
-          </Button>
-          <Button
-            ml={5}
-            onClick={() => setOffset((off) => off + limit)}
-          >
-            <Text as="span" mr={0.75} mt={-1} fontSize="200%" fontWeight="bold">↓</Text>{limit}
-          </Button>
-        </Flex>
-        </>
+          />
+          <TokensTable {...{ tokens }}/>
+          <Flex justify="center">
+            <Button
+              onClick={() => {
+                if(visibleList.length > 0) {
+                  const potentials = visibleList.map(
+                    (entry) => ((entry as Limits)?.high ?? entry) as number
+                  )
+                  const max = Math.max(...potentials)
+                  setVisibleList((vis) => ([
+                    ...vis, { low: max, high: max + 10 }
+                  ]))
+                } else {
+                  setLimit((lim) => lim + 10)
+                }
+              }}
+            >
+              <Text as="span" mr={1} mt={-0.5} fontSize="150%" fontWeight="bold">+</Text>10
+            </Button>
+            <Button
+              ml={5}
+              onClick={() => setOffset((off) => off + limit)}
+            >
+              <Text as="span" mr={0.75} mt={-1} fontSize="200%" fontWeight="bold">↓</Text>{limit}
+            </Button>
+          </Flex>
         </Stack>
       </chakra.main>
     </Container>
