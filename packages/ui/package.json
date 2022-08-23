@@ -14,7 +14,7 @@
     "build:prod": "webpack --mode=production --node-env=production",
     "watch": "webpack --watch",
     "serve": "webpack serve",
-    "gh:publish": "gh-pages -d dist/",
+    "gh:publish": "gh-pages --dist dist/ --dotfiles --message 'Updatin’ GitHub Pages'",
     "analyze": "yarn webpack --profile --json > bundle-stats.json && yarn webpack-bundle-analyzer --port 9898 bundle-stats.json dist/"
   },
   "dependencies": {
