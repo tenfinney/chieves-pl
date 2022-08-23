@@ -22,7 +22,10 @@ const IdTd:React.FC<IndexedToken> = ({ token }) => (
         '𝚄𝚗𝚔𝚗𝚘𝚠𝚗'
       )}
     >
+      <>
+      {console.log({ token })}
       <Text>{token.index}</Text>
+      </>
     </Tooltip>
   </Td>
 )

@@ -2,9 +2,8 @@ import {
   CodedError, FileListish, Limits, Maybe, MetaMaskError, NamedString, NestedError
 } from '@/lib/types'
 import { CID } from 'multiformats/cid'
-import { ipfsLinkPattern } from '@/config'
 import { NETWORKS } from '@/lib/networks'
-import { ipfs } from '@/config'
+import { ipfs, ipfsLinkPattern } from '@/config'
 import all from 'it-all'
 import JSON5 from 'json5'
 
@@ -124,7 +123,9 @@ export const ipfsify = async (filesOrURL: FileListish) => {
     })) as Array<{ path: string; content: string }>,
     { pin: true, wrapWithDirectory: true }
   ))
-  const [{ cid }] = result.slice(-1) as unknown as [{ cid: CID }]
+  const [{ cid }] = (
+    result.slice(-1) as unknown as [{ cid: CID }]
+  )
   const out = list.map((entry) => (
     `ipfs://${cid.toString()}/`
     + (entry as File).name
@@ -186,16 +187,30 @@ export const extractMessage = (error: unknown): string => (
   ) as string
 )
 
-export const toNumList = (str: string): Array<number | Limits> => {
+export const spanListToString = (list: Array<number | Limits>) => (
+  list.map((entry) => (
+    (entry instanceof Number) ? (
+      entry.toString()
+    ) : (
+      (() => {
+        const { low, high } = entry as Limits
+        return `${low}–${high}`
+      })()
+    )
+  ))
+  .join(',')
+)
+
+export const toSpanList = (str: string): Array<number | Limits> => {
   if(str == null) return []
 
   const visibles = (
-    str.split(/\s*(\s|,)\s*/)
-    .filter((str) => !['', ','].includes(str.trim()))
+    str.split(/\s*(\s|,|;)\s*/)
+    .filter((str) => !['', ',', ';'].includes(str.trim()))
   )
-  return (
+  const list = (
     visibles.map((entry) => {
-      const parts = entry.split(/-/)
+      const parts = entry.split(/[-–—]/)
       if(parts.length > 1) {
         const [[low], [high]] = (
           [parts, parts.slice(-1)]
@@ -209,4 +224,12 @@ export const toNumList = (str: string): Array<number | Limits> => {
       return Number(entry)
     })
   )
+
+  Object.defineProperty(
+    list,
+    'toString',
+    { get() { return () => spanListToString(this) } }
+  )
+
+  return list
 }

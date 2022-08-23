@@ -2,7 +2,7 @@ import { create as ipfsHTTPClient } from 'ipfs-http-client'
 import { Buffer } from 'buffer'
 
 export const infuraId = (
-  process.env.INFURA_ID
+  process.env.VITE_INFURA_ID
   ?? import.meta.env?.VITE_INFURA_ID
   ?? '12345678900987654321'
 )
@@ -21,7 +21,7 @@ export const ceramicNetwork = (
 )
 
 export const contractNetwork = (
-  process.env.CHAIN_NAME
+  process.env.VITE_CHAIN_NAME
   ?? import.meta.env?.VITE_CHAIN_NAME
   ?? 'polygon'
 )
@@ -35,11 +35,11 @@ export const ipfsLinkPattern = (
 
 export const ipfsAuth = {
   username: (
-    process.env.IPFS_AUTH_USERNAME
+    process.env.VITE_IPFS_AUTH_USERNAME
     ?? import.meta.env?.VITE_IPFS_AUTH_USERNAME
   ),
   password: (
-    process.env.IPFS_AUTH_PASSWORD
+    process.env.VITE_IPFS_AUTH_PASSWORD
     ?? import.meta.env?.VITE_IPFS_AUTH_PASSWORD
   ),
 }
@@ -94,3 +94,10 @@ export const nftHomepageBase = (
   process.env.NFT_HOMEPAGE_BASE
   ?? 'https://chiev.es/#/view'
 )
+
+export const defaults = {
+  limit: 10,
+  offset: 0,
+  gating: false,
+  visible: '',
+}

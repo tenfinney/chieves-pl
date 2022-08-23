@@ -1,9 +1,7 @@
-import path from 'path';
-import webpack from 'webpack';
+import path from 'path'
+import webpack from 'webpack'
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin'
 import CopyPlugin from 'copy-webpack-plugin'
-// in case you run into any typescript error when configuring `devServer`
-// import 'webpack-dev-server';
 
 const config: webpack.Configuration = {
   mode: 'production',

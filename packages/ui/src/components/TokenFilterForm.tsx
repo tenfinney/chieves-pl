@@ -1,4 +1,4 @@
-import { toNumList } from '@/lib/helpers'
+import { toSpanList } from '@/lib/helpers'
 import { Limits } from '@/lib/types'
 import { Box, Button, Checkbox, Flex, FormControl, FormLabel, Input } from '@chakra-ui/react'
 import React, { SetStateAction, useEffect, useState } from 'react'
@@ -18,26 +18,19 @@ export type FilterValues = {
 }
 
 export const TokenFilterForm: React.FC<{
-  limit: number;
-
+  limit: number
   setLimit: (limit: SetStateAction<number>) => void
   offset: number
   setOffset: (offset: SetStateAction<number>) => void
   gatingVisible: boolean
   setGatingVisible: (gatingVisible: SetStateAction<boolean>) => void
-  visibleList: Array<number | Limits>
   setVisibleList: (visible: SetStateAction<Array<number | Limits>>) => (
     void
   ) 
 }> = ({
-  limit = 100,
-  setLimit,
-  offset = 0,
-  setOffset,
-  gatingVisible = false,
-  setGatingVisible,
-  visibleList = [],
-  setVisibleList,
+  limit = 10, setLimit, offset = 0, setOffset,
+  gatingVisible = false, setGatingVisible,
+  setVisibleList
 }) => {
   const [visible, setVisible] = useState(null)
   const {
@@ -48,7 +41,7 @@ export const TokenFilterForm: React.FC<{
     setOffset(Number(data.offset))
     setGatingVisible(data.gatingVisible)
     setVisible(data.visible)
-    setVisibleList(toNumList(data.visible))
+    setVisibleList(toSpanList(data.visible))
   }
 
   useEffect(() => {
@@ -56,7 +49,6 @@ export const TokenFilterForm: React.FC<{
     setValue('offset', offset)
     setValue('visible', visible)
     setValue('gatingVisible', gatingVisible)
-    
   }, [limit, offset, visible, gatingVisible, setValue])
 
   return (
@@ -133,8 +125,9 @@ export const TokenFilterForm: React.FC<{
         </Flex>
       </FormControl>
 
-      <Button type="submit" size="lg" colorScheme='green' ml='0px' mt='20px'>View</Button>
-      <Header1/>
+      <Button type="submit">
+        View
+      </Button>
     </Box>
   )
 }
