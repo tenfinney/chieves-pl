@@ -3,8 +3,11 @@ import { Buffer } from 'buffer'
 
 export const infuraId = (
   process.env.VITE_INFURA_ID
-  ?? import.meta.env?.VITE_INFURA_ID
-  ?? '12345678900987654321'
+  ?? import.meta.env ? (
+    import.meta.env.VITE_INFURA_ID
+  ) : (
+    '12345678900987654321'
+  )
 )
 
 export const ceramicURL = (
@@ -27,10 +30,13 @@ export const contractNetwork = (
 )
 
 export const ipfsLinkPattern = (
-  process.env.IPFS_LINK_PATTERN
-  ?? import.meta.env?.IPFS_LINK_PATTERN
-  ?? 'https://{v1cid}.ipfs.dweb.link/{path}'
-  ?? 'https://mimis.infura-ipfs.io/ipfs/{cid}/{path}'
+  process.env.VITE_IPFS_LINK_PATTERN
+  ?? import.meta.env ? (
+    import.meta.env.VITE_IPFS_LINK_PATTERN
+  ) : (
+    'https://{v1cid}.ipfs.dweb.link/{path}'
+    ?? 'https://mimis.infura-ipfs.io/ipfs/{cid}/{path}'
+  )
 )
 
 export const ipfsAuth = {

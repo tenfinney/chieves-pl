@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import {
   extractMessage, httpURL, toSpanList,
 } from '@/lib/helpers'
@@ -12,6 +12,7 @@ import {
 import JSON5 from 'json5'
 import { defaults } from '@/config'
 import { chakra, Button, Container, Flex, Text, Stack } from '@chakra-ui/react'
+import { Controller } from 'react-hook-form'
 
 const Home = () => {
   const [tokens, setTokens] = useState<Array<TokenState | Error>>([])
@@ -32,9 +33,9 @@ const Home = () => {
       let token
       setTokens((tkns: Array<TokenState>) => {
         token = { ...tkns[idx], ...info }
-        console.debug({ token, tkn: tkns[idx], idx })
         return ([
           ...tkns.slice(0, idx),
+          ...Array.from({ length: idx - tkns.length }, () => ({})),
           token,
           ...tkns.slice(idx + 1),
         ])
@@ -87,15 +88,21 @@ const Home = () => {
     }
   }, [roContract, constsContract])
 
-  console.debug({ typeCount, GATING_TYPE, TYPE_WIDTH, TYPE_BOUNDARY })
-
   useEffect(() => {
     setVisibleList(toSpanList(visible))
   }, [visible])
 
   const tokenForIndex = useCallback(
-    async (index: number, hideable = true) => {
-      const position = offset + (index - 1)
+    async ({
+      index, idx, hideable = true
+    }: {
+      index: number
+      idx: number
+      hideable?: boolean
+    }) => {
+      if(TYPE_WIDTH == null || TYPE_BOUNDARY == null) {
+        return null
+      }
       try {
         const id: bigint = (
           (await roContract.tokenByIndex(index)).toBigInt()
@@ -116,18 +123,21 @@ const Home = () => {
         }
 
         return setToken(
-          position,
+          idx,
           { id: `0x${id.toString(16)}`, is, index }
         )
       } catch(error) {
-        return setToken(position, { error: extractMessage(error) })
+        return setToken(idx, { error: extractMessage(error) })
       }
     },
     [GATING_TYPE, TYPE_BOUNDARY, TYPE_WIDTH, gatingVisible, offset, roContract, setToken],
   )
 
+  const controller = useRef(null)
   const retrieve = useCallback(
     async (tokens: Array<TokenState | Error>) => {
+      controller.current?.abort()
+      controller.current = new AbortController()
       return (
         await Promise.allSettled(
           tokens.map(async (token, idx) => {
@@ -140,28 +150,35 @@ const Home = () => {
                 const uri = await roContract.uri(token.id)
                 if(uri === '') throw new Error('No URI… Waiting for configuration…')
                 setToken(idx, { uri })
-                const response = await fetch(httpURL(uri)!)
+                const response = await fetch(
+                  httpURL(uri)!,
+                  { signal: controller.current.signal }
+                )
+                if(!response.ok) {
+                  throw new Error(`Request Status: ${response.status}`)
+                }
                 const data = await response.text()
                 if(!data || data.trim() === '') {
                   throw new Error('Aww, No Data. 😾')
                 }
                 try {
-                  const [metadata, total, max] = await Promise.all([
-                    Promise.resolve(JSON5.parse(data)),
-                    roContract.totalSupply(token.id),
-                    roContract.getMax(token.id),
-                  ])
+                  setToken(idx, { metadata: JSON5.parse(data) })
 
-                  return setToken(idx, { metadata, total, max })
+                  roContract.totalSupply(token.id)
+                  .then((total: bigint) => setToken(idx, { total }))
+
+                  roContract.getMax(token.id)
+                  .then((max: bigint) => setToken(idx, { max }))
                 } catch(error) {
-                  console.error({ message: extractMessage(error), error, data })
                   throw error
                 }
               } catch(error) {
-                console.error({ stack: (error as Error).stack })
-                return setToken(idx, {
-                  error: extractMessage(error),
-                })
+                if(!(error instanceof DOMException)) {
+                  const errObj = { error: extractMessage(error) }
+                  return setToken(idx, {
+                    error: extractMessage(error)
+                  })
+                }
               }
             }
           })
@@ -173,14 +190,16 @@ const Home = () => {
 
   useEffect(() => {
     const load = async () => {
-      if(roContract && constsContract) {
+      if(roContract && constsContract && typeCount != null) {
         const generators: Array<Promise<Array<TokenState | Error>>> = []
+        setTokens([])
         if(visibleList.some(() => true)) {
+          let count = 0
           generators.push(...(visibleList.map(
             async (elem) => {
               let { high, low } = elem as Limits
-              const sorted = [high, low]
-              sorted.sort()
+              let sorted = [high, low]
+              sorted = sorted.sort()
               ;[low, high] = sorted
               if(!sorted.some((elem) => elem != null)) {
                 [high, low] = [elem as number, elem as number]
@@ -189,19 +208,26 @@ const Home = () => {
                 await Promise.all(
                   Array.from({ length: high - low + 1 })
                   .map(async (_, idx) => (
-                    await tokenForIndex(low + idx, false)
+                    await tokenForIndex({
+                      index: low + idx,
+                      idx: count++,
+                      hideable: false,
+                    })
                   ))
                 )
               )
             }
           )) as Array<Promise<Array<TokenState | Error>>>)
         } else {
-          const start = offset < 0 ? typeCount + offset : offset
+          const start = offset < 0 ? Number(typeCount) + offset : offset
           const count = Math.min(limit, Number(typeCount) - start)
           generators.push(
             ...(Array.from({ length: count })
             .map(async (_, idx) => (
-              await tokenForIndex(start + idx + 1)
+              await tokenForIndex({
+                index: start + idx + 1,
+                idx,
+              })
             )))
           )
         }

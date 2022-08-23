@@ -189,7 +189,7 @@ export const extractMessage = (error: unknown): string => (
 
 export const spanListToString = (list: Array<number | Limits>) => (
   list.map((entry) => (
-    (entry instanceof Number) ? (
+    (typeof entry === 'number') ? (
       entry.toString()
     ) : (
       (() => {
@@ -230,6 +230,5 @@ export const toSpanList = (str: string): Array<number | Limits> => {
     'toString',
     { get() { return () => spanListToString(this) } }
   )
-
   return list
 }
