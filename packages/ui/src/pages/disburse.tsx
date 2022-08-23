@@ -118,7 +118,6 @@ const Disburse = () => {
             if(!meta) {
               setMetadata(null)
             } else {
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               const response = await fetch(httpURL(meta)!)
               setMetadata(await response.json())
             }

@@ -14,7 +14,7 @@ import React, {
 } from 'react'
 import providerOptions from '@/lib/walletConnect'
 import { NETWORKS } from '@/lib/networks'
-import CONFIG from '@/config'
+import { contractNetwork } from '@/config'
 
 export type Web3ContextType = {
   userProvider?: Web3Provider
@@ -78,8 +78,8 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
           const { default: Web3Modal } = await import('web3modal')
           setWeb3Modal(new Web3Modal({
             network: (
-              CONFIG.contractNetwork === 'polygon'
-              ? 'matic' : CONFIG.contractNetwork
+              contractNetwork === 'polygon'
+              ? 'matic' : contractNetwork
             ),
             cacheProvider: true,
             providerOptions,
@@ -202,7 +202,7 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
 
     useEffect(() => {
       const libs = async () => {
-        const { contractNetwork: chain } = CONFIG
+        const chain = contractNetwork
         if(!contractAddress) {
           import(
             `../contracts/${chain}/BulkDisbursableNFTs.address.ts`
@@ -222,7 +222,7 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
 
     useEffect(() => {
       const libs = async () => {
-        const { contractNetwork: chain } = CONFIG
+        const chain = contractNetwork
         import(
           `../contracts/${chain}/Bits.address.ts`
         )

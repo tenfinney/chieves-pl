@@ -1,4 +1,4 @@
-import CONFIG from '@/config'
+import { infuraId, contractNetwork } from '@/config'
 import { Maybe } from './types'
 
 export type NetworkInfo = {
@@ -19,7 +19,7 @@ export const NETWORKS: NetworkInfo = {
     label: 'Ethereum',
     symbol: 'ETH',
     explorer: 'https://etherscan.io',
-    rpc: `https://mainnet.infura.io/v3/${CONFIG.infuraId}`,
+    rpc: `https://mainnet.infura.io/v3/${infuraId}`,
   },
   rinkeby: {
     chainId: '0x4',
@@ -27,7 +27,7 @@ export const NETWORKS: NetworkInfo = {
     label: 'Rinkeby',
     symbol: 'ETH',
     explorer: 'https://rinkeby.etherscan.io',
-    rpc: `https://rinkeby.infura.io/v3/${CONFIG.infuraId}`,
+    rpc: `https://rinkeby.infura.io/v3/${infuraId}`,
   },
   gnosis: {
     chainId: '0x64',
@@ -65,6 +65,6 @@ export const NETWORKS: NetworkInfo = {
     rpc: 'http://127.0.0.1:8545',
   },
   get contract() {
-    return this[CONFIG.contractNetwork]
+    return this[contractNetwork]
   },
 }

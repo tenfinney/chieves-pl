@@ -10,7 +10,6 @@ import { HomeLink, OptionsForm } from '@/components'
 import { Alert, AlertDescription, AlertIcon, AlertTitle, Box } from '@chakra-ui/react'
 import { useParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
-
 export const Edit = () => {
   const { nftId } = useParams()
   const tokenId = useMemo(() => deregexify(nftId), [nftId])
@@ -26,7 +25,6 @@ export const Edit = () => {
           if(!meta) {
             setMetadata(null)
           } else {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const response = await fetch(httpURL(meta)!)
             setMetadata(await response.json())
           }

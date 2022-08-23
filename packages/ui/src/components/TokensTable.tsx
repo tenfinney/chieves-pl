@@ -2,7 +2,7 @@ import {
   Box, Flex, Spinner, Stack, Table, Tbody, Td, Text, Th, Thead, Tr,
   Link as ChakraLink, Tooltip, chakra,
 } from '@chakra-ui/react'
-import { httpURL, regexify } from '@/lib/helpers'
+import { extractMessage, httpURL, regexify } from '@/lib/helpers'
 import { TokenState } from '@/lib/types'
 import Markdown from 'react-markdown'
 import React from 'react'
@@ -13,7 +13,7 @@ const RouterLink = chakra(ReactRouterLink)
 type IndexedToken = { token: TokenState, index: number }
 type Token = { token: TokenState }
 
-const IdTd:React.FC<IndexedToken> = ({ token, index }) => (
+const IdTd:React.FC<IndexedToken> = ({ token }) => (
   <Td>
     <Tooltip
       label={token.id != null ? (
@@ -31,7 +31,10 @@ const ErrorTd:React.FC<Token> = ({ token }) => (
   <Td colSpan={4}>
     <Flex justify="center">
       <Text color="cyan" fontStyle="italic">
-        {token.error}
+        <>
+        {console.info({ err: token.error, ext: extractMessage(token.error) })}
+        {extractMessage(token.error)}
+        </>
       </Text>
     </Flex>
   </Td>
@@ -119,8 +122,12 @@ const URITd:React.FC<Token> = ({ token }) => (
         <ChakraLink
           ml={2}
           onClick={() => {
-            if(token.uri) {
-              navigator.clipboard.writeText(token.uri)
+            if(
+              token.uri
+              && typeof navigator !== 'undefined'
+              && window.isSecureContext
+            ) {
+              navigator.clipboard?.writeText(token.uri)
             }
           }}
         >

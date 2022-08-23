@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import {
-  Container, Flex, chakra,
+  Container, Flex, chakra, Button,
 } from '@chakra-ui/react'
 import { extractMessage, httpURL, toNumList } from '@/lib/helpers'
 import type { Limits, Maybe, TokenState } from '@/lib/types'
@@ -20,9 +20,9 @@ const Home = () => {
   const [gatingVisible, setGatingVisible] = (
     useState(!!query.get('gating') ?? false)
   )
-  const visible = query.get('visible') ?? ''
+  const visibleListParam = query.get('visible') ?? ''
   const [visibleList, setVisibleList] = (
-    useState<Array<number | Limits>>(toNumList(visible))
+    useState<Array<number | Limits>>(toNumList(visibleListParam))
   )
   const { roContract, constsContract } = useWeb3()
   const setToken = (index: number, info: Record<string, unknown>) => {
@@ -57,31 +57,77 @@ const Home = () => {
   }, [roContract, constsContract])
 
   useEffect(() => {
-    setVisibleList(toNumList(visible))
-  }, [visible])
+    setVisibleList(toNumList(visibleListParam))
+  }, [visibleListParam])
 
-  const tokenForIndex = async (index: number, hideable: boolean = true) => {
-    try {
-      const id: bigint = (
-        (await roContract.tokenByIndex(index)).toBigInt()
-      )
-      const is: { [key: string]: unknown } = {}
-      is.gating = (
-        (
-          id
-          & (
-            2n**BigInt(TYPE_WIDTH) - 1n
-            << BigInt(TYPE_BOUNDARY)
-          )
+  const tokenForIndex = useCallback(
+    async (index: number, hideable = true) => {
+      try {
+        const id: bigint = (
+          (await roContract.tokenByIndex(index)).toBigInt()
         )
-        === GATING_TYPE
+        const is: { [key: string]: unknown } = {}
+        is.gating = (
+          (
+            id
+            & (
+              2n**BigInt(TYPE_WIDTH) - 1n
+              << BigInt(TYPE_BOUNDARY)
+            )
+          )
+          === GATING_TYPE
+        )
+        is.hidden = hideable && is.gating && !gatingVisible
+        return { id: `0x${id.toString(16)}`, is, index }
+      } catch(error) {
+        return error
+      }
+    },
+    [GATING_TYPE, TYPE_BOUNDARY, TYPE_WIDTH, gatingVisible, roContract],
+  )
+
+  const retrieve = useCallback(
+    async (tokens: Array<TokenState | Error>) => {
+      await Promise.all(
+        tokens.map(async (token, index) => {
+          if(!(token instanceof Error)) {
+            if(token.is?.hidden) {
+              return null
+            }
+
+            try {
+              const uri = await roContract.uri(token.id)
+              if(uri === '') throw new Error('No URI… Waiting for configuration…')
+              setToken(index, { uri })
+              const response = await fetch(httpURL(uri)!)
+              const data = await response.text()
+              if(!data || data === '') {
+                throw new Error('No Data')
+              }
+              try {
+                const metadata = JSON5.parse(data)
+                setToken(index, { metadata })
+              } catch(error) {
+                console.error('JSON Error', { error, data })
+                throw error
+              }
+            } catch(error) {
+              setToken(index, {
+                error: extractMessage(error),
+              })
+            }
+
+            const total = await roContract.totalSupply(token.id)
+            setToken(index, { total })
+
+            const max = await roContract.getMax(token.id)
+            setToken(index, { max })
+          }
+        }).filter((tkn) => !!tkn)
       )
-      is.hidden = hideable && is.gating && !gatingVisible
-      return { id: `0x${id.toString(16)}`, is, index }
-    } catch(error) {
-      return error
-    }
-  }
+    },
+    [roContract],
+  )
 
   useEffect(() => {
     const load = async () => {
@@ -119,53 +165,13 @@ const Home = () => {
           )
         }
         const tokens = (await Promise.all(generators)).flat()
-        retrieve(tokens) 
-        setTokens((await Promise.all(generators)).flat())
+        console.info({ generators, tokens })
+        await retrieve(tokens) 
+        setTokens(tokens)
       }
     }
     load()
-  }, [visibleList])
-    
-  const retrieve = useCallback(async (tokens: Array<TokenState | Error>) => {
-    await Promise.all(
-      tokens.map(async (token, index) => {
-        if(!(token instanceof Error)) {
-          if(token.is?.hidden) {
-            return null
-          }
-          let metadata = null
-          try {
-            const uri = await roContract.uri(token.id)
-            if(uri === '') throw new Error('No URI… Waiting for data…')
-            setToken(index, { uri })
-            const url = httpURL(uri)!
-            const response = await fetch(url)
-            const data = await response.text()
-            if(!data || data === '') {
-              throw new Error('No Data')
-            }
-            try {
-              metadata = JSON5.parse(data)
-            } catch(error) {
-              console.error('JSON Error', { error, data })
-            }
-          } catch(error) {
-            setToken(index, {
-              error: extractMessage(error),
-              })
-            } finally {
-              setToken(index, { metadata })
-            }
-
-            const total = await roContract.totalSupply(token.id)
-            setToken(index, { total })
-
-            const max = await roContract.getMax(token.id)
-            setToken(index, { max })
-        }
-      })
-    )
-  }, [])
+  }, [visibleList, retrieve, roContract, constsContract, limit, offset, tokenForIndex, typeCount])
 
   return (
     <Container maxW="full">
@@ -193,6 +199,19 @@ const Home = () => {
           }}
         />
         <TokensTable {...{ tokens }}/>
+        <Flex justify="center">
+        <Button
+            onClick={() => setLimit((lim) => lim + 10)}
+          >
+            ➕10
+          </Button>
+          <Button
+            ml={5}
+            onClick={() => setOffset((off) => off + limit)}
+          >
+            ↓{limit}
+          </Button>
+        </Flex>
       </chakra.main>
     </Container>
   )

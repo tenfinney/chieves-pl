@@ -2,10 +2,11 @@ import {
   CodedError, FileListish, Limits, Maybe, MetaMaskError, NamedString, NestedError
 } from '@/lib/types'
 import { CID } from 'multiformats/cid'
-import { IPFS_LINK_PATTERN } from '@/lib/constants'
+import { ipfsLinkPattern } from '@/config'
 import { NETWORKS } from '@/lib/networks'
-import CONFIG from '@/config'
+import { ipfs } from '@/config'
 import all from 'it-all'
+import JSON5 from 'json5'
 
 export const httpURL = (uri?: Maybe<string>) => {
   const [, origCID, path] = (
@@ -16,7 +17,7 @@ export const httpURL = (uri?: Maybe<string>) => {
     const cid = CID.parse(origCID)
     const v0CID = cid.toV0().toString()
     const v1CID = cid.toV1().toString()
-    const pattern = IPFS_LINK_PATTERN
+    const pattern = ipfsLinkPattern
     return (
       encodeURI(
         pattern
@@ -116,7 +117,7 @@ export const ipfsify = async (filesOrURL: FileListish) => {
     )
   )
 
-  const result = await all(CONFIG.ipfs.addAll(
+  const result = await all(ipfs.addAll(
     list.map((entry) => ({
       path: entry.name,
       content: (entry as NamedString).content ?? entry 
@@ -181,7 +182,7 @@ export const extractMessage = (error: unknown): string => (
     (error as NestedError)?.error?.message
     ?? (error as MetaMaskError)?.data?.message
     ?? (error as Error)?.message
-    ?? error
+    ?? (typeof error === 'string' ? error : `𝑼𝒏𝒌𝒏𝒐𝒘𝒏 𝑬𝒓𝒓𝒐𝒓: ${JSON5.stringify(error, null, 2)}`)
   ) as string
 )
 

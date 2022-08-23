@@ -10,7 +10,7 @@ import {
   Table, Thead, Th, Tbody, Radio, RadioGroup,
   SimpleGrid, Stack, Center,
 } from '@chakra-ui/react'
-import { NFT_HOMEPAGE_BASE } from '@/lib/constants'
+import { nftHomepageBase } from '@/config'
 import { httpURL, isEmpty, regexify } from '@/lib/helpers'
 import {
   Attribute, ERC1155Metadata, Maybe, OpenSeaAttribute,
@@ -213,7 +213,7 @@ export const NFTForm: React.FC<{
     if(!homepage || isEmpty(homepage) || homepage.endsWith('𝘜𝘯𝘬𝘯𝘰𝘸𝘯')) {
       setValue(
         'homepage',
-        `${NFT_HOMEPAGE_BASE}/${regexify(tokenId)}`
+        `${nftHomepageBase}/${regexify(tokenId)}`
       )
     }
   }, [homepage, setValue, tokenId])

@@ -10,7 +10,7 @@ import {
   InMemoryCache,
   ApolloProvider,
 } from '@apollo/client'
-import { CONFIG } from '@/config'
+import { nftGraph } from '@/config'
 import {
   // BrowserRouter as Router,
   HashRouter as Router,
@@ -33,7 +33,7 @@ const themeConfig: ThemeConfig = {
 const theme = extendTheme({ config: themeConfig })
 
 const client = new ApolloClient({
-  uri: CONFIG.nftGraph,
+  uri: nftGraph,
   cache: new InMemoryCache(),
 })
 
