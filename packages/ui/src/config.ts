@@ -42,11 +42,19 @@ export const ipfsLinkPattern = (
 export const ipfsAuth = {
   username: (
     process.env.VITE_IPFS_AUTH_USERNAME
-    ?? import.meta.env?.VITE_IPFS_AUTH_USERNAME
+    ?? import.meta.env ? (
+      import.meta.env.VITE_IPFS_AUTH_USERNAME
+    ) : (
+      'username'
+    )
   ),
   password: (
     process.env.VITE_IPFS_AUTH_PASSWORD
-    ?? import.meta.env?.VITE_IPFS_AUTH_PASSWORD
+    ?? import.meta.env ? (
+      import.meta.env.VITE_IPFS_AUTH_PASSWORD
+    ) : (
+      'password'
+    )
   ),
 }
 
