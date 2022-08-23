@@ -32,6 +32,7 @@ const Home = () => {
       let token
       setTokens((tkns: Array<TokenState>) => {
         token = { ...tkns[idx], ...info }
+        console.debug({ token, tkn: tkns[idx], idx })
         return ([
           ...tkns.slice(0, idx),
           token,
@@ -85,6 +86,8 @@ const Home = () => {
       .then(setTYPE_BOUNDARY)
     }
   }, [roContract, constsContract])
+
+  console.debug({ typeCount, GATING_TYPE, TYPE_WIDTH, TYPE_BOUNDARY })
 
   useEffect(() => {
     setVisibleList(toSpanList(visible))
