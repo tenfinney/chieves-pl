@@ -3,32 +3,32 @@ import { Buffer } from 'buffer'
 
 export const infuraId = (
   process.env.INFURA_ID
-  ?? import.meta.env.VITE_INFURA_ID
+  ?? import.meta.env?.VITE_INFURA_ID
   ?? '12345678900987654321'
 )
 
 export const ceramicURL = (
   process.env.CERAMIC_URL
-  ?? import.meta.env.CERAMIC_URL
+  ?? import.meta.env?.CERAMIC_URL
   ?? 'https://ceramic.metagame.wtf'       // mainnet
   ?? 'https://ceramic-clay.3boxlabs.com'  // testnet
 )
 
 export const ceramicNetwork = (
   process.env.CERAMIC_NETWORK
-  ?? import.meta.env.CERAMIC_NETWORK
+  ?? import.meta.env?.CERAMIC_NETWORK
   ?? 'mainnet' ?? 'testnet-clay'
 )
 
 export const contractNetwork = (
   process.env.CHAIN_NAME
-  ?? import.meta.env.VITE_CHAIN_NAME
+  ?? import.meta.env?.VITE_CHAIN_NAME
   ?? 'polygon'
 )
 
 export const ipfsLinkPattern = (
   process.env.IPFS_LINK_PATTERN
-  ?? import.meta.env.IPFS_LINK_PATTERN
+  ?? import.meta.env?.IPFS_LINK_PATTERN
   ?? 'https://{v1cid}.ipfs.dweb.link/{path}'
   ?? 'https://mimis.infura-ipfs.io/ipfs/{cid}/{path}'
 )
@@ -36,11 +36,11 @@ export const ipfsLinkPattern = (
 export const ipfsAuth = {
   username: (
     process.env.IPFS_AUTH_USERNAME
-    ?? import.meta.env.VITE_IPFS_AUTH_USERNAME
+    ?? import.meta.env?.VITE_IPFS_AUTH_USERNAME
   ),
   password: (
     process.env.IPFS_AUTH_PASSWORD
-    ?? import.meta.env.VITE_IPFS_AUTH_PASSWORD
+    ?? import.meta.env?.VITE_IPFS_AUTH_PASSWORD
   ),
 }
 
@@ -54,13 +54,13 @@ export const Authorization = (
 
 const ipfsAPIHost = (
   process.env.IPFS_API_HOST
-  ?? import.meta.env.IPFS_API_HOST
+  ?? import.meta.env?.IPFS_API_HOST
   ?? 'ipfs.infura.io'
 )
 
 const ipfsAPIPort = (
   process.env.IPFS_API_PORT
-  ?? import.meta.env.IPFS_API_PORT
+  ?? import.meta.env?.IPFS_API_PORT
   ?? 5001
 )
 
@@ -91,5 +91,6 @@ export const rolePermissions = {
 }
 
 export const nftHomepageBase = (
-  'https://chiev.es/#/view'
+  process.env.NFT_HOMEPAGE_BASE
+  ?? 'https://chiev.es/#/view'
 )

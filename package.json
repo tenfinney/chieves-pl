@@ -10,7 +10,7 @@
   "scripts": {
     "ui:start": "yarn workspace @chievemints/ui dev",
     "ui:test": "yarn workspace @chievemints/ui test",
-    "ui:pub": "yarn workspace @chievemints/ui pub",
+    "ui:publish": "yarn ui:build && yarn gh:publish",
     "ui:build": "yarn workspace @chievemints/ui build",
     "hh:node": "yarn workspace @chievemints/contracts chain",
     "hh:build": "yarn workspace @chievemints/contracts compile",
