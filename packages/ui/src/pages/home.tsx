@@ -11,7 +11,7 @@ import {
 } from 'react-router-dom'
 import JSON5 from 'json5'
 import { defaults } from '@/config'
-import { chakra, Button, Container, Flex } from '@chakra-ui/react'
+import { chakra, Button, Container, Flex, Text, Stack } from '@chakra-ui/react'
 
 const Home = () => {
   const [tokens, setTokens] = useState<Array<TokenState | Error>>([])
@@ -92,28 +92,34 @@ const Home = () => {
 
   const tokenForIndex = useCallback(
     async (index: number, hideable = true) => {
+      const position = index - offset
       try {
         const id: bigint = (
           (await roContract.tokenByIndex(index)).toBigInt()
         )
-        const is: { [key: string]: unknown } = {}
-        is.gating = (
+        const gating = (
           (
             id
             & (
-              2n**BigInt(TYPE_WIDTH) - 1n
+              (2n**BigInt(TYPE_WIDTH) - 1n) // TYPE_WIDTH 1s
               << BigInt(TYPE_BOUNDARY)
             )
           )
           === GATING_TYPE
         )
-        is.hidden = hideable && is.gating && !gatingVisible
-        return { id: `0x${id.toString(16)}`, is, index }
+        const is: { [key: string]: unknown } = {
+          gating,
+          hidden: hideable && gating && !gatingVisible,
+        }
+        return setToken(
+          position,
+          { id: `0x${id.toString(16)}`, is, index }
+        )
       } catch(error) {
-        return error
+        return setToken(position, { error: extractMessage(error) })
       }
     },
-    [GATING_TYPE, TYPE_BOUNDARY, TYPE_WIDTH, gatingVisible, roContract],
+    [GATING_TYPE, TYPE_BOUNDARY, TYPE_WIDTH, gatingVisible, offset, roContract, setToken],
   )
 
   const retrieve = useCallback(
@@ -142,11 +148,7 @@ const Home = () => {
                     roContract.getMax(token.id),
                   ])
 
-                  let tkn
-                  Object.entries({ metadata, total, max }).forEach(
-                    ([key, val]) => tkn = setToken(index, { [key]: val })
-                  )
-                  return tkn
+                  return setToken(index, { metadata, total, max })
                 } catch(error) {
                   console.error('JSON Error', { error, data })
                   throw error
@@ -223,7 +225,10 @@ const Home = () => {
       </chakra.header>
 
       <chakra.main>
+        <Stack align="center">
+        <>
         <TokenFilterForm
+          flexGrow={1}
           {...{
             limit, setLimit,
             offset, setOffset,
@@ -231,9 +236,10 @@ const Home = () => {
             visibleList, setVisibleList,
           }}
         />
+        {console.debug({ toks: tokens })}
         <TokensTable {...{ tokens }}/>
         <Flex justify="center">
-        <Button
+          <Button
             onClick={() => {
               if(visibleList.length > 0) {
                 const potentials = visibleList.map(
@@ -248,15 +254,17 @@ const Home = () => {
               }
             }}
           >
-            ➕10
+            <Text as="span" mr={1} mt={-0.5} fontSize="150%" fontWeight="bold">+</Text>10
           </Button>
           <Button
             ml={5}
             onClick={() => setOffset((off) => off + limit)}
           >
-            ↓{limit}
+            <Text as="span" mr={0.75} mt={-1} fontSize="200%" fontWeight="bold">↓</Text>{limit}
           </Button>
         </Flex>
+        </>
+        </Stack>
       </chakra.main>
     </Container>
   )
