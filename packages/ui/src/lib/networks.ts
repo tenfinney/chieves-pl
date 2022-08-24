@@ -1,20 +1,13 @@
-import { infuraId, contractNetwork } from '@/config'
-import { Maybe } from './types'
+// import { infuraId, contractNetwork } from '@/config'
+import { infuraId } from '@/config'
+import { Maybe, NetworkInfo } from '@/types'
 
-export type NetworkInfo = {
-  [chainName: string]: {
-    chainId: string;
-    name: string;
-    label: string;
-    symbol: string;
-    explorer: Maybe<string>;
-    rpc: string;
-  }
-}
+
+const contractNetwork = 'polygon' // env variables are broken
 
 export const NETWORKS: NetworkInfo = {
   mainnet: {
-    chainId: '0x1',
+    chainId: 0x1,
     name: 'Ethereum Mainnet',
     label: 'Ethereum',
     symbol: 'ETH',
@@ -22,7 +15,7 @@ export const NETWORKS: NetworkInfo = {
     rpc: `https://mainnet.infura.io/v3/${infuraId}`,
   },
   rinkeby: {
-    chainId: '0x4',
+    chainId: 0x4,
     name: 'Rinkeby',
     label: 'Rinkeby',
     symbol: 'ETH',
@@ -30,7 +23,7 @@ export const NETWORKS: NetworkInfo = {
     rpc: `https://rinkeby.infura.io/v3/${infuraId}`,
   },
   gnosis: {
-    chainId: '0x64',
+    chainId: 0x64,
     name: 'Gnosis Chain',
     label: 'Gnosis',
     symbol: 'xDAI',
@@ -38,7 +31,7 @@ export const NETWORKS: NetworkInfo = {
     rpc: 'https://rpc.gnosischain.com/',
   },
   polygon: {
-    chainId: '0x89',
+    chainId: 0x89,
     name: 'Polygon',
     label: 'Polygon',
     symbol: 'MATIC',
@@ -46,7 +39,7 @@ export const NETWORKS: NetworkInfo = {
     rpc: 'https://polygon-rpc.com',
   },
   mumbai: {
-    chainId: '0x13881',
+    chainId: 0x13881,
     name: 'Polygon’s Mumbai Testnet',
     label: 'Mumbai',
     symbol: '𝙼𝙰𝚃𝙸𝙲',
@@ -57,7 +50,7 @@ export const NETWORKS: NetworkInfo = {
     ),
   },
   localhost: {
-    chainId: '0x7a69',
+    chainId: 0x7a69,
     name: 'Ganache',
     label: 'Ganache',
     symbol: '🄴🅃🄷',

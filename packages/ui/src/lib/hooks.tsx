@@ -24,7 +24,7 @@ export type Web3ContextType = {
   constsContract?: Contract
   rwContract?: Contract
   address?: string
-  chain?: string
+  chain?: number
   connect: () => Promise<void>
   disconnect: () => void
   connecting: boolean
@@ -64,7 +64,7 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
     const [userProvider, setUserProvider] = (
       useState<Web3Provider>()
     )
-    const [chain, setChain] = useState<string>()
+    const [chain, setChain] = useState<number>()
     const [address, setAddress] = useState<string>()
     const [connected, setConnected] = useState(false)
     const [contractAddress, setContractAddress] = useState(null)
@@ -133,7 +133,7 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
           contractAddress
           && abi
           && userProvider
-          && chain === NETWORKS.contract.chainId
+          && Number(chain) === NETWORKS.contract.chainId
         ) {
           return new Contract(contractAddress, abi, userProvider.getSigner())
         } else {
@@ -164,7 +164,7 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
           web3Provider.getSigner().getAddress()
         ))
 
-        setChain((vider as { chainId: string }).chainId)
+        setChain((vider as { chainId: number }).chainId)
       },
       [],
     )

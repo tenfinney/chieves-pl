@@ -10,6 +10,17 @@ export type Optional<T> = T | undefined
 //   }
 // }
 
+export type NetworkInfo = {
+  [chainName: string]: {
+    chainId: number;
+    name: string;
+    label: string;
+    symbol: string;
+    explorer: Maybe<string>;
+    rpc: string;
+  }
+}
+
 export type OpenSeaAttribute = {
   trait_type?: string
   value?: string | number

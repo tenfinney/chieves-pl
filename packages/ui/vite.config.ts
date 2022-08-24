@@ -25,6 +25,7 @@ export default defineConfig({
     react(),
   ],
   build: {
+    target: ['ES2020'],
     minify: false,
     sourcemap: true,
     polyfillModulePreload: false,

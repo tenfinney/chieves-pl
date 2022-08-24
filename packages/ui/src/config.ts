@@ -1,41 +1,61 @@
 import { create as ipfsHTTPClient } from 'ipfs-http-client'
 import { Buffer } from 'buffer'
 
+declare var process: any;
+
 export const infuraId = (
-  process.env.VITE_INFURA_ID
-  ?? import.meta.env ? (
-    import.meta.env.VITE_INFURA_ID
-  ) : (
-    '12345678900987654321'
+  (
+    (process?.env?.VITE_INFURA_ID) ? (
+      process.env.VITE_INFURA_ID
+    ) : (
+      import.meta?.env ? (
+        import.meta.env.VITE_INFURA_ID
+      ) : (
+        '12345678900987654321'
+      )
+    )
   )
 )
 
-export const ceramicURL = (
-  process.env.CERAMIC_URL
-  ?? import.meta.env?.CERAMIC_URL
-  ?? 'https://ceramic.metagame.wtf'       // mainnet
-  ?? 'https://ceramic-clay.3boxlabs.com'  // testnet
-)
+// export const ceramicURL = (
+//   process.env.CERAMIC_URL
+//   ?? import.meta.env?.CERAMIC_URL
+//   ?? 'https://ceramic.metagame.wtf'       // mainnet
+//   ?? 'https://ceramic-clay.3boxlabs.com'  // testnet
+// )
 
-export const ceramicNetwork = (
-  process.env.CERAMIC_NETWORK
-  ?? import.meta.env?.CERAMIC_NETWORK
-  ?? 'mainnet' ?? 'testnet-clay'
-)
+// export const ceramicNetwork = (
+//   process.env.CERAMIC_NETWORK
+//   ?? import.meta.env?.CERAMIC_NETWORK
+//   ?? 'mainnet' ?? 'testnet-clay'
+// )
 
 export const contractNetwork = (
-  process.env.VITE_CHAIN_NAME
-  ?? import.meta.env?.VITE_CHAIN_NAME
-  ?? 'polygon'
+  (
+    (process?.env?.VITE_CHAIN_NAME) ? (
+      process.env.VITE_CHAIN_NAME
+    ) : (
+      import.meta?.env ? (
+        import.meta.env.VITE_CHAIN_NAME
+      ) : (
+        'polygon'
+      )
+    )
+  )
 )
 
 export const ipfsLinkPattern = (
-  process.env.VITE_IPFS_LINK_PATTERN
-  ?? import.meta.env ? (
-    import.meta.env.VITE_IPFS_LINK_PATTERN
-  ) : (
-    'https://{v1cid}.ipfs.dweb.link/{path}'
-    ?? 'https://mimis.infura-ipfs.io/ipfs/{cid}/{path}'
+    (
+    (process?.env?.VITE_IPFS_LINK_PATTERN) ? (
+      process.env.VITE_IPFS_LINK_PATTERN
+    ) : (
+      import.meta?.env ? (
+        import.meta.env.VITE_IPFS_LINK_PATTERN
+      ) : (
+        'https://{v1cid}.ipfs.dweb.link/{path}'
+        ?? 'https://mimis.infura-ipfs.io/ipfs/{cid}/{path}'
+      )
+    )
   )
 )
 
@@ -67,15 +87,31 @@ export const Authorization = (
 )
 
 const ipfsAPIHost = (
-  process.env.IPFS_API_HOST
-  ?? import.meta.env?.IPFS_API_HOST
-  ?? 'ipfs.infura.io'
+  (
+    (process?.env?.IPFS_API_HOST) ? (
+      process.env.IPFS_API_HOST
+    ) : (
+      import.meta?.env ? (
+        import.meta.env.IPFS_API_HOST
+      ) : (
+        'ipfs.infura.io'
+      )
+    )
+  )
 )
 
 const ipfsAPIPort = (
-  process.env.IPFS_API_PORT
-  ?? import.meta.env?.IPFS_API_PORT
-  ?? 5001
+  (
+    (process?.env?.IPFS_API_PORT) ? (
+      process.env.IPFS_API_PORT
+    ) : (
+      import.meta?.env ? (
+        import.meta.env.IPFS_API_PORT
+      ) : (
+        5001
+      )
+    )
+  )
 )
 
 export const ipfs = ipfsHTTPClient({
@@ -86,8 +122,17 @@ export const ipfs = ipfsHTTPClient({
 })
 
 export const nftGraph = (
-  process.env.NFT_GRAPH
-  ?? 'https://api.thegraph.com/subgraphs/name/alberthaotan/nft-matic'
+  (
+    (process?.env?.VITE_NFT_GRAPH) ? (
+      process.env.VITE_NFT_GRAPH
+    ) : (
+      import.meta?.env ? (
+        import.meta.env.VITE_NFT_GRAPH
+      ) : (
+        'https://api.thegraph.com/subgraphs/name/alberthaotan/nft-matic'
+      )
+    )
+  )
 )
 
 export const rolePermissions = {
@@ -105,8 +150,17 @@ export const rolePermissions = {
 }
 
 export const nftHomepageBase = (
-  process.env.NFT_HOMEPAGE_BASE
-  ?? 'https://chiev.es/#/view'
+  (
+    (process?.env?.VITE_NFT_BASE) ? (
+      process.env.VITE_NFT_BASE
+    ) : (
+      import.meta?.env ? (
+        import.meta.env.VITE_NFT_BASE
+      ) : (
+        'https://chiev.es/#/view'
+      )
+    )
+  )
 )
 
 export const defaults = {

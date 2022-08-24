@@ -16,6 +16,7 @@
       "@/lib/*": ["lib/*"],
       "@/config": ["config"],
       "@/components": ["components/index"],
+      "@/types": ["lib/types"],
     },
   },
   "include": ["./src"],

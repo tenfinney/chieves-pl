@@ -69,7 +69,7 @@ export const isSet = (
   }
 )
 
-export const switchTo = async (chain: string) => {
+export const switchTo = async (chain: number) => {
   try {
     await window.ethereum.request?.({
       method: 'wallet_switchEthereumChain',
