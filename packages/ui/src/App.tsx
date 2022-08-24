@@ -12,7 +12,6 @@ import {
 } from '@apollo/client'
 import { nftGraph } from '@/config'
 import {
-  // BrowserRouter as Router,
   HashRouter as Router,
   Routes,
   Route,

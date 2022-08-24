@@ -130,7 +130,10 @@ const Home = () => {
         return setToken(idx, { error: extractMessage(error) })
       }
     },
-    [GATING_TYPE, TYPE_BOUNDARY, TYPE_WIDTH, gatingVisible, offset, roContract, setToken],
+    [
+      GATING_TYPE, TYPE_BOUNDARY, TYPE_WIDTH,
+      gatingVisible, roContract, setToken,
+    ],
   )
 
   const controller = useRef(null)
@@ -161,20 +164,16 @@ const Home = () => {
                 if(!data || data.trim() === '') {
                   throw new Error('Aww, No Data. 😾')
                 }
-                try {
-                  setToken(idx, { metadata: JSON5.parse(data) })
 
-                  roContract.totalSupply(token.id)
-                  .then((total: bigint) => setToken(idx, { total }))
+                setToken(idx, { metadata: JSON5.parse(data) })
 
-                  roContract.getMax(token.id)
-                  .then((max: bigint) => setToken(idx, { max }))
-                } catch(error) {
-                  throw error
-                }
+                roContract.totalSupply(token.id)
+                .then((total: bigint) => setToken(idx, { total }))
+
+                roContract.getMax(token.id)
+                .then((max: bigint) => setToken(idx, { max }))
               } catch(error) {
-                if(!(error instanceof DOMException)) {
-                  const errObj = { error: extractMessage(error) }
+                if(!(error instanceof DOMException)) { // !aborted
                   return setToken(idx, {
                     error: extractMessage(error)
                   })
@@ -231,6 +230,7 @@ const Home = () => {
             )))
           )
         }
+
         const tokens = (await Promise.all(generators)).flat()
         await retrieve(tokens)
       }
@@ -241,7 +241,7 @@ const Home = () => {
   return (
     <Container maxW="full">
       <Helmet>
-        <title>𝔐𝔢𝔱𝔞𝔊𝔞𝔪𝔢’𝔰 ’𝓒𝓱𝓲𝓮𝓿𝓮𝓶𝓲𝓷𝓽𝓼</title>
+        <title>𝔐𝔢𝔱𝔞𝔊𝔞𝔪𝔢’𝔰 ’𝘾𝙝𝙞𝙚𝙫𝙚𝙢𝙞𝙣𝙩𝙨</title>
         <meta
           name="description"
           content="MetaGame’s ’Chievemint NFTs"
