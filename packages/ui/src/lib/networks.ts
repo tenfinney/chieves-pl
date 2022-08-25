@@ -1,7 +1,6 @@
 // import { infuraId, contractNetwork } from '@/config'
 import { infuraId } from '@/config'
-import { Maybe, NetworkInfo } from '@/types'
-
+import { NetworkInfo } from '@/types'
 
 const contractNetwork = 'polygon' // env variables are broken
 
@@ -44,10 +43,7 @@ export const NETWORKS: NetworkInfo = {
     label: 'Mumbai',
     symbol: '𝙼𝙰𝚃𝙸𝙲',
     explorer: 'https://mumbai.polygonscan.com',
-    rpc: (
-      process.env.NEXT_PUBLIC_MUMBAI_RPC
-      ?? 'https://rpc-mumbai.matic.today'
-    ),
+    rpc: 'https://rpc-mumbai.matic.today',
   },
   localhost: {
     chainId: 0x7a69,

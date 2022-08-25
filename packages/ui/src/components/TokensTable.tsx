@@ -1,6 +1,6 @@
 import {
   Box, Flex, Spinner, Stack, Table, Tbody, Td, Text, Th, Thead, Tr,
-  Link as ChakraLink, Tooltip, chakra,
+  Link as ChakraLink, Tooltip, chakra, TableBodyProps, TableCellProps,
 } from '@chakra-ui/react'
 import { extractMessage, httpURL, regexify } from '@/lib/helpers'
 import { TokenState } from '@/lib/types'
@@ -37,13 +37,17 @@ const ErrorTd:React.FC<Token> = ({ token }) => (
   </Td>
 )
 
-const LoadingTd:React.FC<Token> = () => (
-  <Td colSpan={4}>
-    <Flex justify="center">
-      <Spinner thickness="4px"/>
-      <Text ml={3}>Loading Metadata…</Text>
-    </Flex>
-  </Td>
+const LoadingTd:React.FC<
+  Token & { label?: string } & TableCellProps
+> = (
+  ({ token, label = 'Loading Metadata…', ...props }) => (
+    <Td {...props}>
+      <Flex justify="center">
+        <Spinner thickness="4px"/>
+        <Text ml={3}>{label}</Text>
+      </Flex>
+    </Td>
+  )
 )
 
 const ImageTd:React.FC<Token> = ({ token }) => (
@@ -213,7 +217,13 @@ export const TokensTable: React.FC<{
                   return <ErrorTd {...{ token }}/>
                 }
                 if(!token.metadata) {
-                  return <LoadingTd {...{ token }}/>
+                  return (
+                    <LoadingTd
+                      colSpan={token.uri ? 3 : 4}
+                      label={`${token.uri ? 'Loading' : 'Finding'} Metadata…`}
+                      {...{ token }}
+                    />
+                  )
                 }
                 return (
                   <>

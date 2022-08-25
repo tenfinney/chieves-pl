@@ -59,6 +59,7 @@ const config = (env: any) => {
       path: path.resolve(__dirname, 'dist'),
       filename: '[name].bundle.js',
     },
+    devtool: 'source-map',
   })
 }
 
