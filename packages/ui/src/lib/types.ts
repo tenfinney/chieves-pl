@@ -103,3 +103,5 @@ export type Limits = {
   high?: number
   low?: number
 }
+
+export type SpanList = Array<number | Limits>

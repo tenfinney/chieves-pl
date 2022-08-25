@@ -1,5 +1,7 @@
-import {
-  CodedError, FileListish, Limits, Maybe, MetaMaskError, NamedString, NestedError
+import type {
+  CodedError, FileListish, Limits, Maybe,
+  MetaMaskError, NamedString, NestedError,
+  SpanList,
 } from '@/lib/types'
 import { CID } from 'multiformats/cid'
 import { NETWORKS } from '@/lib/networks'
@@ -187,7 +189,7 @@ export const extractMessage = (error: unknown): string => (
   ) as string
 )
 
-export const spanListToString = (list: Array<number | Limits>) => (
+export const spanListToString = (list: SpanList) => (
   list.map((entry) => (
     (typeof entry === 'number') ? (
       entry.toString()
@@ -201,7 +203,7 @@ export const spanListToString = (list: Array<number | Limits>) => (
   .join(',')
 )
 
-export const toSpanList = (str: string): Array<number | Limits> => {
+export const toSpanList = (str: string): SpanList => {
   if(str == null) return []
 
   const visibles = (
