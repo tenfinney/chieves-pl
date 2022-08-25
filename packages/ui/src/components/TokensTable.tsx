@@ -1,9 +1,9 @@
 import {
   Box, Flex, Spinner, Stack, Table, Tbody, Td, Text, Th, Thead, Tr,
-  Link as ChakraLink, Tooltip, chakra, TableBodyProps, TableCellProps,
+  Link as ChakraLink, Tooltip, chakra, type TableCellProps,
 } from '@chakra-ui/react'
 import { extractMessage, httpURL, regexify } from '@/lib/helpers'
-import { TokenState } from '@/lib/types'
+import type { TokenState } from '@/lib/types'
 import Markdown from 'react-markdown'
 import React from 'react'
 import { Link as ReactRouterLink } from 'react-router-dom'
@@ -220,7 +220,7 @@ export const TokensTable: React.FC<{
                   return (
                     <LoadingTd
                       colSpan={token.uri ? 3 : 4}
-                      label={`${token.uri ? 'Loading' : 'Finding'} Metadata…`}
+                      label={`${token.uri ? 'Loading' : 'Finding'} Metadata…`}  
                       {...{ token }}
                     />
                   )

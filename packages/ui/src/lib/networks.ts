@@ -1,8 +1,6 @@
 // import { infuraId, contractNetwork } from '@/config'
-import { infuraId } from '@/config'
+import { infuraId, contractNetwork } from '@/config'
 import { NetworkInfo } from '@/types'
-
-const contractNetwork = 'polygon' // env variables are broken
 
 export const NETWORKS: NetworkInfo = {
   mainnet: {

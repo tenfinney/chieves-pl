@@ -72,15 +72,16 @@ export const isSet = (
 )
 
 export const switchTo = async (chain: number) => {
+  const chainId = `0x${chain.toString(16)}`
   try {
     await window.ethereum.request?.({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: chain }],
+      params: [{ chainId }],
     })
   } catch (switchError) {
     if ((switchError as CodedError).code === 4902) {
       throw new Error(
-        `The network “${NETWORKS[chain].name ?? 'Unknown'}”`
+        `The network “${NETWORKS[chainId].name ?? 'Unknown'}”`
         + ' is not yet available in your MetaMask.\n\n'
         + ' Please add it.'
       )

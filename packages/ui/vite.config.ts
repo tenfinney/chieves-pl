@@ -10,10 +10,9 @@ import CommonJSPlugin from '@rollup/plugin-commonjs'
 // import NodePolyfillsPlugin from 'rollup-plugin-node-polyfills'
 import InjectPlugin from '@rollup/plugin-inject'
 
-// https://vitejs.dev/config/
 export default defineConfig(
   ({ mode }) => {
-    const env = loadEnv(mode, process.cwd(), '')
+    const env = loadEnv(mode, process.cwd())
 
     const define = Object.fromEntries(
       Object.entries(env).map(([key, val]) => (
@@ -24,7 +23,6 @@ export default defineConfig(
         )
       )).filter((v) => !!v)
     )
-    console.debug({ define })
 
     return {
       plugins: [

@@ -133,7 +133,7 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
           contractAddress
           && abi
           && userProvider
-          && Number(chain) === NETWORKS.contract.chainId
+          && chain === NETWORKS.contract.chainId
         ) {
           return new Contract(contractAddress, abi, userProvider.getSigner())
         } else {
@@ -164,7 +164,7 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
           web3Provider.getSigner().getAddress()
         ))
 
-        setChain((vider as { chainId: number }).chainId)
+        setChain(Number((vider as { chainId: string }).chainId))
       },
       [],
     )
