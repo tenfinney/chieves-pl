@@ -166,6 +166,7 @@ export const OptionsForm: React.FC<{
       [metadata] = await ipfsify(metadata)
       await configure({ metadata })
     } catch(error) {
+      console.error({ error })
       toast({
         title: 'Metadata Error',
         description: extractMessage(error),

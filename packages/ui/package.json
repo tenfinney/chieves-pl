@@ -6,16 +6,16 @@
   "type": "commonjs",
   "scripts": {
     "dev": "vite",
-    "vite:build": "tsc && vite build",
-    "vite:preview": "vite preview",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
     "clean": "rm -rf dist/",
-    "build": "webpack --mode=production --node-env=production",
-    "build:dev": "webpack --mode=development",
-    "build:prod": "webpack --mode=production --node-env=production",
-    "watch": "webpack --watch",
-    "serve": "webpack serve",
-    "gh:publish": "gh-pages --dist dist/ --dotfiles --message 'Updatin’ GitHub Pages'",
-    "analyze": "yarn webpack --profile --json > bundle-stats.json && yarn webpack-bundle-analyzer --port 9898 bundle-stats.json dist/"
+    "webpack:build": "webpack --mode=production --node-env=production",
+    "webpack:build:dev": "webpack --mode=development",
+    "webpack:build:prod": "webpack --mode=production --node-env=production",
+    "webpack:watch": "webpack --watch",
+    "webpack:serve": "webpack serve",
+    "webpack:analyze": "yarn webpack --profile --json > bundle-stats.json && yarn webpack-bundle-analyzer --port 9898 bundle-stats.json dist/",
+    "gh:publish": "gh-pages --dist dist/ --dotfiles --message 'Updatin’ GitHub Pages'"
   },
   "dependencies": {
     "@chakra-ui/icons": "1.1",
