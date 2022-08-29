@@ -27,7 +27,7 @@ const Home = () => {
     useState<Array<number | Limits>>(toSpanList(visible))
   )
   const navigate = useNavigate()
-  const { roContract, constsContract } = useWeb3()
+  const { roContract, bitsLibrary } = useWeb3()
   const setToken = useCallback(
     (idx: number, info: Record<string, unknown>) => {
       let token
@@ -73,21 +73,21 @@ const Home = () => {
   }, [visibleList, limit, offset, gatingVisible, navigate])
 
   useEffect(() => {
-    if(roContract && constsContract) {
+    if(roContract && bitsLibrary) {
       roContract.typeSupply()
       .then((supply: {
         toBigInt: () => bigint // call-bind?
       }) => supply.toBigInt())
       .then(setTypeCount)
-      constsContract.GATING_TYPE()
+      bitsLibrary.GATING_TYPE()
       .then((type: { toBigInt: () => bigint }) => type.toBigInt())
       .then(setGATING_TYPE)
-      constsContract.TYPE_WIDTH()
+      bitsLibrary.TYPE_WIDTH()
       .then(setTYPE_WIDTH)
-      constsContract.TYPE_BOUNDARY()
+      bitsLibrary.TYPE_BOUNDARY()
       .then(setTYPE_BOUNDARY)
     }
-  }, [roContract, constsContract])
+  }, [roContract, bitsLibrary])
 
   useEffect(() => {
     setVisibleList(toSpanList(visible))
@@ -189,7 +189,7 @@ const Home = () => {
   useEffect(() => {
     const load = async () => {
       if(
-        roContract && constsContract && typeCount != null
+        roContract && bitsLibrary && typeCount != null
         && TYPE_WIDTH != null && TYPE_BOUNDARY != null
         && GATING_TYPE != null
       ) {
@@ -231,7 +231,7 @@ const Home = () => {
     }
     load()
   }, [
-    visibleList, retrieve, roContract, constsContract,
+    visibleList, retrieve, roContract, bitsLibrary,
     limit, offset, typeCount,
     TYPE_WIDTH, TYPE_BOUNDARY, GATING_TYPE,
   ])

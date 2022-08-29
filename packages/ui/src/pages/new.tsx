@@ -45,7 +45,8 @@ export const New = () => (
 
 const Content: React.FC = () => {
   const {
-    ensProvider, roContract, rwContract, connecting, connect, chain, address,
+    ensProvider, roContract, rwContract, rolesLibrary,
+    connecting, connect, chain, address,
   } = useWeb3()
   const [search, setSearch] = useSearchParams({ tokenId: '' })
   const id = search.get('tokenId')
@@ -66,10 +67,10 @@ const Content: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       if(roContract) {
-        const numRoles = (await roContract.roleIndexForName('ReservedLast')) - 1
+        const numRoles = (await rolesLibrary.roleIndexForName('ReservedLast')) - 1
         const roles: Array<string> = await Promise.all(
           Array.from({ length: numRoles }).map(async (_, idx) => (
-            await roContract.roleNameByIndex(idx + 1)
+            await rolesLibrary.roleNameByIndex(idx + 1)
           ))
         )
         setRoles(roles)
@@ -89,7 +90,7 @@ const Content: React.FC = () => {
           'Connect your Web3 account to reserve an ID.'
         )
       }
-      if(!roContract){
+      if(!rolesLibrary){
         throw new Error('Library not loaded.')
       }
       const grants: Array<number> = []
@@ -98,7 +99,7 @@ const Content: React.FC = () => {
         async ([key, value]: [key: string, value: unknown]) => {
           if(typeof value === 'boolean' && value) {
             const [, type, role] = key.match(/^(grant|disable)\((.+)\)$/) ?? []
-            const roleId = await rwContract.roleIndexForName(role)
+            const roleId = await rolesLibrary.roleIndexForName(role)
             switch(type) {
               case 'grant': {
                 grants.push(roleId)

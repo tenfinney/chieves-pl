@@ -13,6 +13,7 @@ let owner: SignerWithAddress
 let creator: SignerWithAddress
 let token: Ethers.Contract
 let bits: Ethers.Contract
+let roles: Ethers.Contract
 
 const transact = async (
   { sender = owner, method, args = [] }:
@@ -31,12 +32,16 @@ beforeEach(async () => {
   const Bits = await ethers.getContractFactory(
     'Bits'
   )
+  const Roles = await ethers.getContractFactory(
+    'Roles'
+  )
   token = await upgrades.deployProxy(
     Token,
     ['SmartLaw Cred'],
     { kind: 'uups', timeout: 10 * 60 * 1000 },
   )
   bits = await Bits.deploy()
+  roles = await Roles.deploy()
 })
 
 
@@ -58,9 +63,9 @@ describe('The Token Contract', () => {
         await bits.VANILLA_TYPE(),
         await bits.ROLE_WIDTH(),
         await bits.ROLE_BOUNDARY(),
-        await token.roleIndexForName('Minter'),
-        await token.roleIndexForName('Configurer'),
-        await token.roleIndexForName('Limiter'),
+        await roles.roleIndexForName('Minter'),
+        await roles.roleIndexForName('Configurer'),
+        await roles.roleIndexForName('Limiter'),
       ]
       .map((val) => BigInt(val))
 
@@ -98,13 +103,13 @@ describe('The Token Contract', () => {
         (tkn & ((2n**TYPE_WIDTH) - 1n)) === GATING_TYPE
       )))
 
-      const roles = await Promise.all(
+      const setRoles = await Promise.all(
         gates.map(async (tkn) => (
           (tkn >> ROLE_BOUNDARY) & 2n**ROLE_WIDTH - 1n
         ))
       )
 
-      expect(roles).to.have.members(
+      expect(setRoles).to.have.members(
         [MINTER_ROLE, CONFIGURER_ROLE, LIMITER_ROLE]
       )
     }
@@ -113,7 +118,7 @@ describe('The Token Contract', () => {
   it(
     'it allows for a Superuser to create tokens.',
     async () => {
-      const creatorRole = await token.roleIndexForName('Creator')
+      const creatorRole = await roles.roleIndexForName('Creator')
 
       await expect(
         transact({ sender: creator, method: 'create()' }),
@@ -141,7 +146,7 @@ describe('The Token Contract', () => {
       )
       .to.be.true
 
-      const MINTER_ROLE = await token.roleIndexForName("Minter")
+      const MINTER_ROLE = await roles.roleIndexForName("Minter")
 
       await expect(
         transact({
@@ -154,7 +159,7 @@ describe('The Token Contract', () => {
       .to.eventually.be.fulfilled
 
       const firstGate = (await token.tokenByIndex(3)).toBigInt()
-      const minterRole = await token.roleIndexForName("Minter")
+      const minterRole = await roles.roleIndexForName("Minter")
       const minterOfNum2 = (
         await token['roleToken(uint8,uint256)'](minterRole, 2)
       ).toBigInt()
@@ -191,7 +196,7 @@ describe('The Token Contract', () => {
   it(
     'retrieves generic metadata.',
     async () => {
-      const minterRole = await token.roleIndexForName('Minter')
+      const minterRole = await roles.roleIndexForName('Minter')
       const minterGate = await token['roleToken(uint8)'](minterRole)
 
       await transact({
@@ -226,7 +231,7 @@ describe('The Token Contract', () => {
         'a user not granted a role not to have it',
       ).to.be.false
 
-      const creatorRole = await token.roleIndexForName('Creator')
+      const creatorRole = await roles.roleIndexForName('Creator')
       const creatorGate = await token['roleToken(uint8)'](creatorRole)
 
       await transact({
@@ -256,7 +261,7 @@ describe('The Token Contract', () => {
   it(
     'destroys a single use token after use',
     async () => {
-      const minterRole = await token.roleIndexForName('Minter')
+      const minterRole = await roles.roleIndexForName('Minter')
       const tx = await (
         token['create(uint8[],uint8[])']([minterRole], [])
       )
@@ -314,7 +319,7 @@ describe('The Token Contract', () => {
   it(
     'allows a creator to mint.',
     async () => {
-      const creatorRole = await token.roleIndexForName('Creator')
+      const creatorRole = await roles.roleIndexForName('Creator')
       const creatorGate = await token['roleToken(uint8)'](creatorRole)
 
       await transact({
@@ -332,7 +337,7 @@ describe('The Token Contract', () => {
         'a user granted a role to have it',
       ).to.be.true
 
-      const minterRole = await token.roleIndexForName('Minter')
+      const minterRole = await roles.roleIndexForName('Minter')
       const lastIndex = (await token.typeSupply()).toBigInt()
       await transact({
         sender: creator,
@@ -376,7 +381,7 @@ describe('The Token Contract', () => {
   it(
     'permits unrestricted transfers.',
     async () => {
-      const creatorRole = await token.roleIndexForName('Creator')
+      const creatorRole = await roles.roleIndexForName('Creator')
       const creatorGate = await token['roleToken(uint8)'](creatorRole)
 
       await transact({
@@ -394,7 +399,7 @@ describe('The Token Contract', () => {
         'a user granted a role to have it',
       ).to.be.true
 
-      const minterRole = await token.roleIndexForName('Minter')
+      const minterRole = await roles.roleIndexForName('Minter')
       const lastIndex = (await token.typeSupply()).toBigInt()
       await transact({
         sender: creator,
@@ -421,7 +426,7 @@ describe('The Token Contract', () => {
         'a user to have a gating token when granted a role'
       ).to.equal(5)
 
-      const transfererRole = await token.roleIndexForName('Transferer')
+      const transfererRole = await roles.roleIndexForName('Transferer')
       await token.disableRole(
         transfererRole, createdIndex
       )
@@ -436,9 +441,9 @@ describe('The Token Contract', () => {
   it(
     'can list available roles.',
     async () => {
-      const numRoles = await token.roleIndexForName('ReservedLast')
+      const numRoles = await roles.roleIndexForName('ReservedLast')
       for (let i = 1; i <= numRoles; i++) {
-        const role = await token.roleNameByIndex(i)
+        const role = await roles.roleNameByIndex(i)
       }
     }
   )
@@ -446,7 +451,7 @@ describe('The Token Contract', () => {
   it(
     'destroys a single-use creation token.',
     async () => {
-      const creatorRole = await token.roleIndexForName('Creator')
+      const creatorRole = await roles.roleIndexForName('Creator')
       let creatorToken = await token['roleToken(uint8)'](creatorRole)
       creatorToken = creatorToken.toBigInt()
       const USE_ONCE = (await bits.USE_ONCE()).toBigInt()
@@ -501,7 +506,7 @@ describe('The Token Contract', () => {
   it(
     'permits unrestricted minting.',
     async () => {
-      const creatorRole = await token.roleIndexForName('Creator')
+      const creatorRole = await roles.roleIndexForName('Creator')
       const creatorGate = await token['roleToken(uint8)'](creatorRole)
 
       await transact({
@@ -519,7 +524,7 @@ describe('The Token Contract', () => {
         'a user granted a role to have it',
       ).to.be.true
 
-      const minterRole = await token.roleIndexForName('Minter')
+      const minterRole = await roles.roleIndexForName('Minter')
       const lastIndex = (await token.typeSupply()).toBigInt()
       await transact({
         sender: creator,

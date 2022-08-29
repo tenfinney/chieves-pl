@@ -89,7 +89,6 @@ const deploy = async ({
   } else {
     deployment = await artifacts.deploy()
   }
-
   const {
     address: deployed,
     signer: signator,
@@ -109,7 +108,7 @@ const deploy = async ({
   if(proxy) {
     let loops = 0
     const timeout =  4 * 1000
-    const maxLoops = 25
+    const maxLoops = 5
     let done = false
 
     while(!done && ++loops <= maxLoops) {
@@ -180,6 +179,9 @@ const deploy = async ({
 }
 
 const main = async () => {
+  await deploy({ contract: 'Roles' })
+  await deploy({ contract: 'Bits' })
+
   const primary = 'BulkDisbursableNFTs'
   console.log(`\n\n 📡 Deploying: ${chalk.hex('#0E9907')(primary)}…\n`)
 
@@ -200,9 +202,6 @@ const main = async () => {
     await run('verify:verify', {
       address: implementationAddress,
       constructorArguments: [],
-    })
-    const library = await deploy({
-      contract: 'Bits'
     })
   } catch(err) {
     console.error((err as Error).message)

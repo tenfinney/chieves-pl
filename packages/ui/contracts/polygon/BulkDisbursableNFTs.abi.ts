@@ -221,25 +221,6 @@ export default [
   {
     inputs: [
       {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    name: 'Roles',
-    outputs: [
-      {
-        internalType: 'string',
-        name: '',
-        type: 'string',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
         internalType: 'address',
         name: 'account',
         type: 'address',
@@ -334,12 +315,12 @@ export default [
   {
     inputs: [
       {
-        internalType: 'enum BulkDisbursableNFTs.Role[]',
+        internalType: 'enum Roles.Role[]',
         name: 'grants',
         type: 'uint8[]',
       },
       {
-        internalType: 'enum BulkDisbursableNFTs.Role[]',
+        internalType: 'enum Roles.Role[]',
         name: 'disables',
         type: 'uint8[]',
       },
@@ -363,12 +344,12 @@ export default [
         type: 'address',
       },
       {
-        internalType: 'enum BulkDisbursableNFTs.Role[]',
+        internalType: 'enum Roles.Role[]',
         name: 'grants',
         type: 'uint8[]',
       },
       {
-        internalType: 'enum BulkDisbursableNFTs.Role[]',
+        internalType: 'enum Roles.Role[]',
         name: 'disables',
         type: 'uint8[]',
       },
@@ -400,13 +381,13 @@ export default [
   {
     inputs: [
       {
-        internalType: 'enum BulkDisbursableNFTs.Role',
+        internalType: 'enum Roles.Role',
         name: 'toDisable',
         type: 'uint8',
       },
       {
         internalType: 'uint256',
-        name: 'tokenId',
+        name: 'disablingIndex',
         type: 'uint256',
       },
     ],
@@ -437,7 +418,7 @@ export default [
   {
     inputs: [
       {
-        internalType: 'enum BulkDisbursableNFTs.Role',
+        internalType: 'enum Roles.Role',
         name: 'role',
         type: 'uint8',
       },
@@ -485,7 +466,26 @@ export default [
   {
     inputs: [
       {
-        internalType: 'enum BulkDisbursableNFTs.Role',
+        internalType: 'uint256',
+        name: 'id',
+        type: 'uint256',
+      },
+    ],
+    name: 'getPerUserMax',
+    outputs: [
+      {
+        internalType: 'int256',
+        name: 'max',
+        type: 'int256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'enum Roles.Role',
         name: 'role',
         type: 'uint8',
       },
@@ -513,7 +513,7 @@ export default [
   {
     inputs: [
       {
-        internalType: 'enum BulkDisbursableNFTs.Role',
+        internalType: 'enum Roles.Role',
         name: 'role',
         type: 'uint8',
       },
@@ -531,7 +531,7 @@ export default [
   {
     inputs: [
       {
-        internalType: 'enum BulkDisbursableNFTs.Role',
+        internalType: 'enum Roles.Role',
         name: 'role',
         type: 'uint8',
       },
@@ -554,7 +554,7 @@ export default [
   {
     inputs: [
       {
-        internalType: 'enum BulkDisbursableNFTs.Role',
+        internalType: 'enum Roles.Role',
         name: 'role',
         type: 'uint8',
       },
@@ -577,7 +577,7 @@ export default [
   {
     inputs: [
       {
-        internalType: 'enum BulkDisbursableNFTs.Role',
+        internalType: 'enum Roles.Role',
         name: 'role',
         type: 'uint8',
       },
@@ -596,7 +596,7 @@ export default [
   {
     inputs: [
       {
-        internalType: 'enum BulkDisbursableNFTs.Role',
+        internalType: 'enum Roles.Role',
         name: 'role',
         type: 'uint8',
       },
@@ -625,7 +625,7 @@ export default [
   {
     inputs: [
       {
-        internalType: 'enum BulkDisbursableNFTs.Role',
+        internalType: 'enum Roles.Role',
         name: 'role',
         type: 'uint8',
       },
@@ -649,7 +649,7 @@ export default [
   {
     inputs: [
       {
-        internalType: 'enum BulkDisbursableNFTs.Role',
+        internalType: 'enum Roles.Role',
         name: 'role',
         type: 'uint8',
       },
@@ -766,25 +766,6 @@ export default [
   {
     inputs: [
       {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    name: 'maxes',
-    outputs: [
-      {
-        internalType: 'int64',
-        name: '',
-        type: 'int64',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
         internalType: 'address[]',
         name: 'to',
         type: 'address[]',
@@ -888,45 +869,7 @@ export default [
   {
     inputs: [
       {
-        internalType: 'string',
-        name: 'roleName',
-        type: 'string',
-      },
-    ],
-    name: 'roleIndexForName',
-    outputs: [
-      {
-        internalType: 'enum BulkDisbursableNFTs.Role',
-        name: 'role',
-        type: 'uint8',
-      },
-    ],
-    stateMutability: 'pure',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'enum BulkDisbursableNFTs.Role',
-        name: 'index',
-        type: 'uint8',
-      },
-    ],
-    name: 'roleNameByIndex',
-    outputs: [
-      {
-        internalType: 'string',
-        name: '',
-        type: 'string',
-      },
-    ],
-    stateMutability: 'pure',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'enum BulkDisbursableNFTs.Role',
+        internalType: 'enum Roles.Role',
         name: 'role',
         type: 'uint8',
       },
@@ -945,7 +888,7 @@ export default [
   {
     inputs: [
       {
-        internalType: 'enum BulkDisbursableNFTs.Role',
+        internalType: 'enum Roles.Role',
         name: 'role',
         type: 'uint8',
       },
@@ -1082,6 +1025,24 @@ export default [
       },
     ],
     name: 'setMax',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'id',
+        type: 'uint256',
+      },
+      {
+        internalType: 'int64',
+        name: 'max',
+        type: 'int64',
+      },
+    ],
+    name: 'setPerUserMax',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',

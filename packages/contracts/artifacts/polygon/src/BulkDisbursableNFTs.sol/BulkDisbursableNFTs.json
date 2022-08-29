@@ -225,25 +225,6 @@
     {
       "inputs": [
         {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "RolesProxy",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "address",
           "name": "account",
           "type": "address"
@@ -781,25 +762,6 @@
           "internalType": "bool",
           "name": "superuser",
           "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "maxes",
-      "outputs": [
-        {
-          "internalType": "int64",
-          "name": "",
-          "type": "int64"
         }
       ],
       "stateMutability": "view",

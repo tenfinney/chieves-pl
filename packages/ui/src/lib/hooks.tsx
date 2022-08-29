@@ -21,7 +21,8 @@ export type Web3ContextType = {
   ensProvider?: JsonRpcProvider
   contractProvider?: JsonRpcProvider
   roContract?: Contract
-  constsContract?: Contract
+  bitsLibrary?: Contract
+  rolesLibrary?: Contract
   rwContract?: Contract
   address?: string
   chain?: number
@@ -69,8 +70,10 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
     const [connected, setConnected] = useState(false)
     const [contractAddress, setContractAddress] = useState(null)
     const [abi, setABI] = useState(null)
-    const [constsContractAddress, setConstsContractAddress] = useState(null)
-    const [constsABI, setConstsABI] = useState(null)
+    const [rolesAddress, setRolesAddress] = useState(null)
+    const [rolesABI, setRolesABI] = useState(null)
+    const [bitsAddress, setBitsAddress] = useState(null)
+    const [bitsABI, setBitsABI] = useState(null)
 
     useEffect(() => {
       const lib = async () => {
@@ -116,15 +119,27 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
       },
       [contractProvider, abi, contractAddress],
     )
-    const constsContract = useMemo(
+
+    const bitsLibrary = useMemo(
       () => {
-        if(constsContractAddress && constsABI) {
+        if(bitsAddress && bitsABI) {
           return (
-            new Contract(constsContractAddress, constsABI, contractProvider)
+            new Contract(bitsAddress, bitsABI, contractProvider)
           )
         }
       },
-      [contractProvider, constsABI, constsContractAddress],
+      [contractProvider, bitsABI, bitsAddress],
+    )
+
+    const rolesLibrary = useMemo(
+      () => {
+        if(rolesAddress && rolesABI) {
+          return (
+            new Contract(rolesAddress, rolesABI, contractProvider)
+          )
+        }
+      },
+      [contractProvider, rolesABI, rolesAddress],
     )
 
     const rwContract = useMemo(
@@ -224,15 +239,17 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
     useEffect(() => {
       const libs = async () => {
         const chain = contractNetwork
-        import(
-          `../contracts/${chain}/Bits.address.ts`
-        )
-        .then(({ default: addr }) => setConstsContractAddress(addr))
+        import(`../contracts/${chain}/Bits.address.ts`)
+        .then(({ default: addr }) => setBitsAddress(addr))
 
-        import (
-          `../contracts/${chain}/Bits.abi.ts`
-        )
-        .then(({ default: abi }) => setConstsABI(abi))
+        import(`../contracts/${chain}/Bits.abi.ts`)
+        .then(({ default: abi }) => setBitsABI(abi))
+
+        import(`../contracts/${chain}/Roles.address.ts`)
+        .then(({ default: addr }) => setRolesAddress(addr))
+
+        import(`../contracts/${chain}/Roles.abi.ts`)
+        .then(({ default: abi }) => setRolesABI(abi))
       }
 
       libs()
@@ -245,7 +262,8 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
           ensProvider,
           contractProvider,
           roContract,
-          constsContract,
+          bitsLibrary,
+          rolesLibrary,
           rwContract,
           connect,
           disconnect,
