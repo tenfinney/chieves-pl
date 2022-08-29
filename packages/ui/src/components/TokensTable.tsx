@@ -17,12 +17,19 @@ const IdTd:React.FC<IndexedToken> = ({ token }) => (
   <Td>
     <Tooltip
       label={token.id != null ? (
-        regexify(`0x${BigInt(token.id).toString(16)}`)
+        regexify(token.id)
       ) : (
         '𝚄𝚗𝚔𝚗𝚘𝚠𝚗'
       )}
     >
-      <Text>{token.index}</Text>
+      <Stack>
+        <Text>{token.index}</Text>
+        {token.gates != null && (
+          <Text title={`Controls Token #${token.gates}`}>
+            ({token.gates === 0 ? 'all' : token.gates})
+          </Text>
+        )}
+      </Stack>
     </Tooltip>
   </Td>
 )

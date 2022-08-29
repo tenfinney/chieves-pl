@@ -31,6 +31,7 @@ const Home = () => {
   const setToken = useCallback(
     (idx: number, info: Record<string, unknown>) => {
       let token
+
       setTokens((tkns: Array<TokenState>) => {
         token = { ...tkns[idx], ...info }
         return ([
@@ -92,43 +93,92 @@ const Home = () => {
     setVisibleList(toSpanList(visible))
   }, [visible])
 
-  const tokenForIndex = useCallback(
-    async ({
-      index, idx, hideable = true
-    }: {
-      index: number
-      idx: number
-      hideable?: boolean
-    }) => {
-      if(TYPE_WIDTH == null || TYPE_BOUNDARY == null) {
-        return null
-      }
-      try {
-        const id: bigint = (
-          (await roContract.tokenByIndex(index)).toBigInt()
-        )
-        const gating = (
-          (
-            id
-            & (
-              (2n**BigInt(TYPE_WIDTH) - 1n) // TYPE_WIDTH 1s
-              << BigInt(TYPE_BOUNDARY)
-            )
-          )
-          === GATING_TYPE
-        )
-        const is: { [key: string]: unknown } = {
-          gating,
-          hidden: hideable && gating && !gatingVisible,
-        }
+  const controller = useRef(null)
+  const retrieve = useCallback(
+    async (tokens: Array<TokenState>) => {
+      controller.current?.abort()
+      controller.current = new AbortController()
+      setTokens([])
+      return (
+        await Promise.allSettled(
+          tokens.map(async (token, idx) => {
+            try {
+              const id: bigint = token.id ?? (
+                (await roContract.tokenByIndex(token.index)).toBigInt()
+              )
 
-        return setToken(
-          idx,
-          { id: `0x${id.toString(16)}`, is, index }
+              const gating = token.is?.gating ?? (
+                (
+                  id
+                  & (
+                    (2n**BigInt(TYPE_WIDTH) - 1n) // TYPE_WIDTH 1s
+                    << BigInt(TYPE_BOUNDARY)
+                  )
+                )
+                === GATING_TYPE
+              )
+
+              const gates = token.gates ?? (gating ? (
+                Number((2n**32n - 1n) & id)
+              ) : ( null ))
+
+              const is: { [key: string]: unknown } = {
+                gating,
+                hidden: token.hidable != false && gating && !gatingVisible,
+              }
+
+              setToken(
+                idx,
+                {
+                  id: `0x${id.toString(16)}`,
+                  index: token.index,
+                  gates,
+                  is,
+                }
+              )
+
+              if(is.hidden) {
+                throw new Error('Token is hidden.')
+              }
+
+              const uri = token.uri ?? (
+                await roContract.uri(id)
+              )
+              if(uri === '') {
+                throw new Error('No URI… Waiting for configuration…')
+              }
+              setToken(idx, { uri })
+
+              const response = await fetch(
+                httpURL(uri)!,
+                { signal: controller.current.signal }
+              )
+              if(!response.ok) {
+                throw new Error(`Request Status: ${response.status}`)
+              }
+              const data = await response.text()
+              if(!data || data.trim() === '') {
+                throw new Error('Aww, No Data. 😾')
+              }
+
+              setToken(idx, { metadata: JSON5.parse(data) })
+
+              roContract.totalSupply(id)
+              .then((total: bigint) => setToken(idx, { total }))
+
+              roContract.getMax(id)
+              .then((max: bigint) => setToken(idx, { max }))
+            } catch(error) {
+              console.error({ error })
+              if(!(error instanceof DOMException)) { // !aborted
+                return setToken(idx, {
+                  error: extractMessage(error)
+                })
+              }
+            }
+          })
         )
-      } catch(error) {
-        return setToken(idx, { error: extractMessage(error) })
-      }
+      )
     },
     [
       GATING_TYPE, TYPE_BOUNDARY, TYPE_WIDTH,
@@ -136,107 +186,55 @@ const Home = () => {
     ],
   )
 
-  const controller = useRef(null)
-  const retrieve = useCallback(
-    async (tokens: Array<TokenState | Error>) => {
-      controller.current?.abort()
-      controller.current = new AbortController()
-      return (
-        await Promise.allSettled(
-          tokens.map(async (token, idx) => {
-            if(!(token instanceof Error)) {
-              if(token.is?.hidden) {
-                throw new Error('Token is hidden.')
-              }
-
-              try {
-                const uri = await roContract.uri(token.id)
-                if(uri === '') throw new Error('No URI… Waiting for configuration…')
-                setToken(idx, { uri })
-                const response = await fetch(
-                  httpURL(uri)!,
-                  { signal: controller.current.signal }
-                )
-                if(!response.ok) {
-                  throw new Error(`Request Status: ${response.status}`)
-                }
-                const data = await response.text()
-                if(!data || data.trim() === '') {
-                  throw new Error('Aww, No Data. 😾')
-                }
-
-                setToken(idx, { metadata: JSON5.parse(data) })
-
-                roContract.totalSupply(token.id)
-                .then((total: bigint) => setToken(idx, { total }))
-
-                roContract.getMax(token.id)
-                .then((max: bigint) => setToken(idx, { max }))
-              } catch(error) {
-                if(!(error instanceof DOMException)) { // !aborted
-                  return setToken(idx, {
-                    error: extractMessage(error)
-                  })
-                }
-              }
-            }
-          })
-        )
-      )
-    },
-    [roContract, setToken],
-  )
-
   useEffect(() => {
     const load = async () => {
-      if(roContract && constsContract && typeCount != null) {
-        const generators: Array<Promise<Array<TokenState | Error>>> = []
-        setTokens([])
+      if(
+        roContract && constsContract && typeCount != null
+        && TYPE_WIDTH != null && TYPE_BOUNDARY != null
+        && GATING_TYPE != null
+      ) {
+        const tokens: Array<TokenState> = []
         if(visibleList.some(() => true)) {
-          let count = 0
-          generators.push(...(visibleList.map(
-            async (elem) => {
+          visibleList.forEach(
+            (elem) => {
               let { high, low } = elem as Limits
-              let sorted = [high, low]
-              sorted = sorted.sort()
-              ;[low, high] = sorted
-              if(!sorted.some((elem) => elem != null)) {
+              const sorted = [low, high] = (
+                [low, high].sort((a, b) => (a - b))
+              )
+              if(sorted.some((elem) => elem == null)) {
                 [high, low] = [elem as number, elem as number]
               }
-              return (
-                await Promise.all(
-                  Array.from({ length: high - low + 1 })
-                  .map(async (_, idx) => (
-                    await tokenForIndex({
-                      index: low + idx,
-                      idx: count++,
-                      hideable: false,
-                    })
-                  ))
-                )
-              )
+              tokens.push(...(
+                Array.from({ length: high - low + 1 })
+                .map((_, idx) => ({
+                  index: low + idx,
+                  hidable: false,
+                }))
+              ))
             }
-          )) as Array<Promise<Array<TokenState | Error>>>)
+          )
         } else {
           const start = offset < 0 ? Number(typeCount) + offset : offset
           const count = Math.min(limit, Number(typeCount) - start)
-          generators.push(
-            ...(Array.from({ length: count })
-            .map(async (_, idx) => (
-              await tokenForIndex({
+          tokens.push(
+            ...(
+              Array.from({ length: count })
+              .map((_, idx) => ({
                 index: start + idx + 1,
-                idx,
-              })
-            )))
+              }))
+            )
           )
         }
 
-        const tokens = (await Promise.all(generators)).flat()
         await retrieve(tokens)
       }
     }
     load()
-  }, [visibleList, retrieve, roContract, constsContract, limit, offset, tokenForIndex, typeCount])
+  }, [
+    visibleList, retrieve, roContract, constsContract,
+    limit, offset, typeCount,
+    TYPE_WIDTH, TYPE_BOUNDARY, GATING_TYPE,
+  ])
 
   return (
     <Container maxW="full">

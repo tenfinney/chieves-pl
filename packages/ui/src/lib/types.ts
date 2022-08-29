@@ -52,7 +52,9 @@ export type CodedError = Error & { code: number }
 
 export type TokenState = {
   id?: string
+  hidable?: boolean
   is?: Record<string, unknown>
+  gates?: Maybe<number>
   index?: number
   uri?: string
   metadata?: ERC1155Metadata
