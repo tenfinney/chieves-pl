@@ -158,6 +158,7 @@ export const Web3ContextProvider: React.FC<{ children: ReactNode }> = (
     const update = useCallback(
       async (vider: ExternalProvider) => {
         const web3Provider = new Web3Provider(vider)
+        await web3Provider.ready
         setUserProvider(web3Provider)
 
         setAddress(await (

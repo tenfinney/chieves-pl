@@ -9,7 +9,7 @@ import {
   OrderedList, ListItem, Stack, Text, Flex, Spinner,
   Checkbox, RadioGroup, Radio, useToast,
 } from '@chakra-ui/react'
-import { capitalize, httpURL } from '@/lib/helpers'
+import { capitalize, deregexify, httpURL } from '@/lib/helpers'
 import { Maybe, ERC1155Metadata, Optional } from '@/lib/types'
 import { useWeb3 } from '@/lib/hooks'
 import { HomeLink } from '@/components'
@@ -57,11 +57,10 @@ const split = (raw: string) => (
 )
 
 const Disburse = () => {
-  let { nftId: tokenId } = useParams() 
-  
-  if (Array.isArray(tokenId)) {
-    [tokenId] = tokenId
-  }
+  const { nftId } = useParams() 
+  const tokenId = useMemo(() => (
+    deregexify(Array.isArray(nftId) ? nftId[0] : nftId)
+  ), [nftId])
   const [balance, setBalance] = useState<number>()
   const [metadata, setMetadata] = (
     useState<Maybe<ERC1155Metadata>>()
@@ -70,7 +69,7 @@ const Disburse = () => {
   const [raw, setRaw] = useState('')
   const [action, setAction] = useState('whitelist')
   const {
-    ensProvider, address, roContract, rwContract, connected, connect, userProvider
+    ensProvider, address, roContract, rwContract, connect,
   } = useWeb3()
   const [addresses, setAddresses] = useState<Array<string | ReactNode>>([])
   const toast = useToast()
@@ -185,7 +184,7 @@ const Disburse = () => {
         duration: 10000
       })
     }
-  }, [action, addresses, ensProvider, roContract, rwContract, tokenId])
+  }, [action, ensProvider, raw, roContract, rwContract, toast, tokenId])
 
   if(error) {
     return (

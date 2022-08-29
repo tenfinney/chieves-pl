@@ -1,15 +1,17 @@
 import WalletConnectProvider from '@walletconnect/web3-provider'
 import { NETWORKS } from '@/lib/networks'
-console.log({NETWORKS})
+import { infuraId } from '@/config'
+
 const rpcUrls = NETWORKS
 
 export const options = {
-  // walletconnect: {
-  //   package: WalletConnectProvider,
-  //   options: {
-  //     rpc: rpcUrls,
-  //   }
-  // }
+  walletconnect: {
+    package: WalletConnectProvider,
+    options: {
+      rpc: rpcUrls,
+      // infuraId,
+    }
+  }
 }
 
 export default options

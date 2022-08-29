@@ -18,7 +18,7 @@ export const MaxForm = (
     purpose: string
   }
 ) => {
-  const [max, setMax] = useState<Maybe<number>>(null)
+  const [max, setMax] = useState<Maybe<string>>(null)
   const [processing, setProcessing] = useState(false)
   const { roContract, rwContract } = useWeb3()
   const toast = useToast()
@@ -78,13 +78,14 @@ export const MaxForm = (
             textAlign="center"
             value={max}
             onChange={({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
-              setMax(Number(value))
+              setMax(value.trim().replace(/^0+([^0])/, '$1'))
             }}
           />
         )}  
       </FormControl>
       <SubmitButton
         label="Set Max"
+        disabled={!/^-?\d+$/.test(max)}
         {...{ purpose, processing, ...props }}
       />
     </Flex>

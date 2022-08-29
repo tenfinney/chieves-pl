@@ -1,6 +1,5 @@
-// import { infuraId, contractNetwork } from '@/config'
 import { infuraId, contractNetwork } from '@/config'
-import { NetworkInfo } from '@/types'
+import type { NetworkInfo } from '@/types'
 
 export const NETWORKS: NetworkInfo = {
   mainnet: {

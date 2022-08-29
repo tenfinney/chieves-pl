@@ -402,7 +402,8 @@ describe('The Token Contract', () => {
         args: [[minterRole], []],
       })
       expect((await token.typeSupply()).toBigInt() - lastIndex).to.equal(2n)
-      const createdId = await token.tokenByIndex(lastIndex +1n)
+      const createdIndex = lastIndex + 1n
+      const createdId = await token.tokenByIndex(createdIndex)
 
       await token.setMax(createdId, 20)
 
@@ -422,7 +423,7 @@ describe('The Token Contract', () => {
 
       const transfererRole = await token.roleIndexForName('Transferer')
       await token.disableRole(
-        transfererRole, createdId
+        transfererRole, createdIndex
       )
       await transact({
         sender: creator,
@@ -494,6 +495,82 @@ describe('The Token Contract', () => {
       const ret = await token.getMax(createdId)
 
       expect(ret).to.equal(max)
+    }
+  )
+
+  it(
+    'permits unrestricted minting.',
+    async () => {
+      const creatorRole = await token.roleIndexForName('Creator')
+      const creatorGate = await token['roleToken(uint8)'](creatorRole)
+
+      await transact({
+        method: 'grantRole(uint8,address)',
+        args: [creatorRole, creator.address],
+      })
+
+      expect(
+        await token.balanceOf(creator.address, creatorGate),
+        'a user to have a gating token when granted a role'
+      ).to.equal(1)
+
+      expect(
+        await token['hasRole(uint8,address)'](creatorRole, creator.address),
+        'a user granted a role to have it',
+      ).to.be.true
+
+      const minterRole = await token.roleIndexForName('Minter')
+      const lastIndex = (await token.typeSupply()).toBigInt()
+      await transact({
+        sender: creator,
+        method: 'create(uint8[],uint8[])',
+        args: [[], [minterRole]],
+      })
+      expect((await token.typeSupply()).toBigInt() - lastIndex).to.equal(2n)
+      const createdId = await token.tokenByIndex(lastIndex + 1n)
+      const disablingId = await token.tokenByIndex(lastIndex + 2n)
+
+      expect(
+        await token['hasRole(uint8,uint256)'](minterRole, createdId),
+        'a disabled role to show as present for all users',
+      )
+      .to.equal(true)
+
+      await token.setMax(createdId, 5)
+
+      await expect(
+        transact({
+          sender: creator,
+          method: 'mint(address,uint256,uint256,bytes)',
+          args: [creator.address, createdId, 10, []]
+        }),
+        'minting to be rejected when over the limit',
+      ).to.eventually.be.rejected
+
+      await expect(
+        transact({
+          sender: creator,
+          method: 'mint(address,uint256,uint256,bytes)',
+          args: [creator.address, createdId, 4, []]
+        }),
+        'minting to be allowed when disabled',
+      ).to.eventually.be.fulfilled
+
+      expect(
+        await token.balanceOf(creator.address, createdId),
+        'a user to have minted tokens'
+      ).to.equal(4)
+
+      const minterRoleToken = await token['roleToken(uint8)'](minterRole)
+      await expect(
+        token.setURI(minterRoleToken, 'ipfs://tokenmetadata.json'),
+        'it’s possible to set the token URI for the minter role'
+      ).to.eventually.be.fulfilled
+
+      expect(
+        await token.uri(disablingId),
+        'disabling token URI isn’t unset',
+      ).to.not.be.equal('')
     }
   )
 })

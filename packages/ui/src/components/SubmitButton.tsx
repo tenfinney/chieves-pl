@@ -7,11 +7,11 @@ import React, { MouseEvent, useMemo, useState } from 'react'
 import { useWeb3 } from '@/lib/hooks'
 
 export const SubmitButton: React.FC<ButtonProps & {
-  purpose: string
+  purpose?: string
   processing?: boolean
   label?: string
 }> = ({
-  purpose,
+  purpose = 'create',
   processing = false,
   onClick,
   label = `${capitalize(purpose)} NFT`,
@@ -65,14 +65,14 @@ export const SubmitButton: React.FC<ButtonProps & {
             <Flex>
               <Spinner/>
               <Text ml={2}>
-                {capitalize(purpose).slice(0, -1)}ing…
+                {capitalize(purpose).replace(/e$/, '')}ing…
               </Text>
             </Flex>
           )
         } else if(!userProvider) {
-          return 'Connect To Continue'
+          return `Connect To ${capitalize(purpose)}`
         } else if(offChain) {
-          return `Connect To The ${desiredNetwork} Network`
+          return `Connect To The ${desiredNetwork} Network To ${capitalize(purpose)}`
         } else if(!rwContract) {
           return 'Contract Not Connected'
         } else {

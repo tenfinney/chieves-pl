@@ -23,6 +23,7 @@ const New = React.lazy(() => import('./pages/new'))
 const View = React.lazy(() => import('./pages/view'))
 const Edit = React.lazy(() => import('./pages/edit'))
 const Disburse = React.lazy(() => import('./pages/disburse'))
+const SelfMint = React.lazy(() => import('./pages/self-mint'))
 const Owners = React.lazy(() => import('./pages/owners'))
 
 const themeConfig: ThemeConfig = {
@@ -57,6 +58,7 @@ const App: React.FC = () => (
               <Routes>
                 <Route path="/new" element={<New/>} />
                 <Route path="/view/:nftId" element={<View/>} />
+                <Route path="/self-mint/:nftId" element={<SelfMint/>} />
                 <Route path="/disburse/:nftId" element={<Disburse/>} />
                 <Route path="/owners/:nftId" element={<Owners/>} />
                 <Route path="/edit/:nftId" element={<Edit/>} />

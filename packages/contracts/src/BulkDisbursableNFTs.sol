@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "hardhat/console.sol";
 
 library Bits {
-    // Each _WIDTH is the number of Bits given to the
+  // Each _WIDTH is the number of Bits given to the
   // particular field. The _BOUNDARY is the bit before
   // the first bit of the field.
   uint8 public constant TEAM_WIDTH = 13;
@@ -139,7 +139,7 @@ contract BulkDisbursableNFTs is
 
   string[11] public Roles; // remove this when redeploying the contract
 
-  mapping (uint256 => int64) public maxes;
+  mapping (uint256 => int64) public maxes; // remove this when redeploying
 
   mapping (uint256 => uint256) public uintValues;
   mapping (uint256 => int256) public intValues;
@@ -325,7 +325,11 @@ contract BulkDisbursableNFTs is
   {
     require(
       index < 2**Bits.COUNTER_WIDTH,
-      'Indices can be at most 32 Bits.'
+      string(abi.encodePacked(
+        "Indices can be at most ",
+        Strings.toString(Bits.COUNTER_WIDTH),
+        " bits."
+      ))
     );
 
     id = (
@@ -410,11 +414,9 @@ contract BulkDisbursableNFTs is
   {
     uint256 gate = roleToken(role);
 
-    uint256 disabledIndex = (
-      tokens.indices[gate | Bits.DISABLING_TYPE | index]
-    );
-    if(disabledIndex != 0) {
-      return tokens.entries[disabledIndex];
+    uint256 disablingId = gate | Bits.DISABLING_TYPE | index;
+    if(tokens.indices[disablingId] != 0) {
+      return disablingId;
     }
 
     uint256[8] memory ids = [
@@ -554,11 +556,12 @@ contract BulkDisbursableNFTs is
     _mint(user, id, 1, "");
   }
 
-  function disableRole(Role toDisable, uint256 tokenId)
+  function disableRole(Role toDisable, uint256 disablingIndex)
     public
   {
-    uint256 id = roleToken(toDisable, tokens.indices[tokenId]);
+    uint256 id = roleToken(toDisable, disablingIndex);
     id |= Bits.DISABLING_TYPE;
+
     uint256 index = tokens.entries.length;
     tokens.entries.push(id);
     tokens.indices[id] = index;
@@ -574,9 +577,19 @@ contract BulkDisbursableNFTs is
     returns (string memory metadata)
   {
     metadata = uris[id];
+
     if(bytes(metadata).length == 0) {
-      if(id & Bits.TYPE_MASK == Bits.GATING_TYPE) {
-        uint256 generic = id & ~Bits.COUNTER_MASK & ~Bits.NO_MATCH_FLAGS;
+      uint256 tokenType = id & Bits.TYPE_MASK;
+      if(
+        tokenType == Bits.GATING_TYPE
+        || tokenType == Bits.GATING_TYPE | Bits.DISABLING_TYPE
+      ) {
+        uint256 generic = (
+          id & ~Bits.COUNTER_MASK
+          & ~Bits.NO_MATCH_FLAGS
+          & ~Bits.TYPE_MASK
+          | Bits.GATING_TYPE
+        );
         metadata = uris[generic];
       }
     }
@@ -599,7 +612,6 @@ contract BulkDisbursableNFTs is
     uris[id] = newURI;
     emit URI(newURI, id);
   }
-
 
   /**
    * @notice Event fired when a new token type is created.
@@ -727,7 +739,7 @@ contract BulkDisbursableNFTs is
   }
 
   /**
-    * @notice ¡Unimplmemented! Set the maximum number of tokens
+    * @notice Set the maximum number of tokens
     * allowed to be minted. Trumps the Minter role.
    */
   function setMax(uint256 id, int64 max) public {
@@ -735,7 +747,7 @@ contract BulkDisbursableNFTs is
   }
 
   /**
-    * @notice ¡Unimplmemented! Set the maximum number of tokens
+    * @notice Set the maximum number of tokens
     * allowed to be minted. Trumps the Minter role.
    */
   function _setMax(uint256 id, int64 max, bool local) internal virtual {
