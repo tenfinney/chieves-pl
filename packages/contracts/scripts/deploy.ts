@@ -93,11 +93,11 @@ const deploy = async ({
     address: deployed,
     signer: signator,
     deployTransaction: {
-      gasPrice: gas, hash: tx, chainId: chain,
+      gasPrice: gas, hash: tx, chainId: chain, gasLimit,
     },
   } = deployment
   const signer = await signator.getAddress()
-  const gasPrice = gas ?? '𝕌𝕟𝕕𝕖𝕗𝕚𝕟𝕖𝕕'
+  const gasPrice = gas?.toBigInt() ?? '𝕌𝕟𝕕𝕖𝕗𝕚𝕟𝕖𝕕'
 
   console.debug(
     `\n 🍅 ${chalk.hex('#00AA7F')('Deployed in TX:')} `
@@ -153,9 +153,9 @@ const deploy = async ({
   fs.writeFileSync(files.address, deployed)
 
   let gasInfo = '𐌵ⲛⲕⲛⲟⲱⲛ'
-  if(typeof(gasPrice) === 'number') {
+  if(typeof gasPrice === 'bigint') {
     const gasUsed = (
-      deployment.deployTransaction.gasLimit.mul(gasPrice)
+      gasLimit.toBigInt() * gasPrice
     )
     gasInfo = (
       `${utils.formatEther(gasUsed)} `

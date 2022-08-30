@@ -58,6 +58,7 @@ const apiKey = Object.fromEntries(
 )
 apiKey.gnosis = 'any value will work here'
 
+const gasMultiplier = 1.5
 const infuraId = process.env.INFURA_ID
 const alchemyId = process.env.ALCHEMY_ID
 const config: HardhatUserConfig = {
@@ -76,11 +77,6 @@ const config: HardhatUserConfig = {
     localhost: {
       url: 'http://localhost:8545',
     },
-    rinkeby: {
-      url: `https://rinkeby.infura.io/v3/${infuraId}`,
-      accounts: { mnemonic },
-      gasMultiplier: 2.25,
-    },
     kovan: {
       url: `https://kovan.infura.io/v3/${infuraId}`,
       accounts: { mnemonic },
@@ -88,6 +84,7 @@ const config: HardhatUserConfig = {
     mainnet: {
       url: `https://mainnet.infura.io/v3/${infuraId}`,
       accounts: { mnemonic },
+      gasMultiplier,
     },
     ropsten: {
       url: `https://ropsten.infura.io/v3/${infuraId}`,
@@ -100,10 +97,12 @@ const config: HardhatUserConfig = {
     gnosis: {
       url: 'https://rpc.gnosischain.com/',
       accounts: { mnemonic },
+      gasMultiplier,
     },
     polygon: {
       url: 'https://polygon-rpc.com',
       accounts: { mnemonic },
+      gasMultiplier,
     },
     mumbai: {
       url: `https://polygon-mumbai.g.alchemy.com/v2/${alchemyId}`,
@@ -268,7 +267,8 @@ task('grant', 'Grant a role')
     tx = await contract['grantRole(uint8,address,uint256,bool)'](roleId, user, token, !!args.singleUse)
   } else {
     tx = await contract['grantRole(uint8,address,bool)'](roleId, user, !!args.singleUse)
-  }  
+  }
+  console.log({p: tx.gasLimit.toBigInt() * tx.gasPrice.toBigInt()})
   console.info(` 🕋 Tx: ${tx.hash}`)
 })
 

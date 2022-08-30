@@ -9,7 +9,7 @@ import {
   OrderedList, ListItem, Stack, Text, Flex, Spinner,
   Checkbox, RadioGroup, Radio, useToast,
 } from '@chakra-ui/react'
-import { capitalize, deregexify, httpURL } from '@/lib/helpers'
+import { capitalize, deregexify, extractMessage, httpURL } from '@/lib/helpers'
 import { Maybe, ERC1155Metadata, Optional } from '@/lib/types'
 import { useWeb3 } from '@/lib/hooks'
 import { HomeLink } from '@/components'
@@ -178,7 +178,7 @@ const Disburse = () => {
     } catch(err) {
       toast({
         title: `${capitalize(action)}ing Error`,
-        description: (err as Error).message,
+        description: extractMessage(err),
         status: 'error',
         isClosable: true,
         duration: 10000
