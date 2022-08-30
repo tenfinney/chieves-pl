@@ -32,7 +32,7 @@
     "ui:theme": "yarn workspace @chievemints/ui theme",
     "ui:watch": "yarn workspace @chievemints/ui watch",
     "cm:grant": "yarn workspace @chievemints/contracts hardhat grant",
-    "cm:gatings": "yarn workspace @chievemints/contracts gating-metadata"
+    "cm:metadata": "yarn workspace @chievemints/contracts gating-metadata"
   },
   "workspaces": {
     "packages": [

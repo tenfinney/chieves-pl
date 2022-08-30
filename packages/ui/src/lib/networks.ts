@@ -1,22 +1,24 @@
-import { infuraId, contractNetwork } from '@/config'
+import { contractNetwork } from '@/config'
 import type { NetworkInfo } from '@/types'
+
+declare const MAINNET_RPC: string
+declare const GNOSIS_RPC: string
+declare const POLYGON_RPC: string
+declare const MUMBAI_RPC: string
+declare const LOCAL_RPC: string
 
 export const NETWORKS: NetworkInfo = {
   mainnet: {
-    chainId: 0x1,
+    chainId: 1,
     name: 'Ethereum Mainnet',
     label: 'Ethereum',
     symbol: 'ETH',
     explorer: 'https://etherscan.io',
-    rpc: `https://mainnet.infura.io/v3/${infuraId}`,
-  },
-  rinkeby: {
-    chainId: 0x4,
-    name: 'Rinkeby',
-    label: 'Rinkeby',
-    symbol: 'ETH',
-    explorer: 'https://rinkeby.etherscan.io',
-    rpc: `https://rinkeby.infura.io/v3/${infuraId}`,
+    rpc: (typeof MAINNET_RPC !== 'undefined' ? (
+      MAINNET_RPC
+    ) : (
+      'https://eth.public-rpc.com/'
+    )),
   },
   gnosis: {
     chainId: 0x64,
@@ -24,23 +26,36 @@ export const NETWORKS: NetworkInfo = {
     label: 'Gnosis',
     symbol: 'xDAI',
     explorer: 'https://blockscout.com/xdai/mainnet',
-    rpc: 'https://rpc.gnosischain.com/',
+    rpc: (typeof GNOSIS_RPC !== 'undefined' ? (
+      GNOSIS_RPC
+    ) : (
+      'https://rpc.gnosischain.com/'
+    )),
   },
   polygon: {
-    chainId: 0x89,
+    chainId: 137,
     name: 'Polygon',
     label: 'Polygon',
     symbol: 'MATIC',
     explorer: 'https://polygonscan.com',
-    rpc: 'https://polygon-rpc.com',
+    rpc: (typeof POLYGON_RPC !== 'undefined' ? (
+      POLYGON_RPC
+    ) : (
+      'https://polygon-rpc.com'
+    )),
   },
   mumbai: {
-    chainId: 0x13881,
+    chainId: 80001,
     name: 'Polygon’s Mumbai Testnet',
     label: 'Mumbai',
     symbol: '𝙼𝙰𝚃𝙸𝙲',
     explorer: 'https://mumbai.polygonscan.com',
-    rpc: 'https://rpc-mumbai.matic.today',
+    rpc: (typeof MUMBAI_RPC !== 'undefined' ? (
+      MUMBAI_RPC
+    ) : (
+      'https://rpc.ankr.com/polygon_mumbai'
+      ?? 'https://rpc-mumbai.matic.today'
+    )),
   },
   localhost: {
     chainId: 0x7a69,
@@ -48,7 +63,11 @@ export const NETWORKS: NetworkInfo = {
     label: 'Ganache',
     symbol: '🄴🅃🄷',
     explorer: null,
-    rpc: 'http://127.0.0.1:8545',
+    rpc: (typeof LOCAL_RPC !== 'undefined' ? (
+      LOCAL_RPC
+    ) : (
+      'http://127.0.0.1:8545'
+    )),
   },
   get contract() {
     return this[contractNetwork]
