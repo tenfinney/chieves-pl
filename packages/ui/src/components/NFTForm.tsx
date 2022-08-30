@@ -308,10 +308,10 @@ export const NFTForm: React.FC<{
               <SimpleGrid columns={3} templateColumns="6rem 1fr 2rem">
                 {images.map((image: File | string, idx: number) => {
                   const name = (
-                    image instanceof File ? (
+                    image && image instanceof File ? (
                       image.name
                     ) : (
-                      image.replace(/^.*\//g, '')
+                      (image as string)?.replace(/^.*\//g, '')
                     )
                   )
 

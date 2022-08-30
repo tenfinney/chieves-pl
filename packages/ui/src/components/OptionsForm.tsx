@@ -213,6 +213,7 @@ export const OptionsForm: React.FC<{
         <SubmitButton {...{ purpose, processing }} mb={3} />
       </Box>
       <MaxForm colorScheme="blue" {...{ tokenId, purpose }}/>
+      <MaxForm colorScheme="blue" perUser={true} {...{ tokenId, purpose }}/>
     </Stack>
   )
 }

@@ -12,9 +12,10 @@ import { ButtonProps } from '@chakra-ui/react'
 import { extractMessage } from '@/lib/helpers'
 
 export const MaxForm = (
-  { tokenId, purpose = 'create', ...props }:
+  { tokenId, purpose = 'create', perUser = false, ...props }:
   ButtonProps & {
     tokenId?: string
+    perUser?: boolean
     purpose: string
   }
 ) => {
@@ -26,7 +27,11 @@ export const MaxForm = (
   useEffect(() => {
     const load = async () => {
       if(roContract && tokenId) {
-        setMax(await roContract.getMax(BigInt(tokenId)))
+        if(perUser){
+          setMax(await roContract.getPerUserMax(BigInt(tokenId)))
+        }else{
+          setMax(await roContract.getMax(BigInt(tokenId)))
+        }
       }
     }
     load()
@@ -40,8 +45,13 @@ export const MaxForm = (
     }
     try {
       setProcessing(true)
-      const tx = await rwContract.setMax(tokenId, max)
-      await tx.wait()
+      let tx
+      if (perUser){
+        tx = await rwContract.setPerUserMax(tokenId, max)
+      }else{
+        tx = await rwContract.setMax(tokenId, max)
+      }
+        await tx.wait()
     } catch(error) {
       toast({
         title: 'Contract Error',
@@ -63,7 +73,7 @@ export const MaxForm = (
     >
       <FormControl display="flex" w="auto" alignItems="baseline" mt={3}>
         <FormLabel whiteSpace="pre" _after={{ content: '":"' }}>
-          Maximum Mintable
+          {perUser && 'Per User'} Maximum Mintable
         </FormLabel>
         {max == null ? (
           <Flex>
@@ -84,7 +94,7 @@ export const MaxForm = (
         )}  
       </FormControl>
       <SubmitButton
-        label="Set Max"
+        label={`Set ${perUser ? 'Per User': ''} Max`}
         disabled={!/^-?\d+$/.test(max)}
         {...{ purpose, processing, ...props }}
       />

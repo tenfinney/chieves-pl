@@ -563,7 +563,6 @@ contract BulkDisbursableNFTs is
     id = create(_msgSender(), grants, disables);
   }
 
-
   /**
    * @notice Reserve a new token id & mint gating tokens
    * with the Minter, Configurer, & Limiter for the
@@ -595,6 +594,8 @@ contract BulkDisbursableNFTs is
     for(uint256 i = 0; i < disables.length; i++) {
       disableRole(disables[i], index);
     }
+    setPerUserMax(id, 1);
+
     emit Created(id, maintainer);
     uint256 gate = gateToken(
       Roles.Role.Creator, _msgSender(), 0
@@ -796,6 +797,12 @@ contract BulkDisbursableNFTs is
               require(
                 int256(totalSupply(ids[i]) + amounts[i]) <= getMax(ids[i]),
                 "Maximum mint allowance exceeded."
+              );
+            }
+            if(getPerUserMax(ids[i]) >= 0) {
+              require(
+                int256(balanceOf(to, ids[i]) + amounts[i]) <= getPerUserMax(ids[i]),
+                "Maximum per user allowance exceeded."
               );
             }
             if(ids[i] & Bits.TYPE_MASK == Bits.GATING_TYPE) {
