@@ -80,8 +80,15 @@ export const switchTo = async (chain: number) => {
     })
   } catch (switchError) {
     if ((switchError as CodedError).code === 4902) {
+      const chainName = (
+        Object.values(NETWORKS).find(
+          ({ chainId }: { chainId: number }) => (
+            chain === chainId
+          )
+        )?.name
+      )
       throw new Error(
-        `The network “${NETWORKS[chainId].name ?? 'Unknown'}”`
+        `The network “${chainName ?? '𝓤𝓷𝓴𝓷𝓸𝔀𝓷'}”`
         + ' is not yet available in your MetaMask.\n\n'
         + ' Please add it.'
       )
@@ -93,19 +100,28 @@ export const switchTo = async (chain: number) => {
 
 export const ipfsify = async (filesOrURL: FileListish) => {
   let value = filesOrURL
-  if (Array.isArray(value) && typeof value[0] === 'string') {
-    const count = value.length
-    if (count !== 1) {
-      throw new Error(
-        `Unexpected ${count} entries in string array`
-        + ' passed to ipfsify.'
-      )
-    }
-    value = value[0]
+
+  if(
+    value == null
+    || (Array.isArray(value) && value.every((v) => v == null))
+  ) {
+    const str = JSON5.stringify(value)
+    throw new Error(`\`ipfsify\` called with value = \`${str}\``)
   }
 
-  if (typeof value === 'string') {
-    if (value.startsWith('ipfs://')) {
+  if(Array.isArray(value) && typeof value[0] === 'string') {
+    const count = value.length
+    if(count !== 1) {
+      throw new Error(
+        `Unexpected ${count} entries in string array`
+        + ' passed to `ipfsify`.'
+      )
+    }
+    [value] = value
+  }
+
+  if(typeof value === 'string') {
+    if(value.startsWith('ipfs://')) {
       return [value]
     }
     throw new Error(`Unknown File String: ${value}`)

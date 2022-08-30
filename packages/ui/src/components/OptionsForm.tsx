@@ -91,9 +91,9 @@ export const OptionsForm: React.FC<{
       metadata.external_url = homepage
     }
 
-    if(Array.isArray(images)) {
+    if(Array.isArray(images) && images.some((img) => img != null)) {
       metadata.image = (await ipfsify(images))[0] // wrong
-    } else if (images != null) {
+    } else if(!Array.isArray(images)) {
       console.warn(`Unknown Image Type: ${typeof images}`)
     }
 
@@ -161,7 +161,7 @@ export const OptionsForm: React.FC<{
         }
       })()
       if(!metadata) {
-        throw new Error('Metadata is undefined.')
+        throw new Error('Metadata is `undefined`.')
       }
       [metadata] = await ipfsify(metadata)
       await configure({ metadata })

@@ -34,7 +34,6 @@ export const load = (
   }
 ) => {
   const srcDir = config?.paths?.sources?.replace(/^.*\/([^\/]+)\/?$/, '$1')
-  // const [, srcDir] = config?.paths?.sources?.match(/^.*\/([^\/]+)\/?$/) ?? []
   if (!srcDir) throw new Error('ERROR - could not find source directory')
   const contractsHome = `${config?.paths?.artifacts}/${srcDir}/`
   const [contractFile] = (

@@ -14,15 +14,25 @@ export default defineConfig(
   ({ mode }) => {
     const env = loadEnv(mode, process.cwd())
 
-    const define = Object.fromEntries(
-      Object.entries(env).map(([key, val]) => (
-        (key.startsWith('VITE_')) ? (
-          [key, JSON.stringify(val)]
-        ) : (
-          null
-        )
-      )).filter((v) => !!v)
+    const define: Record<string, string> = (
+      Object.fromEntries(
+        Object.entries(env).map(([key, val]) => {
+          if(key.startsWith('VITE_RAW_')) {
+            return [key.replace(/^VITE_RAW_/, ''), val]
+          } else if(key.startsWith('VITE_')) {
+              return [key.replace(/^VITE_/, ''), JSON.stringify(val)]
+          } else {
+            return null
+          }
+        }).filter((v) => !!v)
+      )
     )
+
+    console.info({ define: Object.fromEntries(
+      Object.entries(define).map(([key, val]) => (
+        [key, val.replace(/\w/g, '•')]
+      ))
+    ) })
 
     return {
       plugins: [
@@ -49,8 +59,8 @@ export default defineConfig(
           ignoreGlobal: false,
           requireReturnsDefault: false,
           // defaultIsModuleExports: true,
-          dynamicRequireTargets: ['**/react/**'],
-          esmExternals: ['react-helmet']
+          // dynamicRequireTargets: ['**/react/**'],
+          // esmExternals: ['react-helmet']
         },
         rollupOptions: {
           // external: ["react", "react-dom"],
@@ -62,7 +72,7 @@ export default defineConfig(
           // },
           plugins: [
             InjectPlugin({ Buffer: ['buffer', 'Buffer'] }),
-            CommonJSPlugin({}),
+            CommonJSPlugin(),
           ],
         },
       },

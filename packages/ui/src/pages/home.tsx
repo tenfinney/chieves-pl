@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import {
   extractMessage, httpURL, toSpanList,
 } from '@/lib/helpers'
-import type { Limits, Maybe, TokenState } from '@/lib/types'
+import { HiddenError, Limits, Maybe, TokenState } from '@/lib/types'
 import { Header, TokenFilterForm, TokensTable } from '@/components'
 import { useWeb3 } from '@/lib/hooks'
 import { Helmet } from 'react-helmet'
@@ -12,7 +12,6 @@ import {
 import JSON5 from 'json5'
 import { defaults } from '@/config'
 import { chakra, Button, Container, Flex, Text, Stack } from '@chakra-ui/react'
-import { Controller } from 'react-hook-form'
 
 const Home = () => {
   const [tokens, setTokens] = useState<Array<TokenState | Error>>([])
@@ -149,7 +148,7 @@ const Home = () => {
               )
 
               if(is.hidden) {
-                throw new Error('Token is hidden.')
+                throw new HiddenError('Token is hidden.')
               }
 
               const uri = token.uri ?? (
@@ -180,7 +179,9 @@ const Home = () => {
               roContract.getMax(id)
               .then((max: bigint) => setToken(idx, { max }))
             } catch(error) {
-              console.error({ error })
+              if(!(error instanceof HiddenError)) {
+                console.error({ error })
+              }
               if(!(error instanceof DOMException)) { // !aborted
                 return setToken(idx, {
                   error: extractMessage(error)
@@ -298,6 +299,12 @@ const Home = () => {
               onClick={() => setOffset((off) => off + limit)}
             >
               <Text as="span" mr={0.75} mt={-1} fontSize="200%" fontWeight="bold">↓</Text>{limit}
+            </Button>
+            <Button
+              ml={5}
+              onClick={() => setOffset((off) => off - limit)}
+            >
+              <Text as="span" mr={0.75} mt={-1} fontSize="200%" fontWeight="bold">↑</Text>{limit}
             </Button>
           </Flex>
         </Stack>

@@ -95,11 +95,38 @@ const ImageTd:React.FC<Token> = ({ token }) => (
 const DescriptionTd:React.FC<Token> = ({ token }) => (
   <Td
     flexGrow={1}
-    sx={{ a: { textDecoration: 'underline' } }}
+    sx={{
+      a: { textDecoration: 'underline' },
+      blockquote: { borderLeft: '3px solid #66666644' },
+    }}
   >
+    {token.is?.disabling && (
+      <Text textAlign="justify" fontStyle="italic" mb={5}>
+        This token disables the following permission for
+        <RouterLink to={`/view/${token.gates}`} ml={1}>
+          the token at index #{token.gates}
+        </RouterLink>:
+      </Text>
+    )}
+    {token.is?.gating && (
+      <Text textAlign="justify" fontStyle="italic" mb={5}>
+        This token gives holders the following permission for
+        {token.gates === 0 ? (
+          ' all tokens'
+        ) : (
+          <RouterLink to={`/view/${token.gates}`} ml={1}>
+            the token at index #{token.gates}
+          </RouterLink>
+        )}:
+      </Text>
+    )}
     <Markdown linkTarget="_blank">
-      {token.metadata?.description ?? (
-        '*No Description*'
+      {token.is?.disabling || token.is?.gating ? (
+        `> ${token.metadata.description.replace(/\n/g, "\n> ")}`
+      ) : (
+        token.metadata?.description ?? (
+          '*No Description*'
+        )
       )}
     </Markdown>
   </Td>

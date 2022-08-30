@@ -12,11 +12,10 @@ import { HardhatEthersHelpers } from '@nomiclabs/hardhat-ethers/types'
 import '@typechain/ethers-v5'
 import '@typechain/hardhat'
 import {
-  HardhatUserConfig, HttpNetworkUserConfig, HttpNetworkHDAccountsConfig,
+  HardhatUserConfig, HttpNetworkUserConfig,
 } from 'hardhat/types'
 import * as bip39 from 'bip39'
 import { deregexify, load } from './lib/helpers'
-import type { ethers as Ethers } from 'ethers'
 
 const { isAddress, getAddress, formatUnits } = utils
 

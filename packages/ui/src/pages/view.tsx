@@ -4,14 +4,15 @@ import {
   Image, chakra, Heading, Stack, Flex, Spinner, Text,
 } from '@chakra-ui/react'
 import ReactMarkdown from 'react-markdown'
+import { useParams } from 'react-router-dom'
+import { Helmet } from 'react-helmet'
+import JSON5 from 'json5'
 import {
   regexify, deregexify, httpURL,
 } from '@/lib/helpers'
 import type { ERC1155Metadata } from '@/lib/types'
 import { HomeLink } from '@/components'
 import { useWeb3 } from '@/lib/hooks'
-import { useParams } from 'react-router-dom'
-import { Helmet } from 'react-helmet'
 
 const Markdown = chakra(ReactMarkdown)
 
@@ -26,16 +27,21 @@ export const View: React.FC<{ tokenId: string, header?: boolean }> = (
         const getMetadata = async () => {
           if(roContract && tokenId) {
             try {
-              const metadataURI = await roContract.uri(
-                BigInt(tokenId)
-              )
+              let realId = BigInt(tokenId)
+              if(realId < 2**32) {
+                realId = await roContract.tokenByIndex(realId)
+              }
+
+              const metadataURI = await roContract.uri(realId)
               const metadataURL = httpURL(metadataURI)
               if(!metadataURL) {
-                throw new Error(`Couldn't find metadata for token #${tokenId}.`)
+                throw new Error(
+                  `Couldn't find metadata for token #${regexify(tokenId)}.`
+                )
               }
               const response = await fetch(metadataURL)
               const data = await response.text()
-              setMetadata(JSON.parse(data))
+              setMetadata(JSON5.parse(data))
             } catch(err) {
               setError((err as Error).message)
             }

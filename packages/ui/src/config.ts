@@ -1,20 +1,20 @@
 import { create as ipfsHTTPClient } from 'ipfs-http-client'
 import { Buffer } from 'buffer'
 
-declare const VITE_INFURA_ID: string
-declare const VITE_CHAIN_NAME: string
-declare const VITE_IPFS_LINK_PATTERN: string
-declare const VITE_IPFS_AUTH_USERNAME: string
-declare const VITE_IPFS_AUTH_PASSWORD: string
+declare const INFURA_ID: string
+declare const CHAIN_NAME: string
+declare const IPFS_LINK_PATTERN: string
+declare const IPFS_AUTH_USERNAME: string
+declare const IPFS_AUTH_PASSWORD: string
 declare const IPFS_API_HOST: string
 declare const IPFS_API_PORT: number
-declare const VITE_NFT_GRAPH: string
-declare const VITE_NFT_BASE: string
+declare const NFT_GRAPH: string
+declare const NFT_BASE: string
 
 export const infuraId = (
   (
-    (typeof VITE_INFURA_ID !== 'undefined') ? (
-      VITE_INFURA_ID
+    (typeof INFURA_ID !== 'undefined') ? (
+      INFURA_ID
     ) : (
       '12345678900987654321'
     )
@@ -36,8 +36,8 @@ export const infuraId = (
 
 export const contractNetwork = (
   (
-    (typeof VITE_CHAIN_NAME !== 'undefined') ? (
-      VITE_CHAIN_NAME
+    (typeof CHAIN_NAME !== 'undefined') ? (
+      CHAIN_NAME
     ) : (
       'polygon'
     )
@@ -46,8 +46,8 @@ export const contractNetwork = (
 
 export const ipfsLinkPattern = (
     (
-    (typeof VITE_IPFS_LINK_PATTERN !== 'undefined') ? (
-      VITE_IPFS_LINK_PATTERN
+    (typeof IPFS_LINK_PATTERN !== 'undefined') ? (
+      IPFS_LINK_PATTERN
     ) : (
       'https://{v1cid}.ipfs.dweb.link/{path}'
       ?? 'https://mimis.infura-ipfs.io/ipfs/{cid}/{path}'
@@ -57,15 +57,15 @@ export const ipfsLinkPattern = (
 
 export const ipfsAuth = {
   username: (
-    (typeof VITE_IPFS_AUTH_USERNAME !== 'undefined') ? (
-      VITE_IPFS_AUTH_USERNAME
+    (typeof IPFS_AUTH_USERNAME !== 'undefined') ? (
+      IPFS_AUTH_USERNAME
     ) : (
       'username'
     )
   ),
   password: (
-    (typeof VITE_IPFS_AUTH_PASSWORD !== 'undefined') ? (
-      VITE_IPFS_AUTH_PASSWORD
+    (typeof IPFS_AUTH_PASSWORD !== 'undefined') ? (
+      IPFS_AUTH_PASSWORD
     ) : (
       'password'
     )
@@ -109,8 +109,8 @@ export const ipfs = ipfsHTTPClient({
 
 export const nftGraph = (
   (
-    (typeof VITE_NFT_GRAPH !== 'undefined') ? (
-      VITE_NFT_GRAPH
+    (typeof NFT_GRAPH !== 'undefined') ? (
+      NFT_GRAPH
     ) : (
       'https://api.thegraph.com/subgraphs/name/alberthaotan/nft-matic'
     )
@@ -119,8 +119,8 @@ export const nftGraph = (
 
 export const nftBase = (
   (
-    (typeof VITE_NFT_BASE !== 'undefined') ? (
-      VITE_NFT_BASE
+    (typeof NFT_BASE !== 'undefined') ? (
+      NFT_BASE
     ) : (
       'https://chiev.es/#/view'
     )

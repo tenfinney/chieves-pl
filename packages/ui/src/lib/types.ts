@@ -107,3 +107,10 @@ export type Limits = {
 }
 
 export type SpanList = Array<number | Limits>
+
+export class HiddenError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'HiddenError'
+  }
+}

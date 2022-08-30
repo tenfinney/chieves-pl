@@ -793,18 +793,18 @@ contract BulkDisbursableNFTs is
             )
           );
           if(needed == Roles.Role.Minter) {
-            if(getMax(ids[i]) >= 0) {
-              require(
-                int256(totalSupply(ids[i]) + amounts[i]) <= getMax(ids[i]),
-                "Maximum mint allowance exceeded."
-              );
-            }
-            if(getPerUserMax(ids[i]) >= 0) {
-              require(
-                int256(balanceOf(to, ids[i]) + amounts[i]) <= getPerUserMax(ids[i]),
-                "Maximum per user allowance exceeded."
-              );
-            }
+            int256 max = getMax(ids[i]);
+            // it should be possible to fool this by splitting the mint
+            // up into separate entries with the same id
+            require(
+              max < 0 || int256(totalSupply(ids[i]) + amounts[i]) <= max,
+              "Maximum mint allowance exceeded."
+            );
+            int256 perUserMax = getPerUserMax(ids[i]);
+            require(
+              perUserMax < 0 || int256(balanceOf(to, ids[i]) + amounts[i]) <= perUserMax,
+              "Maximum per user allowance exceeded."
+            );
             if(ids[i] & Bits.TYPE_MASK == Bits.GATING_TYPE) {
               require(
                 hasRole(Roles.Role.Caster, ids[i]),
