@@ -1,18 +1,17 @@
 import {
-  Button, Center, Flex, Heading, Spinner, Text, chakra,
+  Center, Flex, Heading, Spinner, Text, chakra,
   Stack, Container, useToast, Table, Thead, Th, Tr,
   Tbody, Td, Checkbox, Input, Tooltip, Box,
 } from '@chakra-ui/react'
-import { useWeb3 } from '@/lib/hooks'
 import React, { useCallback, useEffect, useState } from 'react'
-import { NETWORKS } from '@/lib/networks'
-import { OptionsForm, Header, SubmitButton } from '@/components'
 import { Event } from 'ethers'
 import { useForm } from 'react-hook-form'
-import { rolePermissions } from '@/config'
-import { switchTo, extractMessage } from '@/lib/helpers'
 import { Helmet } from 'react-helmet'
 import { useSearchParams } from 'react-router-dom'
+import { OptionsForm, Header, SubmitButton } from '@/components'
+import { useWeb3 } from '@/lib/hooks'
+import { extractMessage } from '@/lib/helpers'
+import { rolePermissions, tokenPermissions } from '@/config'
 
 export const New = () => (
   <Container maxW="full">
@@ -53,7 +52,9 @@ const Content: React.FC = () => {
   const [tokenId, setTokenId] = (
     useState(Array.isArray(id) ? id[0] : id)
   )
-  const [roles, setRoles] = useState<Array<string>>([])
+  const [roles, setRoles] = (
+    useState<Array<string>>(tokenPermissions)
+  )
   const [working, setWorking] = useState(false)
   const { register, handleSubmit } = useForm()
   const toast = useToast()
@@ -77,7 +78,7 @@ const Content: React.FC = () => {
       }
     }
 
-    load()
+    // load() // load static list to avoid extraneous permissions
   }, [roContract])
 
   const reserve = useCallback(
@@ -153,7 +154,7 @@ const Content: React.FC = () => {
     } finally {
       setWorking(false)
     }
-  }, [address, ensProvider, roContract, rwContract, toast])
+  }, [address, ensProvider, rolesLibrary, rwContract, toast])
 
   if(!rwContract || !tokenId || working) {
     return (

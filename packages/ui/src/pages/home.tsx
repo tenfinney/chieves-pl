@@ -12,6 +12,7 @@ import {
 import JSON5 from 'json5'
 import { defaults } from '@/config'
 import { chakra, Button, Container, Flex, Text, Stack } from '@chakra-ui/react'
+import { BigNumber } from 'ethers'
 
 const Home = () => {
   const [tokens, setTokens] = useState<Array<TokenState | Error>>([])
@@ -174,10 +175,14 @@ const Home = () => {
               setToken(idx, { metadata: JSON5.parse(data) })
 
               roContract.totalSupply(id)
-              .then((total: bigint) => setToken(idx, { total }))
+              .then((total: BigNumber) => {
+                setToken(idx, { total: total.toBigInt() })
+              })
 
               roContract.getMax(id)
-              .then((max: bigint) => setToken(idx, { max }))
+              .then((max: BigNumber) => {
+                setToken(idx, { max: max.toBigInt() })
+              })
             } catch(error) {
               if(!(error instanceof HiddenError)) {
                 console.error({ error })

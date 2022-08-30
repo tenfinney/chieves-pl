@@ -141,6 +141,11 @@ export const rolePermissions = {
   Oracle: 'Provides information about the off-chain world.',
 }
 
+export const tokenPermissions = [
+  'Superuser', 'Minter', 'Caster', 'Transferer',
+  'Configurer', 'Limiter', 'Burner', 'Destroyer',
+]
+
 export const defaults = {
   limit: 10,
   offset: 0,

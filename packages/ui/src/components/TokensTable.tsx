@@ -50,7 +50,7 @@ const ErrorTd:React.FC<Token> = ({ token }) => (
 const LoadingTd:React.FC<
   Token & { label?: string } & TableCellProps
 > = (
-  ({ token, label = 'Loading Metadata…', ...props }) => (
+  ({ label = 'Loading Metadata…', ...props }) => (
     <Td {...props}>
       <Flex justify="center">
         <Spinner thickness="4px"/>
@@ -180,12 +180,10 @@ const URITd:React.FC<Token> = ({ token }) => (
 
 const TotalTd:React.FC<Token> = ({ token }) => (
   <Td>
-    <RouterLink to={`/owners/${token.id}`}>
-      {token.total == null ? (
-        <Spinner/>
-      ) : (
-        `${token.total} ⁄ ${token.max}`
-      )}
+    <RouterLink to={`/owners/${regexify(token.id)}`} whiteSpace="pre">
+      {token.total?.toString() ?? <Spinner size="xs"/>}
+      {' ⁄ '}
+      {token.max?.toString() ?? <Spinner size="xs"/>}
     </RouterLink>
   </Td>
 )
