@@ -47,6 +47,7 @@ const Home = () => {
   )
   const [typeCount, setTypeCount] = useState(null)
   const [GATING_TYPE, setGATING_TYPE] = useState<Maybe<bigint>>(null)
+  const [DISABLING_TYPE, setDISABLING_TYPE] = useState<Maybe<bigint>>(null)
   const [TYPE_WIDTH, setTYPE_WIDTH] = useState<Maybe<number>>(null)
   const [TYPE_BOUNDARY, setTYPE_BOUNDARY] = (
     useState<Maybe<number>>(null)
@@ -82,6 +83,9 @@ const Home = () => {
       bitsLibrary.GATING_TYPE()
       .then((type: { toBigInt: () => bigint }) => type.toBigInt())
       .then(setGATING_TYPE)
+      bitsLibrary.DISABLING_TYPE()
+      .then((type: { toBigInt: () => bigint }) => type.toBigInt())
+      .then(setDISABLING_TYPE)
       bitsLibrary.TYPE_WIDTH()
       .then(setTYPE_WIDTH)
       bitsLibrary.TYPE_BOUNDARY()
@@ -107,24 +111,31 @@ const Home = () => {
                 (await roContract.tokenByIndex(token.index)).toBigInt()
               )
 
-              const gating = token.is?.gating ?? (
-                (
-                  id
-                  & (
-                    (2n**BigInt(TYPE_WIDTH) - 1n) // TYPE_WIDTH 1s
-                    << BigInt(TYPE_BOUNDARY)
-                  )
+              const type = (
+                id
+                & (
+                  (2n**BigInt(TYPE_WIDTH) - 1n) // TYPE_WIDTH 1s
+                  << BigInt(TYPE_BOUNDARY)
                 )
-                === GATING_TYPE
               )
-
-              const gates = token.gates ?? (gating ? (
+              const gating = token.is?.gating ?? (
+                type === GATING_TYPE
+              )
+              const disabling = token.is?.disabling ?? (
+                type === (GATING_TYPE | DISABLING_TYPE)
+              )
+              const gates = token.gates ?? (gating || disabling ? (
                 Number((2n**32n - 1n) & id)
               ) : ( null ))
 
               const is: { [key: string]: unknown } = {
                 gating,
-                hidden: token.hidable != false && gating && !gatingVisible,
+                disabling,
+                hidden: (
+                  token.hidable != false
+                  && (gating || disabling)
+                  && !gatingVisible
+                ),
               }
 
               setToken(
@@ -181,7 +192,7 @@ const Home = () => {
       )
     },
     [
-      GATING_TYPE, TYPE_BOUNDARY, TYPE_WIDTH,
+      GATING_TYPE, TYPE_BOUNDARY, TYPE_WIDTH, DISABLING_TYPE,
       gatingVisible, roContract, setToken,
     ],
   )
@@ -191,7 +202,7 @@ const Home = () => {
       if(
         roContract && bitsLibrary && typeCount != null
         && TYPE_WIDTH != null && TYPE_BOUNDARY != null
-        && GATING_TYPE != null
+        && GATING_TYPE != null && DISABLING_TYPE != null
       ) {
         const tokens: Array<TokenState> = []
         if(visibleList.some(() => true)) {
@@ -233,7 +244,7 @@ const Home = () => {
   }, [
     visibleList, retrieve, roContract, bitsLibrary,
     limit, offset, typeCount,
-    TYPE_WIDTH, TYPE_BOUNDARY, GATING_TYPE,
+    TYPE_WIDTH, TYPE_BOUNDARY, GATING_TYPE, DISABLING_TYPE,
   ])
 
   return (

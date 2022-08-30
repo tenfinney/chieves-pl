@@ -330,7 +330,7 @@ contract BulkDisbursableNFTs is
     view
     returns (bool superuser)
   {
-    superuser = isSuper(_msgSender());
+    superuser = isSuper(_msgSender(), 0);
   }
 
   /**
@@ -343,7 +343,36 @@ contract BulkDisbursableNFTs is
     view
     returns (bool superuser)
   {
-    superuser = hasRole(Roles.Role.Superuser, user) || user == owner();
+    superuser = isSuper(user, 0);
+  }
+  
+  /**
+   * @notice Checks if the specified user holds a Superuser token
+   * or is the contract owner.
+  */
+  function isSuper(uint256 tokenId)
+    public
+    virtual
+    view
+    returns (bool superuser)
+  {
+    superuser = isSuper(_msgSender(), tokenId);
+  }
+
+  /**
+   * @notice Checks if the specified user holds a Superuser token
+   * or is the contract owner.
+  */
+  function isSuper(address user, uint256 tokenId)
+    public
+    virtual
+    view
+    returns (bool superuser)
+  {
+    superuser = (
+      hasRole(Roles.Role.Superuser, user, tokenId)
+      || user == owner()
+    );
   }
 
   /**
@@ -420,12 +449,15 @@ contract BulkDisbursableNFTs is
     if(!local) {
       if(role == Roles.Role.Superuser) {
         require(
-          isSuper(),
+          isSuper(tokens.entries[index]),
           "You must be a Superuser to create other Superusers."
         );
       } else {
         require(
-          hasRole(Roles.Role.Caster, index) || isSuper(),
+          hasRole(
+            Roles.Role.Caster, index) 
+            || isSuper(tokens.entries[index]
+          ),
           "You must have the Caster role to assign new roles."
         );
       }
@@ -489,7 +521,7 @@ contract BulkDisbursableNFTs is
     virtual
   {
     require(
-      hasRole(Roles.Role.Configurer, id) || isSuper(),
+      hasRole(Roles.Role.Configurer, id) || isSuper(id),
       "You must have a Configurer token to change metadata."
     );
     uris[id] = newURI;
@@ -551,7 +583,7 @@ contract BulkDisbursableNFTs is
     id = Bits.VANILLA_TYPE | index;
 
     require(
-      hasRole(Roles.Role.Creator, id) || isSuper(),
+      hasRole(Roles.Role.Creator, id) || isSuper(id),
       "You must have a Creator token to create new tokens."
     );
 
@@ -636,7 +668,7 @@ contract BulkDisbursableNFTs is
   function _setMax(uint256 id, int64 max, bool local) internal virtual {
     if(!local) {
       require(
-        hasRole(Roles.Role.Limiter, id) || isSuper(),
+        hasRole(Roles.Role.Limiter, id) || isSuper(id),
         "You must have a Limiter token to change quantity."
       );
     }
@@ -672,7 +704,7 @@ contract BulkDisbursableNFTs is
     override
   {
     require(
-      hasRole(Roles.Role.Burner, owner, id) || isSuper(owner),
+      hasRole(Roles.Role.Burner, owner, id) || isSuper(owner, id),
       "You must have a Burner token to destroy tokens."
     );
     _burn(owner, id, quantity);
@@ -749,8 +781,8 @@ contract BulkDisbursableNFTs is
     internal
     override(ERC1155Upgradeable, ERC1155SupplyUpgradeable)
   {
-    if(!isSuper()) {
-      for(uint256 i = 0; i < ids.length; ++i) {
+    for(uint256 i = 0; i < ids.length; ++i) {
+      if(!isSuper(ids[i])) {
         if(ids[i] & Bits.INTERNAL_MASK != Bits.INTERNAL_MASK) {
           Roles.Role needed = (
             from == address(0) ? (
@@ -768,7 +800,7 @@ contract BulkDisbursableNFTs is
             }
             if(ids[i] & Bits.TYPE_MASK == Bits.GATING_TYPE) {
               require(
-                hasRole(Roles.Role.Caster, ids[i]) || isSuper(),
+                hasRole(Roles.Role.Caster, ids[i]),
                 "You must have a Caster token to mint token gates."
               );
             } else {

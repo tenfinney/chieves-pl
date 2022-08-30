@@ -29,6 +29,9 @@ const IdTd:React.FC<IndexedToken> = ({ token }) => (
             ({token.gates === 0 ? 'all' : token.gates})
           </Text>
         )}
+        {token.is?.disabling && (
+          <Text>(disabled)</Text>
+        )}
       </Stack>
     </Tooltip>
   </Td>

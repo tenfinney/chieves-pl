@@ -12,6 +12,7 @@ import fs from 'fs'
 import { packToFs } from 'ipfs-car/pack/fs'
 import { FsBlockStore } from 'ipfs-car/blockstore/fs'
 import hardhat from 'hardhat'
+import { load } from '../lib/helpers'
 
 const { config, ethers } = hardhat
 // const __filename = fileURLToPath(import.meta.url)
@@ -33,28 +34,7 @@ const main = async () => {
   }
   const storage = new NFTStorage({ token: process.env.NFT_STORAGE_API_KEY })
 
-  const { abi, contractName } = JSON.parse(await (
-    fs.promises.readFile(
-      path.join(
-        artifactsDir,
-        'src/BulkDisbursableNFTs.sol/BulkDisbursableNFTs.json'
-      )
-    )
-  ))
-
-  const contractAddress = (await (
-    fs.promises.readFile(
-      path.join(
-        artifactsDir,
-        'BulkDisbursableNFTs.address'
-      )
-    )
-  ))
-  .toString()
-  .trim()
-
-  const contract = await ethers.getContractAt(abi, contractAddress)
-
+  const { contract } = load({ filenameBase: 'Bulk*', ethers, config })
   const metadataDir = path.join(__dirname, '../metadata')
   const assetsDir = path.join(metadataDir, 'assets')
   const assetsCar = path.join(metadataDir, 'assets.car')
@@ -125,10 +105,12 @@ const main = async () => {
     ` 🍿 Transformed ${chalk.hex('#4CFF0B')(relative(templates))}`
     + ` & uploaded to root ${chalk.hex('#9E59FF')(metadataCID)}.`
   )
-
+  const { contract: rolesLibrary } = (
+    load({ filenameBase: 'Roles*', ethers, config })
+  )
   for(const file of files) {
     const type = file.name.replace(/\.json$/, '')
-    const typeId = await contract.roleIndexForName(capitalize(type))  
+    const typeId = await rolesLibrary.roleIndexForName(capitalize(type))  
     const tokenId = await contract['roleToken(uint8)'](typeId)
 
     if(!tokenId) {

@@ -16,7 +16,7 @@ const shortDir = (path: string) => {
 
 let publishDir = path.join(
   process.cwd(),
-  '../ui/contracts/',
+  '../ui/src/contracts/',
   hre.network.name,
 )
 let artifactsDir = hre.config.paths.artifacts

@@ -15,7 +15,8 @@ import {
   HardhatUserConfig, HttpNetworkUserConfig, HttpNetworkHDAccountsConfig,
 } from 'hardhat/types'
 import * as bip39 from 'bip39'
-import { deregexify } from './lib/helpers'
+import { deregexify, load } from './lib/helpers'
+import type { ethers as Ethers } from 'ethers'
 
 const { isAddress, getAddress, formatUnits } = utils
 
@@ -224,36 +225,14 @@ task('grant', 'Grant a role')
 .addFlag('singleUse', 'Token may be used only once.')
 .addOptionalParam('token', 'Token id to grant for')
 .setAction(async (args, { ethers }) => {
-  const srcDir = config?.paths?.sources
-  // const [, srcDir] = config?.paths?.sources?.match(/^.*\/([^\/]+)\/?$/) ?? []
-  if (!srcDir) throw new Error('ERROR - could not find source directory')
-  const contractsHome = `${config?.paths?.artifacts}/${srcDir}/`
-  const [contractFile] = (
-    glob
-    .sync(`${contractsHome}/*/Bulk*`)
-    .filter((name) => !/\.dbg\.json$/.test(name))
-  )
-  const { abi, contractName } = JSON.parse(
-    fs.readFileSync(contractFile).toString()
-  )
-  console.debug(
-    ` 🦐 Loaded ${chalk.hex('#88C677')(contractName)} From:`
-    + ` ${chalk.hex('#E59AF9')(contractFile)}`
-  )
-  const address = (
-    fs
-    .readFileSync(
-      `${config?.paths?.artifacts}/${contractName}.address`
-    )
-    .toString()
-    .trim()
+  const { contract, name: contractName } = (
+    load({ filenameBase: 'Bulk*', ethers, config })
   )
   let { address: user, role, token, singleUse } = args
   console.log(
     ` 🍏 Setting ${chalk.hex('#E1A47B')(user)}`
     + ` as ${singleUse ? '(single use) ' : ''}${chalk.hex('#5AE1AD')(role)}`
     + ` on ${chalk.hex('#E16464')(contractName)}`
-    + ` at ${chalk.hex('#DD5FE1')(address)}`
     + (token ? ` for id:${chalk.hex('#E11F83')(token)}` : '')
   )
   if(user.includes('.')) {
@@ -279,10 +258,11 @@ task('grant', 'Grant a role')
       token = expanded
     }
   }
-  const contract = new ethers.Contract(
-    address, abi, ethers.provider.getSigner()
+  const { contract: rolesLibrary } = (
+    load({ filenameBase: 'Roles*', ethers, config })
   )
-  const roleId = await contract.roleIndexForName(role)
+
+  const roleId = await rolesLibrary.roleIndexForName(role)
   if(roleId === 0) throw new Error(`Can’t find “${role}”`)
   let tx 
   if(token) {

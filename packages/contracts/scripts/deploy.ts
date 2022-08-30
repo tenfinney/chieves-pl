@@ -195,9 +195,15 @@ const main = async () => {
     await upgrades.erc1967.getImplementationAddress(deployment.address)
   )
   try {
+    const examiner = (
+      `${['polygon', 'mumbai'].includes(chain) ? 'Polygon' : 'Ether'}scan`
+    )
+    const timeout = 20
+    console.log(`Waiting ${timeout} seconds for ${examiner}`)
+    await new Promise((accept) => setTimeout(accept, timeout * 1000))
     console.log(chalk.hex('#FFD25E')(
       `\n 🔍 Verifying ${chalk.hex('#8454FF')(implementationAddress)}`
-      + ` on ${['polygon', 'mumbai'].includes(chain) ? 'Polygon' : 'Ether'}scan…\n`
+      + ` on ${examiner}…\n`
     ))
     await run('verify:verify', {
       address: implementationAddress,
