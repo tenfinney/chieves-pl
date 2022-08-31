@@ -3,10 +3,19 @@ import webpack from 'webpack'
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin'
 import CopyPlugin from 'copy-webpack-plugin'
 import dotenv from 'dotenv'
+import { ExternalProvider } from '@ethersproject/providers'
+import { defines, hideValues } from './src/lib/build'
 
-// dotenv.config({ path: '.env' })
+declare global {
+  interface Window {
+    ethereum?: ExternalProvider;
+  }
+}
+
+dotenv.config({ path: '.env' })
 dotenv.config({ path: '.env.local' })
-console.log ({ process, e: process.env.VITE_TEST_VAR })
+const define = defines(process.env)
+console.debug({ define: hideValues(define) })
 
 const config = (env: any) => {
   return ({
@@ -22,13 +31,7 @@ const config = (env: any) => {
       ],
     },
     plugins: [
-      new webpack.DefinePlugin({
-        'process.env': JSON.stringify(process.env),
-        // 'process.env.VITE_INFURA_ID': JSON.stringify(process.env.VITE_INFURA_ID),
-        'process.env.VITE_IPFS_AUTH_USERNAME': JSON.stringify(process.env.VITE_IPFS_AUTH_USERNAME),
-        // 'process.env.VITE_IPFS_AUTH_PASSWORD': JSON.stringify(process.env.VITE_IPFS_AUTH_PASSWORD),
-
-      }),
+      new webpack.DefinePlugin(define),
       new webpack.ProvidePlugin({
         Buffer: ['buffer', 'Buffer'],
       }),

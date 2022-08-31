@@ -9,31 +9,14 @@ import NodePolyfillsPlugin from 'rollup-plugin-polyfill-node'
 import CommonJSPlugin from '@rollup/plugin-commonjs'
 // import NodePolyfillsPlugin from 'rollup-plugin-node-polyfills'
 import InjectPlugin from '@rollup/plugin-inject'
+import { defines, hideValues } from './src/lib/build'
 
 export default defineConfig(
   ({ mode }) => {
     const env = loadEnv(mode, process.cwd())
-
-    const define: Record<string, string> = (
-      Object.fromEntries(
-        Object.entries(env).map(([key, val]) => {
-          if(key.startsWith('VITE_RAW_')) {
-            return [key.replace(/^VITE_RAW_/, ''), val]
-          } else if(key.startsWith('VITE_')) {
-              return [key.replace(/^VITE_/, ''), JSON.stringify(val)]
-          } else {
-            return null
-          }
-        }).filter((v) => !!v)
-      )
-    )
-
-    console.info({ define: Object.fromEntries(
-      Object.entries(define).map(([key, val]) => (
-        [key, val.replace(/\w/g, '•')]
-      ))
-    ) })
-
+    const define = defines(env)
+    console.debug({ define: hideValues(define) })
+    
     return {
       plugins: [
         // ResolvePlugin({

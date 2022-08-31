@@ -51,15 +51,14 @@ export const OptionsForm: React.FC<{
       }
 
       try {
-        if(tokenId != null) {
-          const tx = await rwContract.setURI(
-            BigInt(tokenId), metadata
-          )
-          await tx.wait()
-        }
+        const tx = await rwContract.setURI(
+          BigInt(tokenId), metadata
+        )
+        await tx.wait()
 
         navigate(`/view/${regexify(tokenId)}`)
       } catch(error) {
+        console.error({ error })
         toast({
           title: 'Contract Error',
           description: extractMessage(error),
