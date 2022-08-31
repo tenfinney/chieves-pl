@@ -182,7 +182,9 @@ export const NFTForm: React.FC<{
         setValue(name ?? prop, metadata[prop])
       })
 
-      setValue('images', [metadata.image])
+      if(metadata.image) {
+        setValue('images', [metadata.image])
+      }
 
       const { attributes: attrs } = metadata
       if(!isEmpty(attrs)) {
@@ -254,7 +256,7 @@ export const NFTForm: React.FC<{
   const configAnimation = (
     (evt: ChangeEvent & { target: { files: Maybe<FileList> } }) => {
       const { target: { files } } = evt
-      if (files?.length === 1) {
+      if (files?.length >= 1) {
         setValue('animation', files[0])
       } else {
         setValue('animation', null)
@@ -298,7 +300,7 @@ export const NFTForm: React.FC<{
               multiple
             />
           </Flex>
-          {images?.length && (
+          {images?.length > 0 && (
             <RadioGroup
               value={primaryImageIdx}
               onChange={(value: string) => {
@@ -308,11 +310,8 @@ export const NFTForm: React.FC<{
               <SimpleGrid columns={3} templateColumns="6rem 1fr 2rem">
                 {images.map((image: File | string, idx: number) => {
                   const name = (
-                    image && image instanceof File ? (
-                      image.name
-                    ) : (
-                      (image as string)?.replace(/^.*\//g, '')
-                    )
+                    (image as File)?.name
+                    ?? (image as string)?.replace(/^.*\//g, '')
                   )
 
                   return (

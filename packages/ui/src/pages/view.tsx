@@ -73,7 +73,7 @@ export const View: React.FC<{ tokenId: string, header?: boolean }> = (
     }
 
     const {
-      name, image, animation_url: animationURL,
+      name, image, animation_url: animation,
       description, background_color: bg,
     } = metadata
 
@@ -117,22 +117,40 @@ export const View: React.FC<{ tokenId: string, header?: boolean }> = (
             {description}
           </Markdown>
         )}
-        {animationURL?.endsWith('.mp4') && (
-          <chakra.video
-            maxW={96} maxH={96}
-            controls autoPlay loop muted
-          >
-            <chakra.source
-              src={httpURL(animationURL) ?? undefined}
-            />
-          </chakra.video>
-        )}
-        {animationURL?.endsWith('.webp') && (
-          <Image
-            src={httpURL(animationURL) ?? undefined}
-            alt={name}
-            maxW={96} maxH={96}
-          />
+        {animation && (
+          (() => {
+            const url = httpURL(animation) ?? undefined
+            const props = { maxW: 96, maxH: 96 }
+
+            if(/(mpe?g|mp4)$/i.test(animation)) {
+              return (
+                <chakra.video
+                  {...props}
+                  controls autoPlay loop muted
+                >
+                  <chakra.source src={url}/>
+                </chakra.video>
+              )
+            } else if(/(glb|gltf)$/i.test(animation)) {
+              return (
+                <Text textAlign="center">
+                  3D Support Coming Soon
+                </Text>
+              )
+            } else {
+              return (
+                <chakra.object
+                  data={url}
+                  title={name}
+                  pointerEvents="none"
+                  bg={`#${bg}`}
+                  borderRadius={15}
+                  p={2}
+                  {...props}
+                />
+              )
+            }
+          })()
         )}
       </Stack>
     )
