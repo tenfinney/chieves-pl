@@ -1,10 +1,84 @@
-<svg width="388" height="494" viewBox="0 0 388 494" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="387.597" height="493.305" fill="#2DF8C7" fill-opacity="0.12"/>
-<rect x="2.4896" y="2.4896" width="382.618" height="488.326" stroke="url(#paint0_linear_2_525)" stroke-opacity="0.6" stroke-width="4.9792"/>
-<defs>
-<linearGradient id="paint0_linear_2_525" x1="230.854" y1="109.972" x2="193.014" y2="-55.126" gradientUnits="userSpaceOnUse">
-<stop stop-color="#2DF8C7"/>
-<stop offset="1" stop-color="#04040D" stop-opacity="0"/>
-</linearGradient>
-</defs>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="388"
+   height="494"
+   viewBox="0 0 388 494"
+   fill="none"
+   version="1.1"
+   id="svg943"
+   sodipodi:docname="RectangleBG2.svg"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
+  <metadata
+     id="metadata947">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="823"
+     inkscape:window-height="480"
+     id="namedview945"
+     showgrid="false"
+     inkscape:zoom="0.47773279"
+     inkscape:cx="194"
+     inkscape:cy="247"
+     inkscape:window-x="4051"
+     inkscape:window-y="1162"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg943" />
+  <rect
+     width="387.597"
+     height="493.305"
+     fill="#03a5fc"
+     fill-opacity="0.12"
+     id="rect932"
+     style="fill:#3274be;fill-opacity:0.31034482" />
+  <rect
+     x="2.4896"
+     y="2.4896"
+     width="382.618"
+     height="488.326"
+     stroke="url(#paint0_linear_2_525)"
+     stroke-opacity="0.6"
+     stroke-width="4.9792"
+     id="rect934" />
+  <defs
+     id="defs941">
+    <linearGradient
+       id="paint0_linear_2_525"
+       x1="230.854"
+       y1="109.972"
+       x2="193.014"
+       y2="-55.126"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         stop-color="#03a5fc"
+         id="stop936" />
+      <stop
+         offset="1"
+         stop-color="#04040D"
+         stop-opacity="0"
+         id="stop938" />
+    </linearGradient>
+  </defs>
 </svg>
