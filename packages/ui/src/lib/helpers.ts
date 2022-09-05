@@ -5,9 +5,9 @@ import type {
 } from '@/lib/types'
 import { CID } from 'multiformats/cid'
 import { NETWORKS } from '@/lib/networks'
-import { ipfs, ipfsLinkPattern } from '@/config'
-import all from 'it-all'
+import { ipfsLinkPattern } from '@/config'
 import JSON5 from 'json5'
+import { NFTStorage } from 'nft.storage'
 
 export const httpURL = (uri?: Maybe<string>) => {
   const [, origCID, path] = (
@@ -98,9 +98,13 @@ export const switchTo = async (chain: number) => {
   }
 }
 
-export const ipfsify = async (filesOrURL: FileListish) => {
+export const ipfsify = async ({
+  storage, filesOrURL,
+}: {
+  filesOrURL: FileListish
+  storage: NFTStorage,
+}) => {
   let value = filesOrURL
-
   if(
     value == null
     || (Array.isArray(value) && value.every((v) => v == null))
@@ -109,20 +113,16 @@ export const ipfsify = async (filesOrURL: FileListish) => {
     throw new Error(`\`ipfsify\` called with value = \`${str}\``)
   }
 
-  if(Array.isArray(value) && typeof value[0] === 'string') {
-    const count = value.length
-    if(count !== 1) {
-      throw new Error(
-        `Unexpected ${count} entries in string array`
-        + ' passed to `ipfsify`.'
-      )
+  if(Array.isArray(value)) {
+    const [last] = value.slice(-1)
+    if(typeof last === 'string') {
+      value = last
     }
-    [value] = value
   }
 
   if(typeof value === 'string') {
     if(value.startsWith('ipfs://')) {
-      return [value]
+      return value
     }
     throw new Error(`Unknown File String: ${value}`)
   }
@@ -135,21 +135,15 @@ export const ipfsify = async (filesOrURL: FileListish) => {
     )
   )
 
-  const result = await all(ipfs.addAll(
-    list.map((entry) => ({
-      path: entry.name,
-      content: (entry as NamedString).content ?? entry 
-    })) as Array<{ path: string; content: string }>,
-    { pin: true, wrapWithDirectory: true }
-  ))
-  const [{ cid }] = (
-    result.slice(-1) as unknown as [{ cid: CID }]
+  const root = await storage.storeDirectory(
+    (list instanceof FileList) ? list : (
+      list.map((entry) => new File(
+        [(entry as NamedString).content ?? entry as File],
+        entry.name,
+      ))
+    )
   )
-  const out = list.map((entry) => (
-    `ipfs://${cid.toString()}/`
-    + (entry as File).name
-  ))
-  return out
+  return `ipfs://${root.toString()}/`
 }
 
 export const regexify = (str?: string) => {

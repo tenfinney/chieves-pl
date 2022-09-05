@@ -1,19 +1,22 @@
 import { capitalize, switchTo } from '@/lib/helpers'
 import { NETWORKS } from '@/lib/networks'
 import {
-  Button, ButtonProps, Flex, Spinner, Text,
+  Button, ButtonProps, Flex, Link, Spinner, Text,
 } from '@chakra-ui/react'
 import React, { MouseEvent, useMemo, useState } from 'react'
 import { useWeb3 } from '@/lib/hooks'
+import { useConfig } from '@/config'
 
 export const SubmitButton: React.FC<ButtonProps & {
   purpose?: string
   processing?: boolean
   label?: string
+  requireStorage?: boolean
 }> = ({
   purpose = 'create',
   processing = false,
   onClick,
+  requireStorage,
   label = `${capitalize(purpose)} NFT`,
   ...props
 }) => {
@@ -28,8 +31,12 @@ export const SubmitButton: React.FC<ButtonProps & {
   const desiredNetwork = (
     offChain ? NETWORKS.contract.name : null
   )
+  const { Settings, storage } = useConfig({ requireStorage })
 
-  return (
+  return <>
+    {(rwContract && requireStorage && !storage) && (
+      <Settings highlight={['nftStorageAPIToken']}/>
+    )}
     <Button
       type="submit"
       variant="solid"
@@ -75,10 +82,18 @@ export const SubmitButton: React.FC<ButtonProps & {
           return `Connect To The ${desiredNetwork} Network To ${capitalize(purpose)}`
         } else if(!rwContract) {
           return 'Contract Not Connected'
+        } else if(requireStorage && !storage) {
+          return <>
+            Missing
+            <Link mx={1} target="_blank" href="//nft.storage">
+              NFT.Storage
+            </Link>
+            Token
+          </>
         } else {
           return label
         }
       })()}
     </Button>
-  )
+  </>
 }

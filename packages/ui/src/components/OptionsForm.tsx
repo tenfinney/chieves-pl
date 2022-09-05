@@ -17,6 +17,7 @@ import {
   ERC1155Metadata, FormValues, Maybe, OpenSeaAttribute, Attribute,
 } from '@/lib/types'
 import { useNavigate } from 'react-router-dom'
+import { useConfig } from '@/config'
 
 export const OptionsForm: React.FC<{
   purpose?: 'create' | 'update'
@@ -38,6 +39,7 @@ export const OptionsForm: React.FC<{
   const JSON5_FORM = 2
   const [tab, setTab] = useState(FIELD_FORM)
   const toast = useToast()
+  const { storage } = useConfig()
 
   const configure = useCallback(
     async ({ metadata }: { metadata: string } ) => {
@@ -91,13 +93,13 @@ export const OptionsForm: React.FC<{
     }
 
     if(Array.isArray(images) && images.some((img) => img != null)) {
-      metadata.image = (await ipfsify(images))[0] // wrong
+      metadata.image = (await ipfsify({ filesOrURL: images, storage }))[0] // wrong
     } else if(!Array.isArray(images)) {
       console.warn(`Unknown Image Type: ${typeof images}`)
     }
 
     if(animation instanceof File || typeof animation === 'string') {
-      metadata.animation_url = (await ipfsify(animation))[0]
+      metadata.animation_url = (await ipfsify({ filesOrURL: animation, storage }))[0]
     } else if (animation != null) {
       console.warn(`Unknown Animation Type: ${typeof animation}`)
     }
@@ -162,7 +164,7 @@ export const OptionsForm: React.FC<{
       if(!metadata) {
         throw new Error('Metadata is `undefined`.')
       }
-      [metadata] = await ipfsify(metadata)
+      [metadata] = await ipfsify({ filesOrURL: metadata, storage })
       await configure({ metadata })
     } catch(error) {
       console.error({ error })
@@ -209,7 +211,11 @@ export const OptionsForm: React.FC<{
             ))}
           </TabPanels>
         </Tabs>
-        <SubmitButton {...{ purpose, processing }} mb={3} />
+        <SubmitButton
+          {...{ purpose, processing }}
+          mb={3}
+          requireStorage={true}
+        />
       </Box>
       <MaxForm colorScheme="blue" {...{ tokenId, purpose }}/>
       <MaxForm colorScheme="blue" perUser={true} {...{ tokenId, purpose }}/>

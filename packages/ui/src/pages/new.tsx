@@ -247,6 +247,7 @@ const Content: React.FC = () => {
                   <SubmitButton
                     purpose="create"
                     label="Reserve an ID"
+                    requireStorage={false}
                   />
                 </Stack>
               )
