@@ -127,6 +127,10 @@ export const ipfsify = async ({
     throw new Error(`Unknown File String: ${value}`)
   }
 
+  if(storage == null) {
+    return null
+  }
+
   const list: Array<File | NamedString> = (
     Array.isArray(value) ? (
       value as Array<File | NamedString>
