@@ -1,15 +1,17 @@
-import { useWeb3 } from '@/lib/hooks'
 import React, {
   ReactNode, useEffect, useMemo, useState,
 } from 'react'
-import { ERC1155Metadata, Maybe } from '@/lib/types'
-import {
-  httpURL, regexify, deregexify,
-} from '@/lib/helpers'
-import { HomeLink, OptionsForm } from '@/components'
 import { Alert, AlertDescription, AlertIcon, AlertTitle, Box } from '@chakra-ui/react'
 import { useParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
+import JSON5 from 'json5'
+import { useWeb3 } from '@/lib/hooks'
+import {
+  httpURL, regexify, deregexify, extractMessage,
+} from '@/lib/helpers'
+import { HomeLink, OptionsForm } from '@/components'
+import type { ERC1155Metadata, Maybe } from '@/lib/types'
+
 export const Edit = () => {
   const { nftId } = useParams()
   const tokenId = useMemo(() => deregexify(nftId), [nftId])
@@ -21,15 +23,21 @@ export const Edit = () => {
     const getMetadata = async () => {
       if(roContract && tokenId) {
         try {
-          const meta = await roContract.uri(tokenId)
-          if(!meta) {
+          const metaURI = await roContract.uri(tokenId)
+          const url = httpURL(metaURI)
+          if(!metaURI) {
             setMetadata(null)
           } else {
-            const response = await fetch(httpURL(meta)!)
-            setMetadata(await response.json())
+            const response = await fetch(url)
+            const body = await response.text()
+            try {
+              setMetadata(JSON5.parse(body))
+            } catch(error) {
+              console.error({ url, tokenId, metaURI, error, body })
+            }
           }
         } catch(err) {
-          setError((err as Error).message)
+          setError(extractMessage(err))
         }
       }
     }
