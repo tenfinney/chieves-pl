@@ -583,4 +583,35 @@ describe('The Token Contract', () => {
       ).to.not.be.equal('')
     }
   )
+
+  it.only(
+    'returns the correct metadata.',
+    async () => {
+      const creatorRole = await roles.roleIndexForName('Creator')
+      const creatorGate = await token['roleToken(uint8)'](creatorRole)
+
+      await transact({
+        method: 'grantRole(uint8,address)',
+        args: [creatorRole, creator.address],
+      })
+
+      const minterRole = await roles.roleIndexForName('Minter')
+      const maintainerRole = await roles.roleIndexForName('Maintainer')
+
+      const lastIndex = (await token.typeSupply()).toBigInt()
+      await transact({
+        sender: creator,
+        method: 'create(uint8[],uint8[])',
+        args: [[maintainerRole], []],
+      })
+      expect((await token.typeSupply()).toBigInt() - lastIndex).to.equal(2n)
+      const createdId = await token.tokenByIndex(lastIndex + 1n)
+      expect(await token.uri(createdId)).to.equal('')
+      await expect(
+        token.setURI(createdId, 'ipfs://tokenmetadata.json'),
+        'it’s possible to set the token URI for the minter role'
+      ).to.eventually.be.fulfilled
+      expect(await token.uri(createdId)).to.equal('ipfs://tokenmetadata.json')
+    }
+  )
 })
