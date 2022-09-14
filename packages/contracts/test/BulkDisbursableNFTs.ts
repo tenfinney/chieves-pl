@@ -303,6 +303,7 @@ describe('The Token Contract', () => {
       )).to.be.true
 
       await token.setMax(createdId, 100)
+      await token.setPerUserMax(createdId, 100)
 
       await transact({
         sender: creator,
@@ -348,6 +349,8 @@ describe('The Token Contract', () => {
       const createdId = await token.tokenByIndex(lastIndex + 1n)
 
       await token.setMax(createdId, 6)
+      await token.setPerUserMax(createdId, 6)
+
       await expect(
         transact({
           sender: creator,
@@ -410,7 +413,8 @@ describe('The Token Contract', () => {
       const createdIndex = lastIndex + 1n
       const createdId = await token.tokenByIndex(createdIndex)
 
-      await token.setMax(createdId, 20)
+      await token.setMax(createdId, 6)
+      await token.setPerUserMax(createdId, 6)
 
       await expect(
         transact({
@@ -542,6 +546,7 @@ describe('The Token Contract', () => {
       .to.equal(true)
 
       await token.setMax(createdId, 5)
+      await token.setPerUserMax(createdId, 5)
 
       await expect(
         transact({

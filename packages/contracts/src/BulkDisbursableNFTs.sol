@@ -500,9 +500,11 @@ contract BulkDisbursableNFTs is
         || tokenType == Bits.GATING_TYPE | Bits.DISABLING_TYPE
       ) {
         uint256 generic = (
-          id & ~Bits.COUNTER_MASK
-          & ~Bits.NO_MATCH_FLAGS
-          & ~Bits.TYPE_MASK
+          id & (
+            ~Bits.COUNTER_MASK
+            & ~Bits.NO_MATCH_FLAGS
+            & ~Bits.TYPE_MASK
+          )
           | Bits.GATING_TYPE
         );
         metadata = uris[generic];
@@ -603,6 +605,7 @@ contract BulkDisbursableNFTs is
     if(gate & Bits.USE_ONCE == Bits.USE_ONCE) {
       _burn(_msgSender(), gate, 1);
     }
+    setPerUserMax(id,1);
   }
 
   /**
@@ -851,7 +854,7 @@ contract BulkDisbursableNFTs is
           delete owned[from].indices[ids[i]];
         }
       }
-    }
+    } 
     super._beforeTokenTransfer(
       operator, from, to, ids, amounts, data
     );

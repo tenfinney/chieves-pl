@@ -155,6 +155,7 @@ const Home = () => {
               const uri = token.uri ?? (
                 await roContract.uri(id)
               )
+              console.log({uri})
               if(uri === '') {
                 throw new Error('No URI… Waiting for configuration…')
               }

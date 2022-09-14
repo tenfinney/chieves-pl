@@ -114,9 +114,12 @@ export const useConfig = ({ requireStorage = false } = {}) => {
   ), [nftStorageAPIToken])
 
   const { isOpen, onOpen, onClose } = useDisclosure()
-  if(!isOpen && !nftStorageAPIToken && requireStorage) {
+  useMemo(() => {
+    if(!isOpen && !nftStorageAPIToken){
+    console.log('LOOKY HERE!!!')
     onOpen()
   }
+  }, [isOpen, storage, nftStorageAPIToken, requireStorage])
 
   const Settings: React.FC<{ highlight: Array<string> }> = (
     useCallback(({ highlight }) => (
@@ -143,6 +146,7 @@ export const useConfig = ({ requireStorage = false } = {}) => {
               <InputGroup>
                 <Input
                   placeholder="Required Token"
+                  type="password"
                   bg={highlight.includes('nftStorageAPIToken') ? (
                     '#FFFF0066'
                   ) : (
