@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, {
+  useState, useEffect, useCallback, useRef,
+} from 'react'
 import {
   extractMessage, httpURL, toSpanList,
 } from '@/lib/helpers'
@@ -11,8 +13,9 @@ import {
 } from 'react-router-dom'
 import JSON5 from 'json5'
 import { defaults } from '@/config'
-import { chakra, Button, Container, Flex, Text, Stack } from '@chakra-ui/react'
-import { BigNumber } from 'ethers'
+import {
+  chakra, Button, Container, Flex, Text, Stack,
+} from '@chakra-ui/react'
 
 const Home = () => {
   const [tokens, setTokens] = useState<Array<TokenState | Error>>([])
@@ -152,38 +155,40 @@ const Home = () => {
                 throw new HiddenError('Token is hidden.')
               }
 
-              const uri = token.uri ?? (
-                await roContract.uri(id)
+              const responses = await Promise.allSettled([
+                (async () => {
+                  const uri = token.uri ?? await roContract.uri(id)
+                  if(uri === '') {
+                    throw new Error('No URI… Waiting for configuration…')
+                  }
+                  setToken(idx, { uri })
+                  const response = await fetch(
+                    httpURL(uri)!,
+                    { signal: controller.current.signal }
+                  )
+                  if(!response.ok) {
+                    throw new Error(`Request Status: ${response.status}`)
+                  }
+                  const data = await response.text()
+                  setToken(idx, { metadata: JSON5.parse(data) })
+                })(),
+                (async () => {
+                  const supply = await roContract.totalSupply(id)
+                  setToken(idx, { total: supply.toBigInt() })
+                })(),
+                (async () => {
+                  const max = await roContract.getMax(id)
+                  console.info({ max })
+                  setToken(idx, { max: max.toBigInt() })
+                })(),
+              ])
+
+              const [{ reason: error } = { reason: null }] = (
+                responses.filter((res) => (
+                  res.status === 'rejected'
+                ))
               )
-              console.log({uri})
-              if(uri === '') {
-                throw new Error('No URI… Waiting for configuration…')
-              }
-              setToken(idx, { uri })
-
-              const response = await fetch(
-                httpURL(uri)!,
-                { signal: controller.current.signal }
-              )
-              if(!response.ok) {
-                throw new Error(`Request Status: ${response.status}`)
-              }
-              const data = await response.text()
-              if(!data || data.trim() === '') {
-                throw new Error('Aww, No Data. 😾')
-              }
-
-              setToken(idx, { metadata: JSON5.parse(data) })
-
-              roContract.totalSupply(id)
-              .then((total: BigNumber) => {
-                setToken(idx, { total: total.toBigInt() })
-              })
-
-              roContract.getMax(id)
-              .then((max: BigNumber) => {
-                setToken(idx, { max: max.toBigInt() })
-              })
+              if(error) throw new Error(error)
             } catch(error) {
               if(!(error instanceof HiddenError)) {
                 console.error({ error })

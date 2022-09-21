@@ -16,6 +16,7 @@ export const Edit = () => {
   const { nftId } = useParams()
   const tokenId = useMemo(() => deregexify(nftId), [nftId])
   const [metadata, setMetadata] = useState<Maybe<ERC1155Metadata>>()
+  const [metaURI, setMetaURI] = useState<Maybe<string>>()
   const [error, setError] = useState<ReactNode>()
   const { roContract } = useWeb3()
 
@@ -25,12 +26,13 @@ export const Edit = () => {
         try {
           const metaURI = await roContract.uri(tokenId)
           const url = httpURL(metaURI)
-          if(!metaURI) {
+          if(!metaURI || metaURI === '') {
             setMetadata(null)
           } else {
             const response = await fetch(url)
             const body = await response.text()
             try {
+              setMetaURI(metaURI)
               setMetadata(JSON5.parse(body))
             } catch(error) {
               console.error({ url, tokenId, metaURI, error, body })
@@ -60,7 +62,7 @@ export const Edit = () => {
       )}
       <OptionsForm
         purpose="update"
-        {...{ tokenId, metadata }}
+        {...{ tokenId, metadata, metaURI }}
       />
     </Box>
   )

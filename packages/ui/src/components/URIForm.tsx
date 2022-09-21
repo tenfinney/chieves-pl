@@ -3,7 +3,7 @@ import React from 'react'
 import { FieldValues, UseFormRegister } from 'react-hook-form'
 
 export const URIForm: React.FC<{
-  register: UseFormRegister<FieldValues>,
+  register: UseFormRegister<FieldValues>
 }> = ({
   register
 }) => {

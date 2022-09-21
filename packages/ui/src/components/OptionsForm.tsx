@@ -9,7 +9,7 @@ import {
 import {
   ipfsify, isSet, isEmpty, regexify, extractMessage,
 } from '@/lib/helpers'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useWeb3 } from '@/lib/hooks'
 import { useForm } from 'react-hook-form'
 import JSON5 from 'json5'
@@ -23,15 +23,16 @@ export const OptionsForm: React.FC<{
   purpose?: 'create' | 'update'
   tokenId?: string
   metadata?: Maybe<ERC1155Metadata>
+  metaURI?: string
 }> = ({
-  purpose = 'create', tokenId, metadata
+  purpose = 'create', tokenId,
 }) => {
   const { rwContract } = useWeb3()
   const navigate = useNavigate()
   const {
     register, handleSubmit, watch, setValue,
     formState: {
-      errors, isSubmitting: processing, isDirty: dirty,
+      isSubmitting: processing, isDirty: dirty,
     },
   } = useForm()
   const FIELD_FORM = 0
@@ -40,6 +41,13 @@ export const OptionsForm: React.FC<{
   const [tab, setTab] = useState(FIELD_FORM)
   const toast = useToast()
   const { storage } = useConfig()
+  const metadata = watch('metadata')
+  const json5 = watch('json5')
+  const uri = watch('uri')
+
+  useEffect(() => {
+    setValue('uri', uri)
+  }, [uri, setValue])
 
   const configure = useCallback(
     async ({ metadata }: { metadata: string } ) => {
@@ -58,7 +66,9 @@ export const OptionsForm: React.FC<{
         )
         await tx.wait()
 
-        navigate(`/view/${regexify(tokenId)}`)
+        if(metadata !== '') {
+          navigate(`/view/${regexify(tokenId)}`)
+        }
       } catch(error) {
         console.error({ error })
         toast({
@@ -93,7 +103,7 @@ export const OptionsForm: React.FC<{
     }
 
     if(Array.isArray(images) && images.some((img) => img != null)) {
-      metadata.image = (await ipfsify({ filesOrURL: images, storage }))[0] // wrong
+      metadata.image = await ipfsify({ filesOrURL: images, storage })
     } else if(!Array.isArray(images)) {
       console.warn(`Unknown Image Type: ${typeof images}`)
     }
@@ -135,25 +145,22 @@ export const OptionsForm: React.FC<{
       let metadata = await (async () => {
         switch(tab) {
           case FIELD_FORM: {
-            return {
-              name,
-              content: JSON.stringify(
-                await buildMeta(data), null, 2
-              )
-            }
+            const content = JSON.stringify(
+              await buildMeta(data), null, 2
+            )
+            return { name, content }
           }
           case URI_FORM: {
-            return data.uri
+            return data.uri ?? ''
           }
           case JSON5_FORM: {
             if(!isSet(data.json5)) {
               throw new Error('JSON5 isn’t set.')
             }
+            const meta = JSON5.parse(data.json5)
             return {
               name,
-              content: JSON.stringify(
-                JSON5.parse(data.json5), null, 2
-              )
+              content: JSON.stringify(meta, null, 2)
             }
           }
           default: {
@@ -161,10 +168,11 @@ export const OptionsForm: React.FC<{
           }
         }
       })()
-      if(!metadata) {
-        throw new Error('Metadata is `undefined`.')
+      if(metadata == null) {
+        throw new Error(`Metadata is \`${JSON5.stringify(metadata)}\`.`)
+      } else if(metadata !== '') {
+        metadata = await ipfsify({ filesOrURL: metadata, storage })
       }
-      [metadata] = await ipfsify({ filesOrURL: metadata, storage })
       await configure({ metadata })
     } catch(error) {
       console.error({ error })
@@ -177,7 +185,7 @@ export const OptionsForm: React.FC<{
       })
     }
   }
-    
+
   return (
     <Stack align="center">
       <Box
@@ -190,7 +198,32 @@ export const OptionsForm: React.FC<{
           mx={[0, 5]}
           isFitted
           variant="enclosed"
-          onChange={(idx: number) => setTab(idx)}
+          onChange={async (idx: number) => {
+            switch(idx) {
+              case FIELD_FORM: {
+                let metadata
+                switch(tab) {
+                  case URI_FORM: {
+                    const res = await fetch(uri)
+                    metadata = JSON5.parse(
+                      await res.text()
+                    )
+                    break
+                  }
+                  case JSON5_FORM: {
+                    metadata = JSON5.parse(json5)
+                    break
+                  }
+                  await configure({ metadata })
+                }
+                break
+              }
+              case URI_FORM: {
+                break
+              }
+            }
+            setTab(idx)
+          }}
         >
           <TabList mb="1em">
             <Tab>Fields</Tab>
@@ -218,7 +251,11 @@ export const OptionsForm: React.FC<{
         />
       </Box>
       <MaxForm colorScheme="blue" {...{ tokenId, purpose }}/>
-      <MaxForm colorScheme="blue" perUser={true} {...{ tokenId, purpose }}/>
+      <MaxForm
+        colorScheme="blue"
+        perUser={true}
+        {...{ tokenId, purpose }}
+      />
     </Stack>
   )
 }
