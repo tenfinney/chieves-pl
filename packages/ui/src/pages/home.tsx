@@ -186,7 +186,7 @@ const Home = () => {
               const [{ reason: error } = { reason: null }] = (
                 responses.filter((res) => (
                   res.status === 'rejected'
-                ))
+                )) as Array<{ reason: string }>
               )
               if(error) throw new Error(error)
             } catch(error) {
