@@ -147,7 +147,7 @@ export const ipfsify = async ({
       ))
     )
   )
-  return `ipfs://${root.toString()}/`
+  return `ipfs://${root.toString()}/${list[0].name}`
 }
 
 export const regexify = (str?: string) => {
