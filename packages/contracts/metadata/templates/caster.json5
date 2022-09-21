@@ -1,9 +1,9 @@
 {
-  name: '’Chievemints Caster',
+  name: 'SmartLaw Claims Caster',
   description: 'Holders of this token can assign permission roles.',
   decimals: 0,
-  external_url: 'https://chiev.es/',
-  image: 'ipfs://{assets-cid}/fairy.svg',
+  external_url: 'https://tokens.freeweb3.com/',
+  image: 'ipfs://{assets-cid}/castor.svg',
   background_color: 'd19226',
   properties: {},
   attributes: [

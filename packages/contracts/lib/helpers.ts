@@ -8,7 +8,7 @@ import { HardhatUserConfig } from 'hardhat/types'
 /* This function is copied over from the `ui` package
  * because I couldn't get TypeScript to import it
  * correctly. Ideally, this should be shared from
- * `@chievemints/ui/lib/helpers`.
+ * `@smartlaw/ui/lib/helpers`.
  */
 export const deregexify = (str?: string) => {
   if(!str) return str

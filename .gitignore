@@ -7,6 +7,7 @@ yarn-error.log*
 # local env files
 .env
 .env.local
+.env.ss.local
 .env.development.local
 .env.test.local
 .env.production.local
@@ -16,6 +17,12 @@ yarn-error.log*
 .yarn/install-state.gz
 .yarn/cache/
 .vercel/
+
+# failsafe
+mnemonic.txt
+mnemonic-alpha.txt
+mnemonic-atypical.txt
+mnemonic-exposed.txt
 .vercel
 
 **/mnemonic*.txt

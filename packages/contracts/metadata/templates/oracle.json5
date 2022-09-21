@@ -1,9 +1,9 @@
 {
-  name: '’Chievemints Oracle',
+  name: 'SmartLaw Claims Oracle',
   description: 'Holders of this token provide information about the off-chain world.',
   decimals: 0,
-  external_url: 'https://chiev.es/',
-  image: 'ipfs://{assets-cid}/wrench & screwdriver.svg',
+  external_url: 'https://tokens.freeweb3.com/',
+  image: 'ipfs://{assets-cid}/oracle.svg',
   background_color: '01525B',
   properties: {},
   attributes: [

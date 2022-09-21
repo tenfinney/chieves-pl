@@ -44,7 +44,7 @@ const deploy = async ({
     )
   )
 
-  console.log(`\n 🛰  Deploying: ${contract}`)
+  console.log(`\n Deploying: ${contract}`)
 
   if(!ethers) throw new Error('`ethers` is not defined.')
 
@@ -59,7 +59,7 @@ const deploy = async ({
   if(proxy) {
     if(!fs.existsSync(files.address)) {
       console.log(
-        `\n 🥂 ${chalk.hex('#FF7D31')(files.address)} doesn't exist;`
+        `\n ${chalk.hex('#FF7D31')(files.address)} doesn't exist;`
         + ' creating a new proxy…'
       )
       deployment = await upgrades.deployProxy(
@@ -67,7 +67,6 @@ const deploy = async ({
         args,
         { kind: 'uups', timeout: 10 * 60 * 1000 },
       )
-      console.log('deployed!!!')
     } else {
       const existing = (
         fs.readFileSync(files.address).toString().trim()
@@ -77,7 +76,7 @@ const deploy = async ({
       )
 
       console.log(
-        `\n ⚇ Existing deployment proxied at ${chalk.hex('#AD4EFF')(existing)}`
+        `\n Existing deployment proxied at ${chalk.hex('#AD4EFF')(existing)}`
         + ` for implementation ${chalk.hex('#87BED5')(impl.old)};`
         + ' upgrading'
       )
@@ -98,10 +97,10 @@ const deploy = async ({
     },
   } = deployment
   const signer = await signator.getAddress()
-  const gasPrice = gas?.toBigInt() ?? '𝕌𝕟𝕕𝕖𝕗𝕚𝕟𝕖𝕕'
+  const gasPrice = gas?.toBigInt() ?? 'Undefined'
 
   console.debug(
-    `\n 🍅 ${chalk.hex('#00AA7F')('Deployed in TX:')} `
+    `\n ${chalk.hex('#00AA7F')('Deployed in TX:')} `
     + chalk.hex('#6572AA')(tx) + ' to '
     + chalk.hex('#8FFFFC')(deployed)
   )
@@ -140,7 +139,7 @@ const deploy = async ({
   }
 
   console.log(
-    `\n 📄 ${chalk.cyan(contract)}, deployed`
+    `\n ${chalk.cyan(contract)}, deployed`
     + (proxy ? (
       ` as a proxy at ${chalk.magenta(deployed)}`
       + ` to the implementation at ${chalk.hex('#DE307E')(impl.new)}`
@@ -153,7 +152,7 @@ const deploy = async ({
   )
   fs.writeFileSync(files.address, deployed)
 
-  let gasInfo = '𐌵ⲛⲕⲛⲟⲱⲛ'
+  let gasInfo = 'unknown'
   if(typeof gasPrice === 'bigint') {
     const gasUsed = (
       gasLimit.toBigInt() * gasPrice
@@ -164,13 +163,13 @@ const deploy = async ({
     )
   }
 
-  console.log(`\n ⛽ ${chalk.hex('#C6A831')(gasInfo)}`)
+  console.log(`\n ${chalk.hex('#C6A831')(gasInfo)}`)
 
   const encoded = abiEncodeArgs(deployment, args)
 
   if(encoded && encoded.length > 2) {
     console.log(
-      `\n 📚 Serializing ${encoded.length}`
+      `\n Serializing ${encoded.length}`
       + ` arguments to ${chalk.hex('#6FBCFF')(files.args)}.`
     )
     fs.writeFileSync(files.args, encoded.slice(2))
@@ -184,7 +183,7 @@ const main = async () => {
   await deploy({ contract: 'Bits' })
 
   const primary = 'BulkDisbursableNFTs'
-  console.log(`\n\n 📡 Deploying: ${chalk.hex('#0E9907')(primary)}…\n`)
+  console.log(`\n\n Deploying: ${chalk.hex('#0E9907')(primary)}…\n`)
 
   const deployment = await deploy({
     contract: primary,
@@ -203,7 +202,7 @@ const main = async () => {
     console.log(`Waiting ${timeout} seconds for ${examiner}`)
     await new Promise((accept) => setTimeout(accept, timeout * 1000))
     console.log(chalk.hex('#FFD25E')(
-      `\n 🔍 Verifying ${chalk.hex('#8454FF')(implementationAddress)}`
+      `\n Verifying ${chalk.hex('#8454FF')(implementationAddress)}`
       + ` on ${examiner}…\n`
     ))
     await run('verify:verify', {
@@ -219,7 +218,7 @@ const main = async () => {
     saveDir = saveDir.substring(process.env.PWD.length + 1)
   }
   console.log(
-    '\n 💾  Artifacts (address, abi, and args) saved to:'
+    '\n Artifacts (address, abi, and args) saved to:'
     + ` ${chalk.hex('#87FF37')(saveDir)}\n\n`
   )
 }

@@ -50,7 +50,7 @@ export const Edit = () => {
   return (
     <Box ml={16}>
       <Helmet>
-        <title>’𝖈𝖍𝖎𝖊𝖛𝖊: ℰ𝒹𝒾𝓉 #{tokenId && regexify(tokenId)}</title>
+        <title>Claim Token: Edit #{tokenId && regexify(tokenId)}</title>
       </Helmet>
       <HomeLink/>
       {error && (

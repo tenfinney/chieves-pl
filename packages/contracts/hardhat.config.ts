@@ -156,7 +156,7 @@ task('mint', 'Mint a token for a user')
     fs.readFileSync(contractFile).toString()
   )
   console.debug(
-    ` 🦐 Loaded ${chalk.hex('#88C677')(contractName)} From:`
+    ` Loaded ${chalk.hex('#88C677')(contractName)} From:`
     + ` ${chalk.hex('#E59AF9')(contractFile)}`
   )
   const address = (
@@ -197,7 +197,7 @@ task('setMax', 'Set maximum mintable allowance.')
     fs.readFileSync(contractFile).toString()
   )
   console.debug(
-    ` 🦐 Loaded ${chalk.hex('#88C677')(contractName)} From:`
+    ` Loaded ${chalk.hex('#88C677')(contractName)} From:`
     + ` ${chalk.hex('#E59AF9')(contractFile)}`
   )
 
@@ -229,7 +229,7 @@ task('grant', 'Grant a role')
   )
   let { address: user, role, token, singleUse } = args
   console.log(
-    ` 🍏 Setting ${chalk.hex('#E1A47B')(user)}`
+    ` Setting ${chalk.hex('#E1A47B')(user)}`
     + ` as ${singleUse ? '(single use) ' : ''}${chalk.hex('#5AE1AD')(role)}`
     + ` on ${chalk.hex('#E16464')(contractName)}`
     + (token ? ` for id:${chalk.hex('#E11F83')(token)}` : '')
@@ -242,7 +242,7 @@ task('grant', 'Grant a role')
     const provider = new ethers.providers.JsonRpcProvider(rpc)
     const derefed = await provider.resolveName(user)
     console.debug(
-      ` 🚊 Looked Up: ${chalk.hex('#FCFF13')(user)}`
+      ` Looked Up: ${chalk.hex('#FCFF13')(user)}`
       + ` → ${chalk.hex('#8B67FF')(derefed)}`
     )
     user = derefed
@@ -251,7 +251,7 @@ task('grant', 'Grant a role')
     const expanded = deregexify(token)
     if(expanded !== token) {
       console.debug(
-        ` 🔭 Expanded: ${chalk.hex('#FCFF13')(token)}`
+        ` Expanded: ${chalk.hex('#FCFF13')(token)}`
         + ` → ${chalk.hex('#8B67FF')(expanded)}`
       )
       token = expanded
@@ -270,14 +270,14 @@ task('grant', 'Grant a role')
     tx = await contract['grantRole(uint8,address,bool)'](roleId, user, !!args.singleUse)
   }
   console.log({p: tx.gasLimit.toBigInt() * tx.gasPrice.toBigInt()})
-  console.info(` 🕋 Tx: ${tx.hash}`)
+  console.info(` Tx: ${tx.hash}`)
 })
 
 task('wallet', 'Create a wallet (pk) link', async (_, { ethers }) => {
   const randomWallet = ethers.Wallet.createRandom()
   const privateKey = randomWallet._signingKey().privateKey
-  console.log(` 🔐 WALLET Generated As ${randomWallet.address}`)
-  console.log(` 🔗 http://localhost:3000/pk#${privateKey}`)
+  console.log(` WALLET Generated As ${randomWallet.address}`)
+  console.log(` http://localhost:3000/pk#${privateKey}`)
 })
 
 
@@ -287,7 +287,7 @@ task('wallet', 'Create a wallet (pk) link', async (_, { ethers }) => {
 // .setAction(async (taskArgs, { network, ethers }) => {
 //   const randomWallet = ethers.Wallet.createRandom()
 //   const privateKey = randomWallet._signingKey().privateKey
-//   console.log(` 🔐 WALLET Generated As ${randomWallet.address}`)
+//   console.log(` WALLET Generated As ${randomWallet.address}`)
 //   let { url = 'http://localhost:3000' } = taskArgs
 
 //   let localDeployerMnemonic
@@ -340,8 +340,8 @@ task('wallet', 'Create a wallet (pk) link', async (_, { ethers }) => {
 //   debug('privateKey', privateKey)
 //   var EthUtil = require('ethereumjs-util')
 //   const address = `0x${EthUtil.privateToAddress(wallet._privKey).toString('hex')}`
-//   console.log(` 🔐 Account Generated as ${address} and set as mnemonic in packages/hardhat`)
-//   console.log(' 💬 Use `yarn run account` to get more information about the deployment account.')
+//   console.log(` Account Generated as ${address} and set as mnemonic in packages/hardhat`)
+//   console.log(' Use `yarn run account` to get more information about the deployment account.')
 
 //   fs.writeFileSync(`${address}.txt`, monic.toString())
 //   if(fs.existsSync('mnemonic.txt')) {
@@ -392,9 +392,9 @@ task('wallet', 'Create a wallet (pk) link', async (_, { ethers }) => {
 //     contract_address = contract_address_long.substring(24)
 //   }
 
-//   console.log(` ⛏  Account Mined as ${address} and set as mnemonic in packages/hardhat`)
-//   console.log(` 📜 This will create the first contract: ${chalk.magenta(`0x${contract_address}`)}`)
-//   console.log(' 💬 Use `yarn run account` to get more information about the deployment account.')
+//   console.log(` Account Mined as ${address} and set as mnemonic in packages/hardhat`)
+//   console.log(` This will create the first contract: ${chalk.magenta(`0x${contract_address}`)}`)
+//   console.log('  Use `yarn run account` to get more information about the deployment account.')
 
 //   fs.writeFileSync(`${address}_produces-${contract_address}.txt`, mnemonic.toString())
 //   if(fs.existsSync('mnemonic.txt')) {
@@ -422,23 +422,23 @@ task('account', 'Get balance information for the deployment account.')
 
   var qrcode = await import('qrcode-terminal')
   qrcode.generate(address)
-  console.log(` ‍📬 Deployer Account is ${address}`)
+  console.log(` Deployer Account is ${address}`)
   for(const [name, net] of Object.entries(config.networks ?? {})) {
-    console.log(`——— ${name} ——  ——  —— 📡`)
+    console.log(`——— ${name} ——  ——  —— `)
     if(!net) {
-      console.log('  ¡No Network!')
+      console.log('No Network!')
     } else {
       try {
         const provider = new ethers.providers.JsonRpcProvider(
           (net as HttpNetworkUserConfig).url
         )
         const balance = await provider.getBalance(address)
-        console.log(`  ⚖ balance: ${ethers.utils.formatEther(balance)}`)
+        console.log(` balance: ${ethers.utils.formatEther(balance)}`)
         console.log(
-          `  📙 nonce: ${await provider.getTransactionCount(address)}`
+          ` nonce: ${await provider.getTransactionCount(address)}`
         )
       } catch(error) {
-        console.error(`  🦖 ${(error as Error).message}`)
+        console.error(` ${(error as Error).message}`)
       }
     }
   }

@@ -36,15 +36,15 @@ const Home = () => {
       let token
 
       setTokens((tkns: Array<TokenState>) => {
-        token = { ...tkns[idx], ...info }
-        return ([
+        token = { ...tkns[idx], ...info };
+        return [
           ...tkns.slice(0, idx),
           ...Array.from({ length: idx - tkns.length }, () => ({})),
           token,
           ...tkns.slice(idx + 1),
-        ])
-      })
-      return token
+        ];
+      });
+      return token;
     },
     [setTokens],
   )
@@ -57,24 +57,24 @@ const Home = () => {
   )
 
   useEffect(() => {
-    const params = {}
-    if(visibleList?.length > 0) {
+    const params = {};
+    if (visibleList?.length > 0) {
       Object.assign(params, {
         visible: visibleList.toString(),
-      })
-     } else {
+      });
+    } else {
       Object.entries({ limit, offset, gating: gatingVisible }).forEach(
         ([key, val]) => {
-          if(val !== defaults[key as keyof typeof defaults]) {
-            Object.assign(params, { [key]: val.toString() })
+          if (val !== defaults[key as keyof typeof defaults]) {
+            Object.assign(params, { [key]: val.toString() });
           }
         }
-      )
+      );
     }
 
-    const options = { search: `?${createSearchParams(params)}` }
-    navigate(options, { replace: true })
-  }, [visibleList, limit, offset, gatingVisible, navigate])
+    const options = { search: `?${createSearchParams(params)}` };
+    navigate(options, { replace: true });
+  }, [visibleList, limit, offset, gatingVisible, navigate]);
 
   useEffect(() => {
     if(roContract && bitsLibrary) {
@@ -97,8 +97,8 @@ const Home = () => {
   }, [roContract, bitsLibrary])
 
   useEffect(() => {
-    setVisibleList(toSpanList(visible))
-  }, [visible])
+    setVisibleList(toSpanList(visible));
+  }, [visible]);
 
   const controller = useRef(null)
   const retrieve = useCallback(
@@ -260,56 +260,94 @@ const Home = () => {
   ])
 
   return (
-    <Container maxW="full">
+    <Container maxW="full" id="back-to-top">
       <Helmet>
-        <title>𝔐𝔢𝔱𝔞𝔊𝔞𝔪𝔢’𝔰 ’𝘾𝙝𝙞𝙚𝙫𝙚𝙢𝙞𝙣𝙩𝙨</title>
-        <meta
-          name="description"
-          content="MetaGame’s ’Chievemint NFTs"
-        />
+        <title>SmartLaw Claims</title>
+        <meta name="description" content="SmartLaw Claims Digital Assets" />
       </Helmet>
 
-      <chakra.header h="45vh">
-        <Flex maxW="40rem" margin="auto">
-          <Header mt="5vh" h="40vh"/>
-        </Flex>
+      <chakra.header bg="black">
+        <MenuLandingDesktop />
+
+        <Container>
+          <MenuHeader />
+          <Who />
+          <How />
+          <Creators />
+          <BuiltWith />
+          <Team />
+        </Container>
       </chakra.header>
 
-      <chakra.main>
+      <chakra.main bg="black">
+        <Header h="40vh" />
         <Stack align="center">
           <TokenFilterForm
             flexGrow={1}
             {...{
-              limit, setLimit,
-              offset, setOffset,
-              gatingVisible, setGatingVisible,
-              visibleList, setVisibleList,
+              limit,
+              setLimit,
+              offset,
+              setOffset,
+              gatingVisible,
+              setGatingVisible,
+              visibleList,
+              setVisibleList,
             }}
           />
-          <TokensTable {...{ tokens }}/>
+          <TokensTable {...{ tokens }} />
+
           <Flex justify="center">
             <Button
               onClick={() => {
-                if(visibleList.length > 0) {
+                if (visibleList.length > 0) {
                   const potentials = visibleList.map(
                     (entry) => ((entry as Limits)?.high ?? entry) as number
-                  )
-                  const max = Math.max(...potentials)
-                  setVisibleList((vis) => ([
-                    ...vis, { low: max, high: max + 10 }
-                  ]))
+                  );
+                  const max = Math.max(...potentials);
+                  setVisibleList((vis) => [
+                    ...vis,
+                    { low: max, high: max + 10 },
+                  ]);
                 } else {
-                  setLimit((lim) => lim + 10)
+                  setLimit((lim) => lim + 10);
                 }
               }}
             >
-              <Text as="span" mr={1} mt={-0.5} fontSize="150%" fontWeight="bold">+</Text>10
+              <Text
+                as="span"
+                mr={1}
+                mt={-0.5}
+                fontSize="150%"
+                fontWeight="bold"
+              >
+                +
+              </Text>
+              10
             </Button>
-            <Button
-              ml={5}
-              onClick={() => setOffset((off) => off + limit)}
-            >
-              <Text as="span" mr={0.75} mt={-1} fontSize="200%" fontWeight="bold">↓</Text>{limit}
+            <Button ml={5} onClick={() => setOffset((off) => off + limit)}>
+              <Text
+                as="span"
+                mr={0.75}
+                mt={-1}
+                fontSize="200%"
+                fontWeight="bold"
+              >
+                ↓
+              </Text>
+              {limit}
+            </Button>
+            <Button ml={5} onClick={() => setOffset((off) => off - limit)}>
+              <Text
+                as="span"
+                mr={0.75}
+                mt={-1}
+                fontSize="200%"
+                fontWeight="bold"
+              >
+                ↑
+              </Text>
+              {limit}
             </Button>
             <Button
               ml={5}
@@ -321,7 +359,7 @@ const Home = () => {
         </Stack>
       </chakra.main>
     </Container>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

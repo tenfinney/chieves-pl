@@ -1,8 +1,8 @@
 {
-  name: 'SmartLaw Minter',
-  description: 'The holder of this NFT has the ability to create new ’chievemints.',
+  name: 'SmartLaw Claims Minter',
+  description: 'The holder of this token has the ability to create new digital assets and tokens.',
   decimals: 0,
-  external_url: 'https://cred.freeweb3.com/new/',
+  external_url: 'https://tokens.freeweb3.com/#/new',
   image: 'ipfs://{assets-cid}/minter.svg',
   background_color: 'E1FFD0',
   properties: {},

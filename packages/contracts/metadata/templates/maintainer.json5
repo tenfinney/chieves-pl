@@ -1,9 +1,9 @@
 {
-  name: '’Chievemints Maintainer',
+  name: 'SmartLaw Claims Maintainer',
   description: 'Holders of this token can update the token contract.',
   decimals: 0,
-  external_url: 'https://chiev.es',
-  image: 'ipfs://{assets-cid}/wrench & screwdriver.svg',
+  external_url: 'https://tokens.freeweb3.com',
+  image: 'ipfs://{assets-cid}/maintainer.svg',
   background_color: '01525B',
   properties: {},
   attributes: [

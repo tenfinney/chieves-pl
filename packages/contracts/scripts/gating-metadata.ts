@@ -57,7 +57,7 @@ const main = async () => {
 
   const assetsCID = carResult.root.toString()
   console.info(
-    ` 🎼 Saved contents of ${chalk.hex('#FF7011')(relative(assetsDir))}`
+    ` Saved contents of ${chalk.hex('#FF7011')(relative(assetsDir))}`
     + ` to ${chalk.hex('#4CFF0B')(relative(assetsCar))}`
     + ` with root ${chalk.hex('#9E59FF')(assetsCID)}.`
   )
@@ -68,7 +68,7 @@ const main = async () => {
     )
   )
   console.info(
-    ` 🍿 Uploaded ${chalk.hex('#4CFF0B')(relative(assetsCar))}`
+    ` Uploaded ${chalk.hex('#4CFF0B')(relative(assetsCar))}`
     + ` with root ${chalk.hex('#9E59FF')(nftStorageAssetsCID)}.`
   )
 
@@ -77,7 +77,7 @@ const main = async () => {
     glob.sync(templates).map(async (file) => {
       const type = file.replace(/^.*\//, '').replace(/\.json5$/, '')
       console.debug(
-        ` 🤖 Loading ${chalk.hex('#FF40CC')(type.toUpperCase())} template:`
+        ` Loading ${chalk.hex('#FF40CC')(type.toUpperCase())} template:`
         + ` ${chalk.hex('#FFF01D')(relative(file))}.`
       )
       const template = await JSON5.parse(
@@ -98,11 +98,11 @@ const main = async () => {
     })
   )
 
-  console.log(' 🍤 Uploading to //nft.storage.')
+  console.log(' Uploading to //nft.storage.')
 
   const metadataCID = await storage.storeDirectory(files)
   console.info(
-    ` 🍿 Transformed ${chalk.hex('#4CFF0B')(relative(templates))}`
+    ` Transformed ${chalk.hex('#4CFF0B')(relative(templates))}`
     + ` & uploaded to root ${chalk.hex('#9E59FF')(metadataCID)}.`
   )
   const { contract: rolesLibrary } = (
@@ -134,7 +134,7 @@ const main = async () => {
         )
       } else {
         console.info(
-          ` ✂ Setting token id`
+          ` Setting token id`
           + ` ${chalk.hex('#6E9AFF')(`0x${hex}`)}`
           + ` URI to ${chalk.hex('#FF069C')(uri)}.`
         )

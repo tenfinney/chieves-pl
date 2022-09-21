@@ -1,8 +1,8 @@
 {
-  name: 'SmartLaw Configurer',
+  name: 'SmartLaw Claims Configurer',
   description: 'Holders of this token can update the metadata associated with a token.',
   decimals: 0,
-  external_url: 'https://cred.freeweb3.com/edit/',
+  external_url: 'https://tokens.freeweb3.com/',
   image: 'ipfs://{assets-cid}/configurer.svg',
   background_color: '01525B',
   properties: {},

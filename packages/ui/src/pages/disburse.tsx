@@ -200,7 +200,7 @@ const Disburse = () => {
     <Container maxW="40rem">
       <Helmet>
         <title>Disburse NFT #{tokenId}</title>
-        <meta name="description" content="Distribute A ’Chievemint NFT" />
+        <meta name="description" content="Distribute a Token or Digital Asset" />
       </Helmet>
 
       <HomeLink/>

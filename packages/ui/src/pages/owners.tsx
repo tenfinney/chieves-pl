@@ -83,7 +83,7 @@ export const Owners = () => {
     }
   }, [decId, startAfter, query, search])
 
-  const [title, setTitle] = useState('𝘜𝘯𝘬𝘯𝘰𝘸𝘯')
+  const [title, setTitle] = useState('Unknown')
   const { ensProvider, roContract } = useWeb3()
   const [error, setError] = useState(
     (query == null ? (
@@ -114,8 +114,8 @@ export const Owners = () => {
   useEffect(() => {
     const process = async () => {
       if(data) {
-        if(data.nfts.length > 1) {
-          throw new Error(`Got ${data.nfts.length} Digital Token`)
+        if(data.nfts.length > 1 ) {
+          throw new Error(`Retrieved ${data.nfts.length} Tokens`)
         }
         if (data.nfts.length === 1) {
           setOwnerships(
@@ -163,7 +163,7 @@ export const Owners = () => {
       {ownerships.length === 0 ? (
         <Alert status="warning">
           <AlertIcon/>
-          <AlertTitle>¡Empty!</AlertTitle>
+          <AlertTitle>Empty!</AlertTitle>
           <AlertDescription>
             No owners found for token #{nftId}.
           </AlertDescription>

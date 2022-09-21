@@ -1,9 +1,9 @@
 {
-  name: 'SmartLaw Superuser',
-  description: 'A holder of this token has permission to perform nearly all the functions on the ’chievemints NFT contract.\n\nThey are not able to transfer other user’s ’chievemints.',
+  name: 'SmartLaw Claims Superuser',
+  description: 'A holder of this token has permission to perform nearly all the functions on the NFT contract.\n\nThey are not able to transfer other user’s tokens or digital assets.',
   decimals: 0,
-  external_url: 'https://cred.freeweb3.com/',
-  image: "ipfs://{assets-cid}/trident.svg",
+  external_url: 'https://tokens.freeweb3.com/',
+  image: "ipfs://{assets-cid}/superuser.svg",
   background_color: 'D2BBFF',
   properties: {},
   attributes: [

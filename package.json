@@ -1,5 +1,5 @@
 {
-  "name": "@chievemints",
+  "name": "@smartlaw",
   "author": {
     "name": "dysbulic",
     "email": "dys@dhappy.org"
@@ -8,31 +8,31 @@
   "license": "CC0-1.0",
   "private": true,
   "scripts": {
-    "ui:start": "yarn workspace @chievemints/ui dev",
-    "ui:test": "yarn workspace @chievemints/ui test",
+    "ui:start": "yarn workspace @smartlaw/ui dev",
+    "ui:test": "yarn workspace @smartlaw/ui test",
     "ui:publish": "yarn ui:build && yarn gh:publish",
-    "ui:build": "yarn workspace @chievemints/ui build",
-    "ui:preview": "yarn workspace @chievemints/ui preview",
-    "hh:node": "yarn workspace @chievemints/contracts chain",
-    "hh:build": "yarn workspace @chievemints/contracts compile",
-    "hh:deploy": "yarn workspace @chievemints/contracts deploy",
-    "hh:publish": "yarn workspace @chievemints/contracts publish",
-    "hh:watch": "yarn workspace @chievemints/contracts watch",
-    "hh:account": "yarn workspace @chievemints/contracts account",
-    "hh:accounts": "yarn workspace @chievemints/contracts accounts",
-    "hh:balance": "yarn workspace @chievemints/contracts balance",
-    "hh:console": "yarn workspace @chievemints/contracts hardhat console",
-    "hh:test": "yarn workspace @chievemints/contracts hardhat test --network localhost",
-    "hh:gen": "yarn workspace @chievemints/contracts generate",
-    "hh:mine": "yarn workspace @chievemints/contracts hardhat mineContractAddress",
-    "hh:wallet": "yarn workspace @chievemints/contracts hardhat wallet",
-    "hh:funded": "yarn workspace @chievemints/contracts hardhat fundedwallet",
-    "clean": "yarn workspace @chievemints/ui clean",
+    "ui:build": "yarn workspace @smartlaw/ui build",
+    "ui:preview": "yarn workspace @smartlaw/ui preview",
+    "hh:node": "yarn workspace @smartlaw/contracts chain",
+    "hh:build": "yarn workspace @smartlaw/contracts compile",
+    "hh:deploy": "yarn workspace @smartlaw/contracts deploy",
+    "hh:publish": "yarn workspace @smartlaw/contracts publish",
+    "hh:watch": "yarn workspace @smartlaw/contracts watch",
+    "hh:account": "yarn workspace @smartlaw/contracts account",
+    "hh:accounts": "yarn workspace @smartlaw/contracts accounts",
+    "hh:balance": "yarn workspace @smartlaw/contracts balance",
+    "hh:console": "yarn workspace @smartlaw/contracts hardhat console",
+    "hh:test": "yarn workspace @smartlaw/contracts hardhat test --network localhost",
+    "hh:gen": "yarn workspace @smartlaw/contracts generate",
+    "hh:mine": "yarn workspace @smartlaw/contracts hardhat mineContractAddress",
+    "hh:wallet": "yarn workspace @smartlaw/contracts hardhat wallet",
+    "hh:funded": "yarn workspace @smartlaw/contracts hardhat fundedwallet",
+    "clean": "yarn workspace @smartlaw/ui clean",
     "clean:full": "yarn clean && rm -rf node_modules/ packages/ui/node_modules/ packages/contracts/node_modules/",
-    "ui:theme": "yarn workspace @chievemints/ui theme",
-    "ui:watch": "yarn workspace @chievemints/ui watch",
-    "cm:grant": "yarn workspace @chievemints/contracts hardhat grant",
-    "cm:metadata": "yarn workspace @chievemints/contracts gating-metadata"
+    "ui:theme": "yarn workspace @smartlaw/ui theme",
+    "ui:watch": "yarn workspace @smartlaw/ui watch",
+    "cm:grant": "yarn workspace @smartlaw/contracts hardhat grant",
+    "cm:metadata": "yarn workspace @smartlaw/contracts gating-metadata"
   },
   "workspaces": {
     "packages": [
@@ -44,6 +44,7 @@
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.2.0",
     "@types/eslint": "^8",
+    "@types/react-scroll": "^1",
     "@types/testing-library__jest-dom": "^5",
     "@typescript-eslint/eslint-plugin": "latest",
     "@typescript-eslint/parser": "latest",
@@ -52,7 +53,8 @@
   },
   "dependencies": {
     "@apollo/client": "^3.6.4",
-    "graphql": "^16.5.0"
+    "graphql": "^16.5.0",
+    "react-scroll": "^1.8.7"
   },
   "resolutions": {
     "bn.js": "5.2.1",

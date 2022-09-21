@@ -1,9 +1,9 @@
 {
-  name: 'SmartLaw Transferer',
-  description: 'By default ’chievemints cannot be transfered.\n\nHolders of this token can do transfers.',
+  name: 'SmartLaw Claims Asset Transferer',
+  description: 'By default tokens and digital assets cannot be transfered.\n\nHolders of this token can do transfers.',
   decimals: 0,
-  external_url: 'https://cred.freeweb3.com/disburse/',
-  image: 'ipfs://{assets-cid}/transfer.svg',
+  external_url: 'https://tokens.freeweb3.com/',
+  image: 'ipfs://{assets-cid}/transferer.svg',
   background_color: 'FFB273',
   properties: {},
   attributes: [

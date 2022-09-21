@@ -55,6 +55,8 @@ export const TokenFilterForm: React.FC<{
   }
 
   return (
+    <Stack align="center">
+
     <Flex
       as="form" onSubmit={handleSubmit(submit)}
       mt={10} mb="1rem" maxW={['100%', 'min(85vw, 50em)']}
@@ -147,6 +149,8 @@ export const TokenFilterForm: React.FC<{
         </Button>
       </Stack>
     </Flex>
+      </Stack>
+
   )
 }
 

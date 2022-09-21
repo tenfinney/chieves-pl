@@ -8,16 +8,16 @@ import { Event } from 'ethers'
 import { useForm } from 'react-hook-form'
 import { Helmet } from 'react-helmet'
 import { useSearchParams } from 'react-router-dom'
-import { OptionsForm, Header, SubmitButton } from '@/components'
+import { OptionsForm, Header, MenuHeader, SubmitButton } from '@/components'
 import { useWeb3 } from '@/lib/hooks'
 import { extractMessage } from '@/lib/helpers'
 import { rolePermissions, tokenPermissions } from '@/config'
 
 export const New = () => (
   <Container maxW="full">
-    <Head>
-      <title>New SmartLaw Cred Token</title>
-    </Head>
+    <Helmet>
+      <title>New Claim Asset or Token</title>
+    </Helmet>
     <chakra.header>
       <Flex justify="center">
         <Header1 my="1vh" maxW="xl"/>
@@ -88,7 +88,7 @@ const Content: React.FC = () => {
     try {
       if(!rwContract) {
         throw new Error(
-          'Connect your Web3 account to reserve an ID.'
+          'Connect your Web3 account to reserve a token ID.'
         )
       }
       if(!rolesLibrary){
@@ -137,7 +137,7 @@ const Content: React.FC = () => {
       )
       if(!event) {
         throw new Error(
-          'Couldn’t find a token creation event.'
+          'Could not find a creation event.'
         )
       }
       const [id] = event.args
@@ -193,7 +193,7 @@ const Content: React.FC = () => {
               return (
                 <Flex justify="center" mt={7}>
                   <Spinner/>
-                  <Text ml={2}>Reserving your token…</Text>
+                  <Text ml={2}>Reserving your digital asset or token…</Text>
                 </Flex>
               )
             }
@@ -215,7 +215,7 @@ const Content: React.FC = () => {
                       <Tr>
                         <Th>Role</Th>
                         <Th>
-                          <Tooltip label="Give the admin these roles:">
+                          <Tooltip label="Give the administrator these roles:">
                             Grant
                           </Tooltip>
                         </Th>

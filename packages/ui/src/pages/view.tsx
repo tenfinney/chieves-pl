@@ -36,7 +36,7 @@ export const View: React.FC<{ tokenId: string, header?: boolean }> = (
               const metadataURL = httpURL(metadataURI)
               if(!metadataURL) {
                 throw new Error(
-                  `Couldn't find metadata for token #${regexify(tokenId)}.`
+                  `Could not find metadata for token #${regexify(tokenId)}.`
                 )
               }
               const response = await fetch(metadataURL)
@@ -57,7 +57,7 @@ export const View: React.FC<{ tokenId: string, header?: boolean }> = (
       return (
         <Alert status="error">
           <AlertIcon />
-          <AlertTitle mr={2}>Error: Loading NFT</AlertTitle>
+          <AlertTitle mr={2}>Error: Loading Token</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )
@@ -81,10 +81,10 @@ export const View: React.FC<{ tokenId: string, header?: boolean }> = (
       <Stack align="center" position="relative">
         {header && (
           <Helmet>
-            <title>’𝖈𝖍𝖎𝖊𝖛𝖊: 𝓥ⲓⲉⲱ #{regexify(tokenId)}</title>
+            <title>Claim View #{regexify(tokenId)}</title>
             <meta
               name="description"
-              content="MetaGame’s ’Chievemint NFTs"
+              content="SmartLaw Claims"
             />
           </Helmet>
         )}

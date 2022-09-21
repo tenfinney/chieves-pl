@@ -1,8 +1,8 @@
 {
-  name: 'SmartLaw Creator',
+  name: 'Creator',
   description: 'Holders of this token can create new token types.',
   decimals: 0,
-  external_url: 'https://cred.freeweb3.com/edit/',
+  external_url: 'https://tokens.freeweb3.com/',
   image: 'ipfs://{assets-cid}/creator.svg',
   background_color: '01525B',
   properties: {},

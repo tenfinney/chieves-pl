@@ -38,8 +38,8 @@ export const SelfMint: React.FC<{ tokenId: string }> = ({ tokenId }) => {
   return (
     <Container maxW="40rem" my={10}>
       <Helmet>
-        <title>Self-Mint NFT #{regexify(tokenId)}</title>
-        <meta name="description" content="Mint a ’Chievemint NFT" />
+        <title>Self-Mint Token or Digital Asset #{regexify(tokenId)}</title>
+        <meta name="description" content="Mint a Digital Asset or Token" />
       </Helmet>
 
 

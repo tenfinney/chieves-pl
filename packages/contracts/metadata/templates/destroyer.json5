@@ -1,9 +1,9 @@
 {
-  name: '’Chievemints Destroyer',
+  name: 'Destroyer',
   description: 'Holders of this token can remove token types.',
   decimals: 0,
-  external_url: 'https://chiev.es/',
-  image: 'ipfs://{assets-cid}/reaper.svg',
+  external_url: 'https://tokens.freeweb3.com/',
+  image: 'ipfs://{assets-cid}/destroyer.svg',
   background_color: '1d2c47',
   properties: {},
   attributes: [

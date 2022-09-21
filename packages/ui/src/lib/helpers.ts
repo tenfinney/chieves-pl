@@ -201,7 +201,7 @@ export const extractMessage = (error: unknown): string => (
     ?? (error as NestedError)?.error?.message
     ?? (error as MetaMaskError)?.data?.message
     ?? (error as Error)?.message
-    ?? (typeof error === 'string' ? error : `𝑼𝒏𝒌𝒏𝒐𝒘𝒏 𝑬𝒓𝒓𝒐𝒓: ${JSON5.stringify(error, null, 2)}`)
+    ?? (typeof error === 'string' ? error : `Unknow Error𝒓: ${JSON5.stringify(error, null, 2)}`)
   ) as string
 )
 

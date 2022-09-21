@@ -1,8 +1,8 @@
 {
-  name: 'Cred Token Limiter',
-  description: 'The holder of this NFT can change the maximum allowed to be minted for a ’chievemint.',
+  name: 'Limiter',
+  description: 'The holder of this NFT can change the maximum allowed to be minted for a token or digital asset.',
   decimals: 0,
-  external_url: 'https://cred.freeweb3.com/',
+  external_url: 'https://tokens.freeweb3.com/',
   image: 'ipfs://{assets-cid}/max.svg',
   background_color: 'FFF6E7',
   properties: {},

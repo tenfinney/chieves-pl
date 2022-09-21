@@ -1,15 +1,11 @@
 {
   "cSpell.words": [
     "chakra",
-    "Chievemint",
-    "Chievemints",
     "deregexify",
     "Disbersable",
-    "𝑬𝒓𝒓𝒐𝒓",
     "ipfsify",
     "regexify",
-    "𝑼𝒏𝒌𝒏𝒐𝒘𝒏",
-    "𝙐𝙣𝙩𝙞𝙩𝙡𝙚𝙙"
+
   ],
   "search.exclude": {
     "**/.yarn": true,

@@ -90,7 +90,7 @@ export const OptionsForm: React.FC<{
     } = data
 
     const metadata: ERC1155Metadata = {
-      name: isSet(name) ? name : '𝙐𝙣𝙩𝙞𝙩𝙡𝙚𝙙',
+      name: isSet(name) ? name : 'Untitled Token',
       decimals: 0,
     }
 

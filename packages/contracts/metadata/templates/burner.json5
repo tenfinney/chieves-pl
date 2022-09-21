@@ -1,9 +1,9 @@
 {
-  name: '’Chievemints Burner',
+  name: 'Burner',
   description: 'Holders of this token can burn the token.',
   decimals: 0,
-  external_url: 'https://chiev.es/',
-  image: 'ipfs://{assets-cid}/fire.svg',
+  external_url: 'https://tokens.freeweb3.com/',
+  image: 'ipfs://{assets-cid}/burner.svg',
   background_color: '010e5b',
   properties: {},
   attributes: [

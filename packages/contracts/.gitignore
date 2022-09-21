@@ -1,4 +1,7 @@
 mnemonic.txt
+mnemonic-alpha.txt
+mnemonic-atypical.txt
+mnemonic-exposed.txt
 .env
 cache/
 *.dbg.json
