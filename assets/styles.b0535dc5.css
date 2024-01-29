@@ -1,0 +1,104 @@
+@font-face {
+  font-family: 'Museo Moderno';
+  font-style: normal;
+  font-weight: 600;
+  src: url('/assets/MuseoModerno.0b9a1aec.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Museo Moderno Light';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/assets/MuseoModerno.0b9a1aec.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Museo Moderno';
+  font-style: normal;
+  font-weight: 600;
+  src: url('/assets/MuseoModerno.0b9a1aec.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Museo Moderno Light';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/assets/MuseoModerno.0b9a1aec.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Anek Devanagari';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./AnekDevanagari-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Anek Latin';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./AnekLatin-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Anton';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./Anton-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Arizonia';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./Arizonia-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Encode Sans Semi Condensed';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./EncodeSansSemiCondensed-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./Exo2-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Georama';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./Georama-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'League Gothic';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./LeagueGothic-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./Orbitron-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Oxanium';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./Oxanium-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Russo One';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./RussoOne-Regular.ttf') format('truetype');
+}
